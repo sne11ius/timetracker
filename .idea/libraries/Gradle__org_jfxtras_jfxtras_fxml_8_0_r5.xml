@@ -1,0 +1,11 @@
+<component name="libraryTable">
+  <library name="Gradle: org.jfxtras:jfxtras-fxml:8.0-r5">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.jfxtras/jfxtras-fxml/8.0-r5/e1ec492d85199521e272a4b01d6b76c2d840ff61/jfxtras-fxml-8.0-r5.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.jfxtras/jfxtras-fxml/8.0-r5/91fe880fa27681a5104b6e4e45f782f3c4bc9ae7/jfxtras-fxml-8.0-r5-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

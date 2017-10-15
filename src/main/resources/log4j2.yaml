@@ -1,0 +1,25 @@
+Configuration:
+  status: debug
+
+  Appenders:
+    Console:
+      name: CONSOLE
+      target: SYSTEM_OUT
+      PatternLayout:
+        Pattern: "%d{ISO8601} %-5p [%c] %m%n"
+  Loggers:
+    Root:
+      level: info
+      AppenderRef:
+        - ref: CONSOLE
+    Logger:
+      - name: wi.co.timetracker
+        additivity: false
+        level: debug
+        AppenderRef:
+          - ref: CONSOLE
+      - name: "JavaFX Application Thread"
+        additivity: false
+        level: warn
+        AppenderRef:
+          - ref: CONSOLE
