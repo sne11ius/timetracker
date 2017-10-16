@@ -25,7 +25,7 @@ class MainController(lineNums: String = "") : Controller() {
     fun lineNumbersProperty() = getProperty(MainController::lineNumbers)
 
     init {
-        mainModel.fileContentProperty().addListener({ _, old, new ->
+        mainModel.fileContentProperty().addListener({ _, _, new ->
             if (null != mainModel.file) {
                 mainModel.file.writeText(new)
                 load(mainModel.currentDate)
@@ -35,6 +35,7 @@ class MainController(lineNums: String = "") : Controller() {
             println("newValue: $newValue")
             load(newValue)
         })
+        load(Calendar.getInstance())
     }
 
     private fun load(newValue: Calendar) {
@@ -50,8 +51,8 @@ class MainController(lineNums: String = "") : Controller() {
             parseResult.file.delete()
         }
         mainModel.dayModel = parseResult.dayModel
-        mainModel.errors = parseResult.errors.fold("", { msg, err ->
-            msg + "\n${err.severity.toString().padEnd(5)} Zeile ${err.line}: ${err.message}"
+        mainModel.errors = parseResult.errors.fold("", { msg, (severity, line, message) ->
+            msg + "${severity.toString().padEnd(5)} Zeile $line: $message\n"
         })
     }
 

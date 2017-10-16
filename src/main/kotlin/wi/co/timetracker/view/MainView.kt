@@ -1,6 +1,7 @@
 package wi.co.timetracker.view
 
 import javafx.beans.binding.Bindings.bindBidirectional
+import javafx.geometry.Insets
 import javafx.geometry.NodeOrientation
 import jfxtras.scene.control.CalendarPicker
 import tornadofx.*
@@ -13,6 +14,7 @@ class MainView : View() {
     override val root = borderpane {
         minWidth = 500.0
         minHeight = 500.0
+        padding = Insets(10.0)
         top = buttonbar {
             button("Preferences") {
                 action {
@@ -21,6 +23,7 @@ class MainView : View() {
             }
         }
         center = vbox {
+            spacing = 10.0
             borderpane {
                 left = textarea {
                     prefWidth = 40.0
@@ -40,6 +43,8 @@ class MainView : View() {
             label("center")
         }
         right = vbox {
+            spacing = 10.0
+            padding = Insets(10.0)
             this += CalendarPicker().apply {
                 prefWidth = 250.0
                 prefHeight = 250.0

@@ -94,8 +94,8 @@ class PersistenceService {
                     total = it.substringAfterLast("=").trim()
                     log.debug { "Total: $total" }
                 } else {
-                    log.warn { "Cannot parse line $index" }
-                    errors += error(line, "Cannot parse line $index")
+                    log.warn { "Cannot parse line $line" }
+                    errors += error(line, "Cannot parse line")
                     return ParseResult(file, errors, null)
                 }
             }
