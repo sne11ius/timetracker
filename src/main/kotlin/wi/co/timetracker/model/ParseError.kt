@@ -6,16 +6,16 @@ enum class Severity {
     ERROR
 }
 
-data class ParseError(val severity: Severity, val line: Int, val message: String)
+data class ParseError(val severity: Severity, val index: Int, val message: String)
 
-fun error(line: Int, message: String): ParseError {
-    return ParseError(Severity.ERROR, line, message)
+fun error(index: Int, message: String): ParseError {
+    return ParseError(Severity.ERROR, index, message)
 }
 
-fun warn(line: Int, message: String): ParseError {
-    return ParseError(Severity.WARN, line, message)
+fun warn(index: Int, message: String): ParseError {
+    return ParseError(Severity.WARN, index, message)
 }
 
-fun info(line: Int, message: String): ParseError {
-    return ParseError(Severity.INFO, line, message)
+fun info(index: Int, message: String): ParseError {
+    return ParseError(Severity.INFO, index, message)
 }
