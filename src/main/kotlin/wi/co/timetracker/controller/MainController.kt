@@ -7,9 +7,12 @@ import tornadofx.property
 import wi.co.timetracker.model.MainModel
 import wi.co.timetracker.service.PersistenceService
 import java.io.File
-import java.util.*
+import java.time.DayOfWeek
+import java.time.Duration
+import java.time.LocalDate
+import java.time.ZoneId
 
-class MainController(lineNums: String = "") : Controller() {
+class MainController(lineNums: String = "", dayPart: String = "", weekPart: String = "", monthPart: String = "") : Controller() {
 
     private val logger = KotlinLogging.logger {}
 
@@ -24,22 +27,78 @@ class MainController(lineNums: String = "") : Controller() {
     var lineNumbers by property(lineNums)
     fun lineNumbersProperty() = getProperty(MainController::lineNumbers)
 
+    var dayPart by property(dayPart)
+    fun dayPartProperty() = getProperty(MainController::dayPart)
+
+    var weekPart by property(weekPart)
+    fun weekPartProperty() = getProperty(MainController::weekPart)
+
+    var monthPart by property(monthPart)
+    fun monthPartProperty() = getProperty(MainController::monthPart)
+
     init {
         mainModel.fileContentProperty().addListener({ _, _, new ->
             if (null != mainModel.file) {
                 mainModel.file.writeText(new)
-                load(mainModel.currentDate)
+                val localDate = mainModel.currentDate.time.toInstant().atZone(ZoneId.systemDefault()).toLocalDate()
+                readDay(localDate)
             }
         })
         mainModel.currentDateProperty().addListener({ _, _, newValue ->
             println("newValue: $newValue")
-            load(newValue)
+            val localDate = mainModel.currentDate.time.toInstant().atZone(ZoneId.systemDefault()).toLocalDate()
+            readDay(localDate)
+            readWeek(localDate)
+            readMonth(localDate)
         })
-        load(Calendar.getInstance())
+        val now = LocalDate.now()
+        readDay(now)
+        readWeek(now)
+        readMonth(now)
     }
 
-    private fun load(newValue: Calendar) {
-        val parseResult = persistenceService.loadData(newValue, File(preferences.baseDir))
+    private fun readMonth(anyDayInMonth: LocalDate) {
+        var day = anyDayInMonth.withDayOfMonth(1)
+        var exptectedWorkTime = Duration.ZERO
+        var actualWorkTime = Duration.ZERO
+        while (day.month == anyDayInMonth.month) {
+            logger.debug { day }
+            if (day.dayOfWeek != DayOfWeek.SATURDAY && day.dayOfWeek != DayOfWeek.SUNDAY) {
+                exptectedWorkTime = exptectedWorkTime.plusHours(8)
+                val (_, _, dayModel) = persistenceService.loadData(day, baseDir())
+                if (null != dayModel) {
+                    actualWorkTime = actualWorkTime.plus(dayModel.duration("Essen", "Pause"))
+                }
+            }
+            day = day.plusDays(1)
+        }
+        //val diff = exptectedWorkTime.minus(actualWorkTime).abs()
+        monthPart = "Monat\nSoll: ${exptectedWorkTime.toHours()}\nIst: ${actualWorkTime.toHours()}"
+    }
+
+    private fun readWeek(anyDayInWeek: LocalDate) {
+        var day = anyDayInWeek
+        while (day.dayOfWeek != DayOfWeek.MONDAY)
+            day = day.minusDays(1)
+        var exptectedWorkTime = Duration.ZERO
+        var actualWorkTime = Duration.ZERO
+        while (day.dayOfWeek != DayOfWeek.MONDAY || day.dayOfMonth <= anyDayInWeek.dayOfMonth) {
+            logger.debug { day }
+            if (day.dayOfWeek != DayOfWeek.SATURDAY && day.dayOfWeek != DayOfWeek.SUNDAY) {
+                exptectedWorkTime = exptectedWorkTime.plusHours(8)
+                val (_, _, dayModel) = persistenceService.loadData(day, baseDir())
+                if (null != dayModel) {
+                    actualWorkTime = actualWorkTime.plus(dayModel.duration("Essen", "Pause"))
+                }
+            }
+            day = day.plusDays(1)
+        }
+        //val diff = exptectedWorkTime.minus(actualWorkTime).abs()
+        weekPart = "Woche\nSoll: ${exptectedWorkTime.toHours()}\nIst: ${actualWorkTime.toHours()}"
+    }
+
+    private fun readDay(day: LocalDate) {
+        val parseResult = persistenceService.loadData(day, baseDir())
         lineNumbers = if (parseResult.file.exists()) {
             (1..parseResult.file.readLines().size).fold("", { str, index ->
                 "$str$index\n"
@@ -51,9 +110,14 @@ class MainController(lineNums: String = "") : Controller() {
             parseResult.file.delete()
         }
         mainModel.dayModel = parseResult.dayModel
+        val actualDuration = if (parseResult.dayModel != null) parseResult.dayModel.duration("Essen", "Pause") else Duration.ZERO
+        val expedtedDuration = if (day.dayOfWeek == DayOfWeek.SATURDAY || day.dayOfWeek == DayOfWeek.SUNDAY) Duration.ZERO else Duration.ZERO.plusHours(8)
+        dayPart = "Tag\nSoll: ${expedtedDuration.toHours()}\nIst: ${actualDuration.toHours()}"
         mainModel.errors = parseResult.errors.fold("", { msg, (severity, line, message) ->
             msg + "${severity.toString().padEnd(5)} Zeile $line: $message\n"
         })
     }
+
+    private fun baseDir(): File = File(preferences.baseDir)
 
 }

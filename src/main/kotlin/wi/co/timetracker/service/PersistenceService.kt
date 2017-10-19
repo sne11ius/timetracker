@@ -4,14 +4,13 @@ import mu.KotlinLogging
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import wi.co.timetracker.model.*
+import wi.co.timetracker.parser.LineParser
 import java.io.File
 import java.io.File.separator
-import java.text.SimpleDateFormat
 import java.time.Duration
+import java.time.LocalDate
 import java.time.LocalTime
-import java.time.ZoneId
 import java.time.format.DateTimeFormatter
-import java.util.*
 
 @Service
 class PersistenceService {
@@ -21,8 +20,8 @@ class PersistenceService {
     @Autowired
     lateinit private var lineParser: LineParser
 
-    fun loadData(date: Calendar, baseDir: File): ParseResult {
-        println("Load data for ${date.time} from $baseDir")
+    fun loadData(date: LocalDate, baseDir: File): ParseResult {
+        println("Load data for ${date} from $baseDir")
         val file = mkFile(date, baseDir)
         if (file.exists()) {
             if (file.readText().isBlank()) {
@@ -36,9 +35,7 @@ class PersistenceService {
         }
     }
 
-    private fun loadDayModel(cal: Calendar, file: File): ParseResult {
-        val date = java.time.LocalDateTime
-                .ofInstant(cal.toInstant(), ZoneId.systemDefault())
+    private fun loadDayModel(date: LocalDate, file: File): ParseResult {
         val totalLines = file.readLines().size
         val entries = mutableListOf<EntryModel>()
         val errors = mutableListOf<ParseError>()
@@ -58,11 +55,7 @@ class PersistenceService {
                 }
             }
         }
-        val dayModel = DayModel(date
-                .withHour(0)
-                .withMinute(0)
-                .withSecond(0)
-                .withNano(0), entries)
+        val dayModel = DayModel(date, entries)
         if (total != null) {
             try {
                 val totalHours = total!!.substringBefore(",")
@@ -87,11 +80,10 @@ class PersistenceService {
         return ParseResult(file, errors, dayModel)
     }
 
-    private fun mkFile(calendar: Calendar, baseDir: File): File {
-        val date = calendar.time
-        val year = SimpleDateFormat("yyyy").format(date)
-        val yearAndMonth = SimpleDateFormat("yyyy-MM").format(date)
-        val full = SimpleDateFormat("yyyy-MM-dd").format(date)
+    private fun mkFile(date: LocalDate, baseDir: File): File {
+        val year = date.format(DateTimeFormatter.ofPattern("yyyy"))
+        val yearAndMonth = date.format(DateTimeFormatter.ofPattern("yyyy-MM"))
+        val full = date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
         val filename = "Zeiten $full.txt"
         val file = File(baseDir, "$year$separator$yearAndMonth$separator$filename")
         println("Load file $file")
