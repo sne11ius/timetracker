@@ -3,11 +3,11 @@ package wi.co.timetracker.model
 import tornadofx.getProperty
 import tornadofx.property
 import java.io.File
-import java.util.*
+import java.time.LocalDate
 
 
 class MainModel(
-        currentDate: Calendar = Calendar.getInstance(),
+        currentDate: LocalDate = LocalDate.now(),
         file: File? = null,
         fileContent: String = "",
         dayModel: DayModel? = null,

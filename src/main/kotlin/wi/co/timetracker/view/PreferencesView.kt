@@ -34,6 +34,9 @@ class PreferencesView : View() {
                         }
                     }
                 }
+                field("Pausenindikatoren (getrennt durch Komma)") {
+                    textfield().bind(preferences.breakIndicatorsProperty())
+                }
             }
             hbox {
                 alignment = Pos.BASELINE_RIGHT
@@ -49,6 +52,7 @@ class PreferencesView : View() {
                         controller.save()
                         close()
                     }
+                    isDefaultButton = true
                 }
             }
         }

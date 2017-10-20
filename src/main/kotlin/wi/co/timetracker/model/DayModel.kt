@@ -8,7 +8,7 @@ data class DayModel(val date: LocalDate, val entries: List<EntryModel>) {
 
     private val log = KotlinLogging.logger {}
 
-    fun duration(vararg excludes: String): Duration {
+    fun duration(excludes: List<String>): Duration {
         return entries.fold(Duration.ZERO, { d, m ->
             if (!excludes.any { m.text.contains(it, true) }) {
                 d.plus(m.duration())
