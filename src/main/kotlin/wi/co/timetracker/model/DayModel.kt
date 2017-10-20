@@ -2,9 +2,9 @@ package wi.co.timetracker.model
 
 import mu.KotlinLogging
 import java.time.Duration
-import java.time.LocalDateTime
+import java.time.LocalDate
 
-data class DayModel(val date: LocalDateTime, val entries: List<EntryModel>) {
+data class DayModel(val date: LocalDate, val entries: List<EntryModel>) {
 
     private val log = KotlinLogging.logger {}
 

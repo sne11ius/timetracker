@@ -3,6 +3,7 @@ package wi.co.timetracker.view
 import javafx.beans.binding.Bindings.bindBidirectional
 import javafx.geometry.Insets
 import javafx.geometry.NodeOrientation
+import javafx.geometry.Orientation
 import jfxtras.scene.control.CalendarPicker
 import tornadofx.*
 import wi.co.timetracker.controller.MainController
@@ -22,25 +23,30 @@ class MainView : View() {
                 }
             }
         }
-        center = vbox {
-            spacing = 10.0
-            borderpane {
-                left = textarea {
-                    prefWidth = 40.0
-                    minWidth = 40.0
-                    isEditable = false
-                    isDisable = true
-                    bind(controller.lineNumbersProperty())
-                    nodeOrientation = NodeOrientation.RIGHT_TO_LEFT
-                }
-                center = textarea {
-                    bind(controller.mainModel.fileContentProperty())
-                }
+        center = borderpane {
+            top = hbox {
+                label() { prefWidth = 100.0 }.bind(controller.dayPartProperty())
+                label() { prefWidth = 100.0 }.bind(controller.weekPartProperty())
+                label() { prefWidth = 100.0 }.bind(controller.monthPartProperty())
             }
-            textarea {
-                isEditable = false
-            }.bind(controller.mainModel.errorsProperty())
-            label("center")
+            center = splitpane(Orientation.VERTICAL) {
+                borderpane {
+                    left = textarea {
+                        prefWidth = 40.0
+                        minWidth = 40.0
+                        isEditable = false
+                        isDisable = true
+                        bind(controller.lineNumbersProperty())
+                        nodeOrientation = NodeOrientation.RIGHT_TO_LEFT
+                    }
+                    center = textarea {
+                        bind(controller.mainModel.fileContentProperty())
+                    }
+                }
+                textarea {
+                    isEditable = false
+                }.bind(controller.mainModel.errorsProperty())
+            }
         }
         right = vbox {
             spacing = 10.0

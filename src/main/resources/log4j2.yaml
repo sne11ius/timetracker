@@ -18,6 +18,16 @@ Configuration:
         level: debug
         AppenderRef:
           - ref: CONSOLE
+      - name: wi.co.timetracker.parser
+        additivity: false
+        level: info
+        AppenderRef:
+          - ref: CONSOLE
+      - name: wi.co.timetracker.model
+        additivity: false
+        level: info
+        AppenderRef:
+          - ref: CONSOLE
       - name: "JavaFX Application Thread"
         additivity: false
         level: warn

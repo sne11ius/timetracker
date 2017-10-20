@@ -1,10 +1,11 @@
-package wi.co.timetracker.service
+package wi.co.timetracker.parser
 
 import mu.KotlinLogging
 import org.springframework.stereotype.Component
 import wi.co.timetracker.model.EntryModel
 import wi.co.timetracker.model.ParseError
 import java.time.Duration
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
@@ -40,7 +41,7 @@ class LineParser {
         SUM_MINUTE_PART
     }
 
-    fun parseLine(baseDate: LocalDateTime, line: String): SingleLineParseResult {
+    fun parseLine(baseDate: LocalDate, line: String): SingleLineParseResult {
         var state = State.HOURS_START
         var hoursStart = ""
         var minutesStart = ""
@@ -168,7 +169,7 @@ class LineParser {
                     }
                 }
                 State.TEXT -> when {
-                    i > MAX_TEXT_LENGTH -> return err(i, "Max text length of $MAX_TEXT_LENGTH exceeded.")
+                    i > MAX_TEXT_LENGTH -> return err(i, "Max text length of ${MAX_TEXT_LENGTH} exceeded.")
                     char == ',' ->
                         return err(i, "Unexpected character '$char'. Expected not ','.")
                     char == '(' -> state = State.COMMENT
@@ -177,7 +178,7 @@ class LineParser {
                 }
                 State.COMMENT -> when {
                     i > MAX_COMMENT_LENGTH ->
-                        return err(i, "Max comment length of $MAX_COMMENT_LENGTH exceeded.")
+                        return err(i, "Max comment length of ${MAX_COMMENT_LENGTH} exceeded.")
                     char == ')' -> state = State.SKIP_TO_SUM_FROM_COMMENT
                     else -> comment += char
                 }
@@ -246,14 +247,15 @@ class LineParser {
         return SingleLineParseResult(listOf(wi.co.timetracker.model.error(index, msg)), null)
     }
 
-    private fun mkEntry(baseDate: LocalDateTime, hoursStart: String, minutesStart: String, hoursEnd: String, minutesEnd: String, text: String, comment: String, sumHours: String, sumMinutePart: String): SingleLineParseResult {
+    private fun mkEntry(baseDate: LocalDate, hoursStart: String, minutesStart: String, hoursEnd: String, minutesEnd: String, text: String, comment: String, sumHours: String, sumMinutePart: String): SingleLineParseResult {
+        val baseTime = LocalDateTime.of(baseDate, LocalTime.now()).withHour(0).withMinute(0).withSecond(0).withNano(0)
         val start = try {
-            baseDate.withHour(hoursStart.toInt()).withMinute(minutesStart.toInt())
+            baseTime.withHour(hoursStart.toInt()).withMinute(minutesStart.toInt())
         } catch (e: Exception) {
             return err(-1, "Could not parse start time $hoursStart:$minutesStart: ${e.message}")
         }
         val end = try {
-            baseDate.withHour(hoursEnd.toInt()).withMinute(minutesEnd.toInt())
+            baseTime.withHour(hoursEnd.toInt()).withMinute(minutesEnd.toInt())
         } catch (e: Exception) {
             return err(-1, "Could not parse end time $hoursEnd:$minutesEnd: ${e.message}")
         }
