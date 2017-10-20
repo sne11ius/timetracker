@@ -170,7 +170,7 @@ class LineParser {
                 State.TEXT -> when {
                     i > MAX_TEXT_LENGTH -> return err(i, "Max text length of $MAX_TEXT_LENGTH exceeded.")
                     char == ',' ->
-                        return err(i, "Unexpected character '$char'. Expected ','.")
+                        return err(i, "Unexpected character '$char'. Expected not ','.")
                     char == '(' -> state = State.COMMENT
                     char == '=' -> state = State.SKIP_TO_SUM_FROM_TEXT
                     else -> text += char
