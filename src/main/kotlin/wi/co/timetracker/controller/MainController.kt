@@ -38,28 +38,28 @@ class MainController(lineNums: String = "", dayPart: String = "", weekPart: Stri
     init {
         preferencesController.setOnPreferencesUpdatedListener(object : PreferencesController.OnPreferencesUpdatedListener {
             override fun onPreferencesUpdated() {
-                reload(mainModel.currentDate, preferencesController.getBreakIndicators())
+                reload(mainModel.currentDate)
             }
         })
         mainModel.fileContentProperty().addListener({ _, _, new ->
             if (null != mainModel.file) {
                 mainModel.file.writeText(new)
-                reload(mainModel.currentDate, preferencesController.getBreakIndicators())
+                reload(mainModel.currentDate)
             }
         })
         mainModel.currentDateProperty().addListener({ _, _, new ->
-            reload(new, preferencesController.getBreakIndicators())
+            reload(new)
         })
-        reload(LocalDate.now(), preferencesController.getBreakIndicators())
+        reload(LocalDate.now())
     }
 
-    private fun reload(date: LocalDate, breakIndicators: List<String>) {
-        readDay(date, breakIndicators)
-        readWeek(date, breakIndicators)
-        readMonth(date, breakIndicators)
+    private fun reload(date: LocalDate) {
+        readDay(date, preferencesController.getBreakIndicators(), preferencesController.getTravelIndicators(), preferencesController.getTravelMultiplier())
+        readWeek(date, preferencesController.getBreakIndicators(), preferencesController.getTravelIndicators(), preferencesController.getTravelMultiplier())
+        readMonth(date, preferencesController.getBreakIndicators(), preferencesController.getTravelIndicators(), preferencesController.getTravelMultiplier())
     }
 
-    private fun readMonth(anyDayInMonth: LocalDate, breakIndicators: List<String>) {
+    private fun readMonth(anyDayInMonth: LocalDate, breakIndicators: List<String>, travelIndicators: List<String>, travelMultiplier: Float) {
         var day = anyDayInMonth.withDayOfMonth(1)
         var exptectedWorkTime = Duration.ZERO
         var actualWorkTime = Duration.ZERO
@@ -67,9 +67,9 @@ class MainController(lineNums: String = "", dayPart: String = "", weekPart: Stri
             logger.debug { day }
             if (day.dayOfWeek != DayOfWeek.SATURDAY && day.dayOfWeek != DayOfWeek.SUNDAY) {
                 exptectedWorkTime = exptectedWorkTime.plusHours(8)
-                val (_, _, dayModel) = persistenceService.loadData(day, baseDir(), breakIndicators)
+                val (_, _, dayModel) = persistenceService.loadData(day, baseDir(), breakIndicators, travelIndicators, travelMultiplier)
                 if (null != dayModel) {
-                    actualWorkTime = actualWorkTime.plus(dayModel.duration(breakIndicators))
+                    actualWorkTime = actualWorkTime.plus(dayModel.duration(breakIndicators, travelIndicators, travelMultiplier))
                 }
             }
             day = day.plusDays(1)
@@ -78,7 +78,7 @@ class MainController(lineNums: String = "", dayPart: String = "", weekPart: Stri
         monthPart = "Monat\nSoll: ${exptectedWorkTime.toHours()}\nIst: ${actualWorkTime.toHours()}"
     }
 
-    private fun readWeek(anyDayInWeek: LocalDate, breakIndicators: List<String>) {
+    private fun readWeek(anyDayInWeek: LocalDate, breakIndicators: List<String>, travelIndicators: List<String>, travelMultiplier: Float) {
         var day = anyDayInWeek
         while (day.dayOfWeek != DayOfWeek.MONDAY)
             day = day.minusDays(1)
@@ -88,9 +88,9 @@ class MainController(lineNums: String = "", dayPart: String = "", weekPart: Stri
             logger.debug { day }
             if (day.dayOfWeek != DayOfWeek.SATURDAY && day.dayOfWeek != DayOfWeek.SUNDAY) {
                 exptectedWorkTime = exptectedWorkTime.plusHours(8)
-                val (_, _, dayModel) = persistenceService.loadData(day, baseDir(), breakIndicators)
+                val (_, _, dayModel) = persistenceService.loadData(day, baseDir(), breakIndicators, travelIndicators, travelMultiplier)
                 if (null != dayModel) {
-                    actualWorkTime = actualWorkTime.plus(dayModel.duration(breakIndicators))
+                    actualWorkTime = actualWorkTime.plus(dayModel.duration(breakIndicators, travelIndicators, travelMultiplier))
                 }
             }
             day = day.plusDays(1)
@@ -99,8 +99,8 @@ class MainController(lineNums: String = "", dayPart: String = "", weekPart: Stri
         weekPart = "Woche\nSoll: ${exptectedWorkTime.toHours()}\nIst: ${actualWorkTime.toHours()}"
     }
 
-    private fun readDay(day: LocalDate, breakIndicators: List<String>) {
-        val parseResult = persistenceService.loadData(day, baseDir(), breakIndicators)
+    private fun readDay(day: LocalDate, breakIndicators: List<String>, travelIndicators: List<String>, travelMultiplier: Float) {
+        val parseResult = persistenceService.loadData(day, baseDir(), breakIndicators, travelIndicators, travelMultiplier)
         lineNumbers = if (parseResult.file.exists()) {
             (1..parseResult.file.readLines().size).fold("", { str, index ->
                 "$str$index\n"
@@ -112,7 +112,7 @@ class MainController(lineNums: String = "", dayPart: String = "", weekPart: Stri
             parseResult.file.delete()
         }
         mainModel.dayModel = parseResult.dayModel
-        val actualDuration = if (parseResult.dayModel != null) parseResult.dayModel.duration(breakIndicators) else Duration.ZERO
+        val actualDuration = if (parseResult.dayModel != null) parseResult.dayModel.duration(breakIndicators, travelIndicators, travelMultiplier) else Duration.ZERO
         val expedtedDuration = if (day.dayOfWeek == DayOfWeek.SATURDAY || day.dayOfWeek == DayOfWeek.SUNDAY) Duration.ZERO else Duration.ZERO.plusHours(8)
         dayPart = "Tag\nSoll: ${expedtedDuration.toHours()}\nIst: ${actualDuration.toHours()}"
         mainModel.errors = parseResult.errors.fold("", { msg, (severity, line, message) ->

@@ -1,7 +1,6 @@
 package wi.co.timetracker.view
 
 import javafx.geometry.Pos
-import javafx.scene.control.TextField
 import tornadofx.*
 import wi.co.timetracker.controller.PreferencesController
 
@@ -11,13 +10,11 @@ class PreferencesView : View() {
 
     private val preferences = controller.preferences
 
-    var showBaseDirectoryField: TextField by singleAssign()
-
     override val root = Form()
 
     init {
         with(root) {
-            minWidth = 500.0
+            minWidth = 650.0
 
             fieldset("Einstellungen") {
                 field("Basisverzeichnis") {
@@ -36,6 +33,22 @@ class PreferencesView : View() {
                 }
                 field("Pausenindikatoren (getrennt durch Komma)") {
                     textfield().bind(preferences.breakIndicatorsProperty())
+                }
+                field("Reiseindikatoren (getrennt durch Komma)") {
+                    textfield().bind(preferences.travelIndicatorsProperty())
+                }
+                field("Multiplikator Reisezeit") {
+                    slider {
+                        min = 0.0
+                        max = 1.0
+                        isShowTickLabels = true
+                        isShowTickMarks = true
+                        isSnapToTicks = true
+                        majorTickUnit = 0.1
+                        minorTickCount = 0
+                        blockIncrement = 0.1
+                    }.bind(preferences.travelMultiplierProperty())
+                    label().bind(preferences.travelMultiplierProperty())
                 }
             }
             hbox {

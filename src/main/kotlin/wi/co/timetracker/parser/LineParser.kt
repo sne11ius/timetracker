@@ -41,7 +41,7 @@ class LineParser {
         SUM_MINUTE_PART
     }
 
-    fun parseLine(baseDate: LocalDate, line: String): SingleLineParseResult {
+    fun parseLine(baseDate: LocalDate, line: String, travelIndicators: List<String>, travelMultiplier: Float): SingleLineParseResult {
         var state = State.HOURS_START
         var hoursStart = ""
         var minutesStart = ""
@@ -234,7 +234,9 @@ class LineParser {
                         text,
                         comment,
                         sumHours,
-                        sumMinutePart
+                        sumMinutePart,
+                        travelIndicators,
+                        travelMultiplier
                 )
             }
             else -> {
@@ -247,7 +249,7 @@ class LineParser {
         return SingleLineParseResult(listOf(wi.co.timetracker.model.error(index, msg)), null)
     }
 
-    private fun mkEntry(baseDate: LocalDate, hoursStart: String, minutesStart: String, hoursEnd: String, minutesEnd: String, text: String, comment: String, sumHours: String, sumMinutePart: String): SingleLineParseResult {
+    private fun mkEntry(baseDate: LocalDate, hoursStart: String, minutesStart: String, hoursEnd: String, minutesEnd: String, text: String, comment: String, sumHours: String, sumMinutePart: String, travelIndicators: List<String>, travelMultiplier: Float): SingleLineParseResult {
         val baseTime = LocalDateTime.of(baseDate, LocalTime.now()).withHour(0).withMinute(0).withSecond(0).withNano(0)
         val start = try {
             baseTime.withHour(hoursStart.toInt()).withMinute(minutesStart.toInt())
@@ -272,8 +274,13 @@ class LineParser {
             } catch (e: Exception) {
                 return err(-1, "Could not parse sum $sumHours,$sumMinutePart: ${e.message}")
             }
-            if (notedDuration != model.duration()) {
-                val diff = model.duration().minus(notedDuration).abs()
+            val actualDuration = if (travelIndicators.any { text.contains(it, true) }) {
+                Duration.ofMillis((model.duration().toMillis() * travelMultiplier).toLong())
+            } else {
+                model.duration()
+            }
+            if (notedDuration != actualDuration) {
+                val diff = actualDuration.minus(notedDuration).abs()
                 val diffString = LocalTime.MIDNIGHT.plus(diff).format(DateTimeFormatter.ofPattern("HH:mm:ss"))
                 return err(-1, "Duration mismatch of $diffString.")
             }

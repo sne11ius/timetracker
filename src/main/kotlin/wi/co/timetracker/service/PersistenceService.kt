@@ -20,7 +20,7 @@ class PersistenceService {
     @Autowired
     lateinit private var lineParser: LineParser
 
-    fun loadData(date: LocalDate, baseDir: File, breakIndicators: List<String>): ParseResult {
+    fun loadData(date: LocalDate, baseDir: File, breakIndicators: List<String>, travelIndicators: List<String>, travelMultiplier: Float): ParseResult {
         println("Load data for $date from $baseDir")
         val file = mkFile(date, baseDir)
         if (file.exists()) {
@@ -28,14 +28,14 @@ class PersistenceService {
                 println("File empty")
                 return ParseResult(file, listOf(info(0, "No file for this date")), null)
             }
-            return loadDayModel(date, file, breakIndicators)
+            return loadDayModel(date, file, breakIndicators, travelIndicators, travelMultiplier)
         } else {
             println("No file")
             return ParseResult(file, listOf(info(0, "No file for this date")), null)
         }
     }
 
-    private fun loadDayModel(date: LocalDate, file: File, breakIndicators: List<String>): ParseResult {
+    private fun loadDayModel(date: LocalDate, file: File, breakIndicators: List<String>, travelIndicators: List<String>, travelMultiplier: Float): ParseResult {
         val totalLines = file.readLines().size
         val entries = mutableListOf<EntryModel>()
         val errors = mutableListOf<ParseError>()
@@ -47,7 +47,7 @@ class PersistenceService {
                 if (index == totalLines - 1 && it.startsWith("=")) {
                     total = it.substringAfterLast("=").trim()
                 } else {
-                    val parseResult = lineParser.parseLine(date, it)
+                    val parseResult = lineParser.parseLine(date, it, travelIndicators, travelMultiplier)
                     for (err in parseResult.errors)
                         errors += ParseError(err.severity, line, "Column ${err.index + 1}: ${err.message}")
                     if (null != parseResult.entry)
@@ -64,7 +64,7 @@ class PersistenceService {
                 val notedDuration = Duration
                         .ofHours(totalHours.toLong())
                         .plusMinutes(minutes.toLong())
-                val computedDuration = dayModel.duration(breakIndicators)
+                val computedDuration = dayModel.duration(breakIndicators, travelIndicators, travelMultiplier)
                 if (computedDuration != notedDuration) {
                     log.warn { "Workday duration mismatch for $dayModel" }
                     log.warn { "Noted: $notedDuration" }
