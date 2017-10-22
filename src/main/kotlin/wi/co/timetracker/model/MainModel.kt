@@ -14,18 +14,18 @@ class MainModel(
         errors: String = ""
 ) {
 
-    var currentDate by property(currentDate)
+    var currentDate: LocalDate by property(currentDate)
     fun currentDateProperty() = getProperty(MainModel::currentDate)
 
-    var file by property(file)
-    fun fileProperty() = getProperty(MainModel::file)
+    var file: File by property(file)
+    //fun fileProperty() = getProperty(MainModel::file)
 
-    var fileContent by property(fileContent)
+    var fileContent: String by property(fileContent)
     fun fileContentProperty() = getProperty(MainModel::fileContent)
 
-    var dayModel by property(dayModel)
-    fun dayModelProperty() = getProperty(MainModel::dayModel)
+    var dayModel: DayModel? by property(dayModel)
+    //fun dayModelProperty() = getProperty(MainModel::dayModel)
 
-    var errors by property(errors)
+    var errors: String by property(errors)
     fun errorsProperty() = getProperty(MainModel::errors)
 }

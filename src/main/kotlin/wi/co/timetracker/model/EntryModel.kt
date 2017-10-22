@@ -1,12 +1,9 @@
 package wi.co.timetracker.model
 
-import mu.KotlinLogging
 import java.time.Duration
 import java.time.LocalDateTime
 
-data class EntryModel(private val begin: LocalDateTime, private val end: LocalDateTime, val text: String, val notedDuration: Duration? = null, val comment: String = "") {
-
-    private val log = KotlinLogging.logger {}
+data class EntryModel(private val begin: LocalDateTime, private val end: LocalDateTime, val text: String, private val notedDuration: Duration? = null, val comment: String = "") {
 
     fun computeDurationDifference(travelIndicators: List<String>, travelMultiplier: Float): Duration {
         return if (null == notedDuration)

@@ -18,7 +18,7 @@ class PreferencesView : View() {
 
             fieldset("Einstellungen") {
                 field("Basisverzeichnis") {
-                    textfield() {
+                    textfield {
                         isEditable = false
                         isDisable = true
                     }.bind(preferences.baseDirProperty())

@@ -24,19 +24,19 @@ class MainController(lineNums: String = "", dayPart: String = "", weekPart: Stri
 
     val mainModel = MainModel()
 
-    var lineNumbers by property(lineNums)
+    private var lineNumbers: String by property(lineNums)
     fun lineNumbersProperty() = getProperty(MainController::lineNumbers)
 
-    var dayPart by property(dayPart)
+    private var dayPart: String by property(dayPart)
     fun dayPartProperty() = getProperty(MainController::dayPart)
 
-    var weekPart by property(weekPart)
+    private var weekPart: String by property(weekPart)
     fun weekPartProperty() = getProperty(MainController::weekPart)
 
-    var monthPart by property(monthPart)
+    private var monthPart: String by property(monthPart)
     fun monthPartProperty() = getProperty(MainController::monthPart)
 
-    var summary by property(summary)
+    private var summary: String by property(summary)
     fun summaryProperty() = getProperty(MainController::summary)
 
     init {
@@ -46,10 +46,8 @@ class MainController(lineNums: String = "", dayPart: String = "", weekPart: Stri
             }
         })
         mainModel.fileContentProperty().addListener({ _, _, new ->
-            if (null != mainModel.file) {
-                mainModel.file.writeText(new)
-                reload(mainModel.currentDate)
-            }
+            mainModel.file.writeText(new)
+            reload(mainModel.currentDate)
         })
         mainModel.currentDateProperty().addListener({ _, _, new ->
             reload(new)

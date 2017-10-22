@@ -11,7 +11,7 @@ class Preferences(baseDir: String = System.getProperty("user.home"), breakIndica
     var breakIndicators: String by property(breakIndicators)
     fun breakIndicatorsProperty() = getProperty(Preferences::breakIndicators)
 
-    var travelIndicators by property(travelIndicators)
+    var travelIndicators: String by property(travelIndicators)
     fun travelIndicatorsProperty() = getProperty(Preferences::travelIndicators)
 
     var travelMultiplier: Number by property(travelMultiplier)
