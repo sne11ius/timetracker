@@ -10,17 +10,13 @@ data class DayModel(val date: LocalDate, private val entries: List<EntryModel>) 
 
     fun duration(excludes: List<String>, travelIndicators: List<String>, travelMultiplier: Float): Duration {
         return entries.fold(Duration.ZERO, { d, m ->
-            if (!excludes.any { m.text.contains(it, true) }) {
-                if (travelIndicators.any { m.text.contains(it, true) }) {
-                    val scaledDuration = Duration.ofMillis((m.duration().toMillis() * travelMultiplier).toLong())
-                    d.plus(scaledDuration)
+            d.plus(
+                    if (excludes.any { m.text.contains(it) }) {
+                        Duration.ZERO
                 } else {
-                    d.plus(m.duration())
+                        m.computeDuration(travelIndicators, travelMultiplier)
                 }
-            } else {
-                log.debug { "Skipping entry: $m" }
-                d
-            }
+            )
         })
     }
 

@@ -56,6 +56,7 @@ class PersistenceService {
             }
         }
         val dayModel = DayModel(date, entries)
+
         if (total != null) {
             try {
                 val totalHours = total!!.substringBefore(",")
@@ -66,12 +67,16 @@ class PersistenceService {
                         .plusMinutes(minutes.toLong())
                 val computedDuration = dayModel.duration(breakIndicators, travelIndicators, travelMultiplier)
                 if (computedDuration != notedDuration) {
-                    log.warn { "Workday duration mismatch for $dayModel" }
+                    log.warn { "Workday computeDuration mismatch for $dayModel" }
                     log.warn { "Noted: $notedDuration" }
                     log.warn { "Computed: $computedDuration" }
                     val diff = computedDuration.minus(notedDuration).abs()
-                    val diffString = LocalTime.MIDNIGHT.plus(diff).format(DateTimeFormatter.ofPattern("HH:mm:ss"))
-                    errors += warn(file.readLines().size, "Workday duration mismatch of $diffString")
+                    if (diff.toMinutes() >= 5) {
+                        val diffString = LocalTime.MIDNIGHT.plus(diff).format(DateTimeFormatter.ofPattern("HH:mm:ss"))
+                        errors += warn(file.readLines().size, "Workday mismatch of $diffString")
+                    } else {
+                        log.debug { "Ignoring workday duration mismatch of < 5 minutes" }
+                    }
                 }
             } catch (e: NumberFormatException) {
                 errors += error(file.readLines().size, "Cannot parse total")

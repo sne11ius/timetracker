@@ -17,7 +17,7 @@ class MainView : View() {
         minHeight = 500.0
         padding = Insets(10.0)
         top = buttonbar {
-            button("Preferences") {
+            button("Einstellungen") {
                 action {
                     find(PreferencesView::class).openModal()
                 }
@@ -29,23 +29,31 @@ class MainView : View() {
                 label() { prefWidth = 100.0 }.bind(controller.weekPartProperty())
                 label() { prefWidth = 100.0 }.bind(controller.monthPartProperty())
             }
-            center = splitpane(Orientation.VERTICAL) {
-                borderpane {
-                    left = textarea {
-                        prefWidth = 40.0
-                        minWidth = 40.0
+            center = splitpane {
+                splitpane(Orientation.VERTICAL) {
+                    borderpane {
+                        left = textarea {
+                            prefWidth = 40.0
+                            minWidth = 40.0
+                            isEditable = false
+                            isDisable = true
+                            bind(controller.lineNumbersProperty())
+                            nodeOrientation = NodeOrientation.RIGHT_TO_LEFT
+                        }
+                        center = textarea {
+                            bind(controller.mainModel.fileContentProperty())
+                        }
+                    }
+                    textarea {
                         isEditable = false
-                        isDisable = true
-                        bind(controller.lineNumbersProperty())
-                        nodeOrientation = NodeOrientation.RIGHT_TO_LEFT
-                    }
-                    center = textarea {
-                        bind(controller.mainModel.fileContentProperty())
-                    }
+                    }.bind(controller.mainModel.errorsProperty())
                 }
                 textarea {
+                    prefWidth = 300.0
+                    minWidth = 300.0
                     isEditable = false
-                }.bind(controller.mainModel.errorsProperty())
+                    bind(controller.summaryProperty())
+                }
             }
         }
         right = vbox {

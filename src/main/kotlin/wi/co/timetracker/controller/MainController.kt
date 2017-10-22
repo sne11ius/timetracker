@@ -4,22 +4,22 @@ import mu.KotlinLogging
 import tornadofx.Controller
 import tornadofx.getProperty
 import tornadofx.property
+import wi.co.timetracker.extensions.existsAndBlank
+import wi.co.timetracker.extensions.isWeekend
+import wi.co.timetracker.extensions.isWorkDay
 import wi.co.timetracker.model.MainModel
 import wi.co.timetracker.service.PersistenceService
-import java.io.File
 import java.time.DayOfWeek
 import java.time.Duration
 import java.time.LocalDate
 
-class MainController(lineNums: String = "", dayPart: String = "", weekPart: String = "", monthPart: String = "") : Controller() {
+class MainController(lineNums: String = "", dayPart: String = "", weekPart: String = "", monthPart: String = "", summary: String = "") : Controller() {
 
     private val logger = KotlinLogging.logger {}
 
     private val persistenceService: PersistenceService by di()
 
     private val preferencesController: PreferencesController by inject()
-
-    private val preferences = preferencesController.preferences
 
     val mainModel = MainModel()
 
@@ -34,6 +34,9 @@ class MainController(lineNums: String = "", dayPart: String = "", weekPart: Stri
 
     var monthPart by property(monthPart)
     fun monthPartProperty() = getProperty(MainController::monthPart)
+
+    var summary by property(summary)
+    fun summaryProperty() = getProperty(MainController::summary)
 
     init {
         preferencesController.setOnPreferencesUpdatedListener(object : PreferencesController.OnPreferencesUpdatedListener {
@@ -67,15 +70,15 @@ class MainController(lineNums: String = "", dayPart: String = "", weekPart: Stri
             logger.debug { day }
             if (day.dayOfWeek != DayOfWeek.SATURDAY && day.dayOfWeek != DayOfWeek.SUNDAY) {
                 exptectedWorkTime = exptectedWorkTime.plusHours(8)
-                val (_, _, dayModel) = persistenceService.loadData(day, baseDir(), breakIndicators, travelIndicators, travelMultiplier)
+                val (_, _, dayModel) = persistenceService.loadData(day, preferencesController.getBaseDir(), breakIndicators, travelIndicators, travelMultiplier)
                 if (null != dayModel) {
                     actualWorkTime = actualWorkTime.plus(dayModel.duration(breakIndicators, travelIndicators, travelMultiplier))
                 }
             }
             day = day.plusDays(1)
         }
-        //val diff = exptectedWorkTime.minus(actualWorkTime).abs()
-        monthPart = "Monat\nSoll: ${exptectedWorkTime.toHours()}\nIst: ${actualWorkTime.toHours()}"
+        // val diff = exptectedWorkTime.minus(actualWorkTime)
+        monthPart = "Monat\nSoll: ${exptectedWorkTime.toHours()}\nIst: ${actualWorkTime.toHours()}"//\nDifferennz: $diff"
     }
 
     private fun readWeek(anyDayInWeek: LocalDate, breakIndicators: List<String>, travelIndicators: List<String>, travelMultiplier: Float) {
@@ -84,11 +87,11 @@ class MainController(lineNums: String = "", dayPart: String = "", weekPart: Stri
             day = day.minusDays(1)
         var exptectedWorkTime = Duration.ZERO
         var actualWorkTime = Duration.ZERO
-        while (day.dayOfWeek != DayOfWeek.MONDAY || day.dayOfMonth <= anyDayInWeek.dayOfMonth) {
-            logger.debug { day }
-            if (day.dayOfWeek != DayOfWeek.SATURDAY && day.dayOfWeek != DayOfWeek.SUNDAY) {
+        for (index in 0 until 7) {
+            logger.debug { "$day: ${day.dayOfWeek}" }
+            if (day.dayOfWeek.isWorkDay()) {
                 exptectedWorkTime = exptectedWorkTime.plusHours(8)
-                val (_, _, dayModel) = persistenceService.loadData(day, baseDir(), breakIndicators, travelIndicators, travelMultiplier)
+                val (_, _, dayModel) = persistenceService.loadData(day, preferencesController.getBaseDir(), breakIndicators, travelIndicators, travelMultiplier)
                 if (null != dayModel) {
                     actualWorkTime = actualWorkTime.plus(dayModel.duration(breakIndicators, travelIndicators, travelMultiplier))
                 }
@@ -100,7 +103,7 @@ class MainController(lineNums: String = "", dayPart: String = "", weekPart: Stri
     }
 
     private fun readDay(day: LocalDate, breakIndicators: List<String>, travelIndicators: List<String>, travelMultiplier: Float) {
-        val parseResult = persistenceService.loadData(day, baseDir(), breakIndicators, travelIndicators, travelMultiplier)
+        val parseResult = persistenceService.loadData(day, preferencesController.getBaseDir(), breakIndicators, travelIndicators, travelMultiplier)
         lineNumbers = if (parseResult.file.exists()) {
             (1..parseResult.file.readLines().size).fold("", { str, index ->
                 "$str$index\n"
@@ -108,18 +111,16 @@ class MainController(lineNums: String = "", dayPart: String = "", weekPart: Stri
         } else ""
         mainModel.file = parseResult.file
         mainModel.fileContent = if (parseResult.file.exists()) parseResult.file.readText() else ""
-        if (parseResult.file.exists() && parseResult.file.readText().isBlank()) {
+        if (parseResult.file.existsAndBlank()) {
             parseResult.file.delete()
         }
         mainModel.dayModel = parseResult.dayModel
         val actualDuration = if (parseResult.dayModel != null) parseResult.dayModel.duration(breakIndicators, travelIndicators, travelMultiplier) else Duration.ZERO
-        val expedtedDuration = if (day.dayOfWeek == DayOfWeek.SATURDAY || day.dayOfWeek == DayOfWeek.SUNDAY) Duration.ZERO else Duration.ZERO.plusHours(8)
-        dayPart = "Tag\nSoll: ${expedtedDuration.toHours()}\nIst: ${actualDuration.toHours()}"
+        val expectedDuration = if (day.dayOfWeek.isWeekend()) Duration.ZERO else Duration.ofHours(8)
+        dayPart = "Tag\nSoll: ${expectedDuration.toHours()}\nIst: ${actualDuration.toHours()}"
         mainModel.errors = parseResult.errors.fold("", { msg, (severity, line, message) ->
             msg + "${severity.toString().padEnd(5)} Zeile $line: $message\n"
         })
     }
-
-    private fun baseDir(): File = File(preferences.baseDir)
 
 }
