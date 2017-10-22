@@ -21,16 +21,16 @@ class PersistenceService {
     lateinit private var lineParser: LineParser
 
     fun loadData(date: LocalDate, baseDir: File, breakIndicators: List<String>, travelIndicators: List<String>, travelMultiplier: Float): ParseResult {
-        println("Load data for $date from $baseDir")
+        log.debug { "Load data for $date from $baseDir" }
         val file = mkFile(date, baseDir)
         if (file.exists()) {
             if (file.readText().isBlank()) {
-                println("File empty")
+                log.debug { "File empty" }
                 return ParseResult(file, listOf(info(0, "No file for this date")), null)
             }
             return loadDayModel(date, file, breakIndicators, travelIndicators, travelMultiplier)
         } else {
-            println("No file")
+            log.debug { "No file" }
             return ParseResult(file, listOf(info(0, "No file for this date")), null)
         }
     }
@@ -43,7 +43,7 @@ class PersistenceService {
         file.readLines().forEachIndexed { index, it ->
             val line = index + 1
             if (!it.isBlank()) {
-                println("Reading index: $it")
+                log.debug { "Reading index: $it" }
                 if (index == totalLines - 1 && it.startsWith("=")) {
                     total = it.substringAfterLast("=").trim()
                 } else {
@@ -62,21 +62,20 @@ class PersistenceService {
                 val totalHours = total!!.substringBefore(",")
                 val minutePart = if (total!!.contains(",")) total!!.substringAfter(",") else "0"
                 val minutes = "0.$minutePart".toFloat() * 60
+                val secondsPart = minutes.toString().substringAfter(".")
+                val seconds = "0.${if (secondsPart.isBlank()) "0" else secondsPart}".toFloat() * 60
                 val notedDuration = Duration
                         .ofHours(totalHours.toLong())
                         .plusMinutes(minutes.toLong())
+                        .plusSeconds(seconds.toLong())
                 val computedDuration = dayModel.duration(breakIndicators, travelIndicators, travelMultiplier)
                 if (computedDuration != notedDuration) {
                     log.warn { "Workday computeDuration mismatch for $dayModel" }
                     log.warn { "Noted: $notedDuration" }
                     log.warn { "Computed: $computedDuration" }
                     val diff = computedDuration.minus(notedDuration).abs()
-                    if (diff.toMinutes() >= 5) {
-                        val diffString = LocalTime.MIDNIGHT.plus(diff).format(DateTimeFormatter.ofPattern("HH:mm:ss"))
-                        errors += warn(file.readLines().size, "Workday mismatch of $diffString")
-                    } else {
-                        log.debug { "Ignoring workday duration mismatch of < 5 minutes" }
-                    }
+                    val diffString = LocalTime.MIDNIGHT.plus(diff).format(DateTimeFormatter.ofPattern("HH:mm:ss"))
+                    errors += warn(file.readLines().size, "Workday mismatch of $diffString")
                 }
             } catch (e: NumberFormatException) {
                 errors += error(file.readLines().size, "Cannot parse total")
@@ -91,7 +90,7 @@ class PersistenceService {
         val full = date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
         val filename = "Zeiten $full.txt"
         val file = File(baseDir, "$year$separator$yearAndMonth$separator$filename")
-        println("Load file $file")
+        log.debug { "Load file $file" }
         return file
     }
 }

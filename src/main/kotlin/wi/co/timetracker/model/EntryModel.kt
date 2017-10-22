@@ -12,17 +12,12 @@ data class EntryModel(private val begin: LocalDateTime, private val end: LocalDa
         return if (null == notedDuration)
             Duration.ZERO
         else
-            notedDuration.minus(computeDuration(travelIndicators, travelMultiplier)).abs()
+            notedDuration.minus(computeDuration(travelIndicators, travelMultiplier))
     }
 
     fun computeDuration(travelIndicators: List<String>, travelMultiplier: Float): Duration {
-        return if (travelIndicators.any { text.contains(it, true) }) {
-            val adjustedDuration = Duration.ofMillis((computeBaseDuration().toMillis() * travelMultiplier).toLong())
-            val roundedDuration = Duration.ofMinutes(adjustedDuration.toMinutes())
-            if (roundedDuration != notedDuration) {
-                log.warn { "not equal: $adjustedDuration, $notedDuration" }
-            }
-            roundedDuration
+        return if (travelIndicators.any { text.contains(it) || comment.contains(it) }) {
+            Duration.ofMillis((computeBaseDuration().toMillis() * travelMultiplier).toLong())
         } else
             computeBaseDuration()
     }

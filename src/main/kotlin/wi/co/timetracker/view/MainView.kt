@@ -25,9 +25,9 @@ class MainView : View() {
         }
         center = borderpane {
             top = hbox {
-                label() { prefWidth = 100.0 }.bind(controller.dayPartProperty())
-                label() { prefWidth = 100.0 }.bind(controller.weekPartProperty())
-                label() { prefWidth = 100.0 }.bind(controller.monthPartProperty())
+                label() { prefWidth = 160.0 }.bind(controller.dayPartProperty())
+                label() { prefWidth = 160.0 }.bind(controller.weekPartProperty())
+                label() { prefWidth = 160.0 }.bind(controller.monthPartProperty())
             }
             center = splitpane {
                 splitpane(Orientation.VERTICAL) {

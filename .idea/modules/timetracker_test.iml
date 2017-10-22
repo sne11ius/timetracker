@@ -39,6 +39,7 @@
     <orderEntry type="library" name="Gradle: no.tornado:tornadofx:1.7.11" level="project" />
     <orderEntry type="library" name="Gradle: org.jfxtras:jfxtras-controls:8.0-r5" level="project" />
     <orderEntry type="library" name="Gradle: org.springframework:spring-context:5.0.0.RELEASE" level="project" />
+    <orderEntry type="library" name="Gradle: org.apache.commons:commons-lang3:3.6" level="project" />
     <orderEntry type="library" name="Gradle: io.github.microutils:kotlin-logging:1.4.6" level="project" />
     <orderEntry type="library" name="Gradle: org.apache.logging.log4j:log4j-api:2.9.1" level="project" />
     <orderEntry type="library" name="Gradle: org.apache.logging.log4j:log4j-core:2.9.1" level="project" />

@@ -30,7 +30,12 @@ Configuration:
           - ref: CONSOLE
       - name: wi.co.timetracker.controller.MainController
         additivity: false
-        level: debug
+        level: info
+        AppenderRef:
+          - ref: CONSOLE
+      - name: wi.co.timetracker.service
+        additivity: false
+        level: info
         AppenderRef:
           - ref: CONSOLE
       - name: "JavaFX Application Thread"

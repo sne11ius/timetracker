@@ -17,7 +17,7 @@ data class SingleLineParseResult(val errors: List<ParseError>, val entry: EntryM
 const val MAX_TEXT_LENGTH = 200
 const val MAX_COMMENT_LENGTH = 200
 const val MAX_SUM_HOURS = 2
-const val MAX_SUM_MINUTE_PART = 2
+const val MAX_SUM_MINUTE_PART = 3
 
 @Component
 class LineParser {
@@ -265,43 +265,23 @@ class LineParser {
             return err(-1, "Empty text")
         }
         val minutes = "0.${if (sumMinutePart.isEmpty()) "0" else sumMinutePart}".toFloat() * 60
+        val secondsPart = minutes.toString().substringAfter(".")
+        val seconds = "0.${if (secondsPart.isBlank()) "0" else secondsPart}".toFloat() * 60
         val notedDuration = if (sumHours.isNotBlank() || sumMinutePart.isNotBlank()) {
             try {
                 Duration
                         .ofHours(if (sumHours.isBlank()) 0 else sumHours.toLong())
                         .plusMinutes(minutes.toLong())
+                        .plusSeconds(seconds.toLong())
             } catch (e: Exception) {
                 return err(-1, "Could not parse sum $sumHours,$sumMinutePart: ${e.message}")
             }
         } else null
         val model = EntryModel(start, end, text.trim(), notedDuration, comment.trim())
-        /*
-        val actualDuration = if (travelIndicators.any { text.contains(it, true) }) {
-            val scaledDuration = Duration.ofMillis((model.computeDuration(travelIndicators, travelMultiplier).toMillis() * travelMultiplier).toLong())
-            val roundedDuration = BigDecimal.valueOf(scaledDuration.toMillis()).divide(BigDecimal.valueOf(Duration.ofHours(1).toMillis())).setScale(2, RoundingMode.UP).toFloat()
-            var hours = roundedDuration.toString().substringBefore(".")
-            if (hours.isEmpty()) {
-                hours = "0"
-            }
-            var minutes = roundedDuration.toString().substringAfter(".")
-            if (minutes.isBlank()) {
-                minutes = "0"
-            }
-            Duration.ofHours(hours.toLong()).plusMinutes(("0.$minutes".toFloat() * 60).toLong())
-        } else {
-            model.computeDuration(travelIndicators, travelMultiplier)
-        }
-        */
-        //val actualDuration = model.computeDuration(travelIndicators, travelMultiplier)
         val durationDifference = model.computeDurationDifference(travelIndicators, travelMultiplier)
-        //if (notedDuration != actualDuration) {
-        //    val diff = actualDuration.minus(notedDuration).abs()
-        //    val diffString = LocalTime.MIDNIGHT.plus(diff).format(DateTimeFormatter.ofPattern("HH:mm:ss"))
-        //    return err(-1, "Duration mismatch of $diffString.")
-        //}
         if (durationDifference != Duration.ZERO) {
             val diffString = LocalTime.MIDNIGHT.plus(durationDifference).format(DateTimeFormatter.ofPattern("HH:mm:ss"))
-            return err(-1, "Duration mismatch of (Stunden:Minuten:Sekunden) $diffString.")
+            return err(-1, "Duration mismatch of (HH:mm:ss) $diffString.")
         }
         return SingleLineParseResult(emptyList(), model)
     }

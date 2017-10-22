@@ -5,6 +5,7 @@ import tornadofx.Controller
 import tornadofx.getProperty
 import tornadofx.property
 import wi.co.timetracker.extensions.existsAndBlank
+import wi.co.timetracker.extensions.formatDefault
 import wi.co.timetracker.extensions.isWeekend
 import wi.co.timetracker.extensions.isWorkDay
 import wi.co.timetracker.model.MainModel
@@ -57,9 +58,11 @@ class MainController(lineNums: String = "", dayPart: String = "", weekPart: Stri
     }
 
     private fun reload(date: LocalDate) {
-        readDay(date, preferencesController.getBreakIndicators(), preferencesController.getTravelIndicators(), preferencesController.getTravelMultiplier())
-        readWeek(date, preferencesController.getBreakIndicators(), preferencesController.getTravelIndicators(), preferencesController.getTravelMultiplier())
-        readMonth(date, preferencesController.getBreakIndicators(), preferencesController.getTravelIndicators(), preferencesController.getTravelMultiplier())
+        with(preferencesController) {
+            readDay(date, getBreakIndicators(), getTravelIndicators(), getTravelMultiplier())
+            readWeek(date, getBreakIndicators(), getTravelIndicators(), getTravelMultiplier())
+            readMonth(date, getBreakIndicators(), getTravelIndicators(), getTravelMultiplier())
+        }
     }
 
     private fun readMonth(anyDayInMonth: LocalDate, breakIndicators: List<String>, travelIndicators: List<String>, travelMultiplier: Float) {
@@ -68,7 +71,7 @@ class MainController(lineNums: String = "", dayPart: String = "", weekPart: Stri
         var actualWorkTime = Duration.ZERO
         while (day.month == anyDayInMonth.month) {
             logger.debug { day }
-            if (day.dayOfWeek != DayOfWeek.SATURDAY && day.dayOfWeek != DayOfWeek.SUNDAY) {
+            if (day.dayOfWeek.isWorkDay()) {
                 exptectedWorkTime = exptectedWorkTime.plusHours(8)
                 val (_, _, dayModel) = persistenceService.loadData(day, preferencesController.getBaseDir(), breakIndicators, travelIndicators, travelMultiplier)
                 if (null != dayModel) {
@@ -77,8 +80,8 @@ class MainController(lineNums: String = "", dayPart: String = "", weekPart: Stri
             }
             day = day.plusDays(1)
         }
-        // val diff = exptectedWorkTime.minus(actualWorkTime)
-        monthPart = "Monat\nSoll: ${exptectedWorkTime.toHours()}\nIst: ${actualWorkTime.toHours()}"//\nDifferennz: $diff"
+        val diff = exptectedWorkTime.minus(actualWorkTime)
+        monthPart = "Monat\nSoll: ${exptectedWorkTime.toHours()}\nIst: ${actualWorkTime.formatDefault()}\nDifferenz: ${diff.formatDefault()}"
     }
 
     private fun readWeek(anyDayInWeek: LocalDate, breakIndicators: List<String>, travelIndicators: List<String>, travelMultiplier: Float) {
@@ -98,8 +101,8 @@ class MainController(lineNums: String = "", dayPart: String = "", weekPart: Stri
             }
             day = day.plusDays(1)
         }
-        //val diff = exptectedWorkTime.minus(actualWorkTime).abs()
-        weekPart = "Woche\nSoll: ${exptectedWorkTime.toHours()}\nIst: ${actualWorkTime.toHours()}"
+        val diff = exptectedWorkTime.minus(actualWorkTime)
+        weekPart = "Woche\nSoll: ${exptectedWorkTime.toHours()}\nIst: ${actualWorkTime.formatDefault()}\nDifferenz: ${diff.formatDefault()}"
     }
 
     private fun readDay(day: LocalDate, breakIndicators: List<String>, travelIndicators: List<String>, travelMultiplier: Float) {
@@ -117,10 +120,15 @@ class MainController(lineNums: String = "", dayPart: String = "", weekPart: Stri
         mainModel.dayModel = parseResult.dayModel
         val actualDuration = if (parseResult.dayModel != null) parseResult.dayModel.duration(breakIndicators, travelIndicators, travelMultiplier) else Duration.ZERO
         val expectedDuration = if (day.dayOfWeek.isWeekend()) Duration.ZERO else Duration.ofHours(8)
-        dayPart = "Tag\nSoll: ${expectedDuration.toHours()}\nIst: ${actualDuration.toHours()}"
+        val diff = expectedDuration.minus(actualDuration)
+        dayPart = "Tag\nSoll: ${expectedDuration.toHours()}\nIst: ${actualDuration.formatDefault()}\nDifferenz: ${diff.formatDefault()}"
         mainModel.errors = parseResult.errors.fold("", { msg, (severity, line, message) ->
             msg + "${severity.toString().padEnd(5)} Zeile $line: $message\n"
         })
+        summary = if (parseResult.dayModel != null) {
+            parseResult.dayModel.toDaySummaryModel(breakIndicators, travelIndicators, travelMultiplier).toString()
+        } else {
+            ""
+        }
     }
-
 }
