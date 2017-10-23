@@ -17,7 +17,7 @@ data class SingleLineParseResult(val errors: List<ParseError>, val entry: EntryM
 const val MAX_TEXT_LENGTH = 200
 const val MAX_COMMENT_LENGTH = 200
 const val MAX_SUM_HOURS = 2
-const val MAX_SUM_MINUTE_PART = 2
+const val MAX_SUM_MINUTE_PART = 3
 
 @Component
 class LineParser {
@@ -41,7 +41,7 @@ class LineParser {
         SUM_MINUTE_PART
     }
 
-    fun parseLine(baseDate: LocalDate, line: String): SingleLineParseResult {
+    fun parseLine(baseDate: LocalDate, line: String, travelIndicators: List<String>, travelMultiplier: Float): SingleLineParseResult {
         var state = State.HOURS_START
         var hoursStart = ""
         var minutesStart = ""
@@ -61,7 +61,7 @@ class LineParser {
             val char = line[i]
             log.debug { "Parse '$char' at $i" }
             when (state) {
-                State.HOURS_START -> if (0 == hoursStart.length) {
+                State.HOURS_START -> if (hoursStart.isEmpty()) {
                     if (char in '0'..'2') {
                         hoursStart += char
                         if (hoursStart.length == 2) {
@@ -117,7 +117,7 @@ class LineParser {
                         return err(i, "Unexpected character '$char'. Expected ' '.")
                     }
                 }
-                State.HOURS_END -> if (0 == hoursEnd.length) {
+                State.HOURS_END -> if (hoursEnd.isEmpty()) {
                     if (char in '0'..'2') {
                         hoursEnd += char
                         if (hoursEnd.length == 2) {
@@ -169,7 +169,7 @@ class LineParser {
                     }
                 }
                 State.TEXT -> when {
-                    i > MAX_TEXT_LENGTH -> return err(i, "Max text length of ${MAX_TEXT_LENGTH} exceeded.")
+                    i > MAX_TEXT_LENGTH -> return err(i, "Max text length of $MAX_TEXT_LENGTH exceeded.")
                     char == ',' ->
                         return err(i, "Unexpected character '$char'. Expected not ','.")
                     char == '(' -> state = State.COMMENT
@@ -178,7 +178,7 @@ class LineParser {
                 }
                 State.COMMENT -> when {
                     i > MAX_COMMENT_LENGTH ->
-                        return err(i, "Max comment length of ${MAX_COMMENT_LENGTH} exceeded.")
+                        return err(i, "Max comment length of $MAX_COMMENT_LENGTH exceeded.")
                     char == ')' -> state = State.SKIP_TO_SUM_FROM_COMMENT
                     else -> comment += char
                 }
@@ -234,7 +234,9 @@ class LineParser {
                         text,
                         comment,
                         sumHours,
-                        sumMinutePart
+                        sumMinutePart,
+                        travelIndicators,
+                        travelMultiplier
                 )
             }
             else -> {
@@ -247,7 +249,7 @@ class LineParser {
         return SingleLineParseResult(listOf(wi.co.timetracker.model.error(index, msg)), null)
     }
 
-    private fun mkEntry(baseDate: LocalDate, hoursStart: String, minutesStart: String, hoursEnd: String, minutesEnd: String, text: String, comment: String, sumHours: String, sumMinutePart: String): SingleLineParseResult {
+    private fun mkEntry(baseDate: LocalDate, hoursStart: String, minutesStart: String, hoursEnd: String, minutesEnd: String, text: String, comment: String, sumHours: String, sumMinutePart: String, travelIndicators: List<String>, travelMultiplier: Float): SingleLineParseResult {
         val baseTime = LocalDateTime.of(baseDate, LocalTime.now()).withHour(0).withMinute(0).withSecond(0).withNano(0)
         val start = try {
             baseTime.withHour(hoursStart.toInt()).withMinute(minutesStart.toInt())
@@ -262,21 +264,24 @@ class LineParser {
         if (text.isBlank()) {
             return err(-1, "Empty text")
         }
-        val model = EntryModel(start, end, text.trim(), comment.trim())
         val minutes = "0.${if (sumMinutePart.isEmpty()) "0" else sumMinutePart}".toFloat() * 60
-        if (sumHours.isNotBlank() || sumMinutePart.isNotBlank()) {
-            val notedDuration = try {
+        val secondsPart = minutes.toString().substringAfter(".")
+        val seconds = "0.${if (secondsPart.isBlank()) "0" else secondsPart}".toFloat() * 60
+        val notedDuration = if (sumHours.isNotBlank() || sumMinutePart.isNotBlank()) {
+            try {
                 Duration
                         .ofHours(if (sumHours.isBlank()) 0 else sumHours.toLong())
                         .plusMinutes(minutes.toLong())
+                        .plusSeconds(seconds.toLong())
             } catch (e: Exception) {
                 return err(-1, "Could not parse sum $sumHours,$sumMinutePart: ${e.message}")
             }
-            if (notedDuration != model.duration()) {
-                val diff = model.duration().minus(notedDuration).abs()
-                val diffString = LocalTime.MIDNIGHT.plus(diff).format(DateTimeFormatter.ofPattern("HH:mm:ss"))
-                return err(-1, "Duration mismatch of $diffString.")
-            }
+        } else null
+        val model = EntryModel(start, end, text.trim(), notedDuration, comment.trim())
+        val durationDifference = model.computeDurationDifference(travelIndicators, travelMultiplier)
+        if (durationDifference != Duration.ZERO) {
+            val diffString = LocalTime.MIDNIGHT.plus(durationDifference).format(DateTimeFormatter.ofPattern("HH:mm:ss"))
+            return err(-1, "Duration mismatch of (HH:mm:ss) $diffString.")
         }
         return SingleLineParseResult(emptyList(), model)
     }
