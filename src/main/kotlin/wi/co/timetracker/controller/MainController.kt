@@ -9,11 +9,12 @@ import wi.co.timetracker.extensions.existsAndBlank
 import wi.co.timetracker.extensions.formatDefault
 import wi.co.timetracker.extensions.isWeekend
 import wi.co.timetracker.model.MainModel
+import wi.co.timetracker.model.MonthModel
 import wi.co.timetracker.service.FileLoader
 import java.time.Duration
 import java.time.LocalDate
 
-class MainController(lineNums: String = "", dayPart: String = "", weekPart: String = "", monthPart: String = "", summary: String = "", fiSummary: String = "") : Controller() {
+class MainController(lineNums: String = "", dayPart: String = "", weekPart: String = "", monthPart: String = "", summary: String = "", fiSummary: String = "", currentFiSummaryProject: String = "") : Controller() {
 
     private val logger = KotlinLogging.logger {}
 
@@ -41,7 +42,12 @@ class MainController(lineNums: String = "", dayPart: String = "", weekPart: Stri
     private var fiSummary: String by property(fiSummary)
     fun fiSummaryProperty() = getProperty(MainController::fiSummary)
 
+    private var currentFiSummaryProject: String by property(currentFiSummaryProject)
+    fun currentFiSummaryProjectProperty() = getProperty(MainController::currentFiSummaryProject)
+
     val projectsInMonth = mutableListOf<String>().observable()
+
+    var currentMonth: MonthModel? = null
 
     init {
         preferencesController.setOnPreferencesUpdatedListener(object : PreferencesController.OnPreferencesUpdatedListener {
@@ -56,6 +62,15 @@ class MainController(lineNums: String = "", dayPart: String = "", weekPart: Stri
         mainModel.currentDateProperty().addListener({ _, _, new ->
             reload(new)
         })
+
+        currentFiSummaryProjectProperty().addListener({ _, _, new ->
+            if (new != null) {
+                val m = currentMonth
+                if (null != m) {
+                    this.fiSummary = m.getSummary(new, preferencesController.getBreakIndicators(), preferencesController.getTravelIndicators(), preferencesController.getTravelMultiplier())
+                }
+            } else this.fiSummary = ""
+        })
         reload(LocalDate.now())
     }
 
@@ -69,8 +84,11 @@ class MainController(lineNums: String = "", dayPart: String = "", weekPart: Stri
 
     private fun readMonth(anyDayInMonth: LocalDate, breakIndicators: List<String>, travelIndicators: List<String>, travelMultiplier: Float) {
         val month = fileLoader.loadMonth(anyDayInMonth, preferencesController.getBaseDir(), breakIndicators, travelIndicators, travelMultiplier)
+        projectsInMonth.clear()
+        projectsInMonth.addAll(month.projectNames())
         val diff = month.workDurationDifference(breakIndicators, travelIndicators, travelMultiplier)
         monthPart = with(month) { mkShortSummary("Monat", expectedWorkDuration(), actualWorkDuration(breakIndicators, travelIndicators, travelMultiplier), diff) }
+        currentMonth = month
     }
 
     private fun readWeek(anyDayInWeek: LocalDate, breakIndicators: List<String>, travelIndicators: List<String>, travelMultiplier: Float) {

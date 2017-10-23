@@ -6,14 +6,17 @@ import java.math.BigDecimal
 import java.math.RoundingMode
 import java.time.DayOfWeek
 import java.time.Duration
+import java.time.LocalDate
 
 fun String.toFile(): File = File(this)
+
+fun File.existsAndBlank(): Boolean = this.exists() && this.readText().isBlank()
 
 fun DayOfWeek.isWeekend(): Boolean = this == DayOfWeek.SATURDAY || this == DayOfWeek.SUNDAY
 fun DayOfWeek.isWorkDay(): Boolean = !isWeekend()
 fun DayOfWeek.getExpectedWorkDuration(): Duration = if (this.isWorkDay()) Duration.ofHours(8) else Duration.ZERO
 
-fun File.existsAndBlank(): Boolean = this.exists() && this.readText().isBlank()
+fun LocalDate.format(format: String) = this.format(java.time.format.DateTimeFormatter.ofPattern(format))
 
 fun Duration.formatDefault(): String {
     return if (this.isNegative) {

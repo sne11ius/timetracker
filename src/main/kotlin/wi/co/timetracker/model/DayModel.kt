@@ -3,7 +3,7 @@ package wi.co.timetracker.model
 import java.time.Duration
 import java.time.LocalDate
 
-data class DayModel(val date: LocalDate, private val entries: List<EntryModel>) {
+data class DayModel(val date: LocalDate, val entries: List<EntryModel>) {
 
     fun duration(excludes: List<String>, travelIndicators: List<String>, travelMultiplier: Float): Duration {
         return entries.fold(Duration.ZERO, { d, m ->
@@ -38,7 +38,7 @@ data class DayModel(val date: LocalDate, private val entries: List<EntryModel>) 
                             string
                         }
                     }).removeSuffix(", ")
-                    EntrySummaryModel(text, (if (anyEmpty && anyNotEmpty) "u.a. " else "") + comments, totalDuration)
+                    EntrySummaryModel(date, text, (if (anyEmpty && anyNotEmpty) "u.a. " else "") + comments, totalDuration)
                 }
                 .sortedBy { it.text }
         )

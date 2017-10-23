@@ -4,6 +4,7 @@ import javafx.beans.binding.Bindings.bindBidirectional
 import javafx.geometry.Insets
 import javafx.geometry.NodeOrientation
 import javafx.geometry.Orientation
+import javafx.scene.control.SelectionMode
 import jfxtras.scene.control.LocalDatePicker
 import tornadofx.*
 import wi.co.timetracker.controller.MainController
@@ -66,7 +67,10 @@ class MainView : View() {
                         center = textarea {
                             bind(controller.fiSummaryProperty())
                         }
-                        right = listview(controller.projectsInMonth)
+                        right = listview(controller.projectsInMonth) {
+                            selectionModel.selectionMode = SelectionMode.SINGLE
+                            bindSelected(controller.currentFiSummaryProjectProperty())
+                        }
                     }
                 }
             }
