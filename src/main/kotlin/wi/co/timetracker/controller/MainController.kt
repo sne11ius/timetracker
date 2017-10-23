@@ -8,11 +8,8 @@ import wi.co.timetracker.extensions.existsAndBlank
 import wi.co.timetracker.extensions.formatDefault
 import wi.co.timetracker.extensions.isWeekend
 import wi.co.timetracker.extensions.isWorkDay
-import wi.co.timetracker.model.DayModel
 import wi.co.timetracker.model.MainModel
-import wi.co.timetracker.model.WeekModel
 import wi.co.timetracker.service.FileLoader
-import java.time.DayOfWeek
 import java.time.Duration
 import java.time.LocalDate
 
