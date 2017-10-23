@@ -11,6 +11,7 @@ fun String.toFile(): File = File(this)
 
 fun DayOfWeek.isWeekend(): Boolean = this == DayOfWeek.SATURDAY || this == DayOfWeek.SUNDAY
 fun DayOfWeek.isWorkDay(): Boolean = !isWeekend()
+fun DayOfWeek.getExpectedWorkDuration(): Duration = if (this.isWorkDay()) Duration.ofHours(8) else Duration.ZERO
 
 fun File.existsAndBlank(): Boolean = this.exists() && this.readText().isBlank()
 

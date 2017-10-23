@@ -3,6 +3,7 @@ package wi.co.timetracker.service
 import mu.KotlinLogging
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
+import wi.co.timetracker.extensions.isWorkDay
 import wi.co.timetracker.model.*
 import wi.co.timetracker.parser.LineParser
 import java.io.File
@@ -51,9 +52,20 @@ class FileLoader {
         return WeekModel(entries)
     }
 
-    //fun loadMonth(anyDayInWeek: LocalDate, baseDir: File, breakIndicators: List<String>, travelIndicators: List<String>, travelMultiplier: Float): MonthModel {
-    //
-    //}
+    fun loadMonth(anyDayInMonth: LocalDate, baseDir: File, breakIndicators: List<String>, travelIndicators: List<String>, travelMultiplier: Float): MonthModel {
+        var day = anyDayInMonth.withDayOfMonth(1)
+        val entries = mutableListOf<DayModel>()
+        while (day.month == anyDayInMonth.month) {
+            if (day.dayOfWeek.isWorkDay()) {
+                val (_, _, dayModel) = loadDay(day, baseDir, breakIndicators, travelIndicators, travelMultiplier)
+                if (null != dayModel) {
+                    entries += dayModel
+                }
+            }
+            day = day.plusDays(1)
+        }
+        return MonthModel(day, entries)
+    }
 
     private fun loadDayFromFile(date: LocalDate, file: File, breakIndicators: List<String>, travelIndicators: List<String>, travelMultiplier: Float): ParseResult {
         val totalLines = file.readLines().size

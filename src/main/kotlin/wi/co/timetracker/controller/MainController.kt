@@ -3,11 +3,11 @@ package wi.co.timetracker.controller
 import mu.KotlinLogging
 import tornadofx.Controller
 import tornadofx.getProperty
+import tornadofx.observable
 import tornadofx.property
 import wi.co.timetracker.extensions.existsAndBlank
 import wi.co.timetracker.extensions.formatDefault
 import wi.co.timetracker.extensions.isWeekend
-import wi.co.timetracker.extensions.isWorkDay
 import wi.co.timetracker.model.MainModel
 import wi.co.timetracker.service.FileLoader
 import java.time.Duration
@@ -41,6 +41,8 @@ class MainController(lineNums: String = "", dayPart: String = "", weekPart: Stri
     private var fiSummary: String by property(fiSummary)
     fun fiSummaryProperty() = getProperty(MainController::fiSummary)
 
+    val projectsInMonth = mutableListOf<String>().observable()
+
     init {
         preferencesController.setOnPreferencesUpdatedListener(object : PreferencesController.OnPreferencesUpdatedListener {
             override fun onPreferencesUpdated() {
@@ -66,33 +68,15 @@ class MainController(lineNums: String = "", dayPart: String = "", weekPart: Stri
     }
 
     private fun readMonth(anyDayInMonth: LocalDate, breakIndicators: List<String>, travelIndicators: List<String>, travelMultiplier: Float) {
-        var day = anyDayInMonth.withDayOfMonth(1)
-        var exptectedWorkTime = Duration.ZERO
-        var actualWorkTime = Duration.ZERO
-        while (day.month == anyDayInMonth.month) {
-            logger.debug { day }
-            if (day.dayOfWeek.isWorkDay()) {
-                exptectedWorkTime = exptectedWorkTime.plusHours(8)
-                val (_, _, dayModel) = fileLoader.loadDay(day, preferencesController.getBaseDir(), breakIndicators, travelIndicators, travelMultiplier)
-                if (null != dayModel) {
-                    actualWorkTime = actualWorkTime.plus(dayModel.duration(breakIndicators, travelIndicators, travelMultiplier))
-                }
-            }
-            day = day.plusDays(1)
-        }
-        val diff = exptectedWorkTime.minus(actualWorkTime)
-        monthPart = "Monat\nSoll: ${exptectedWorkTime.toHours()}\nIst: ${actualWorkTime.formatDefault()}\nDifferenz: ${diff.formatDefault()}"
+        val month = fileLoader.loadMonth(anyDayInMonth, preferencesController.getBaseDir(), breakIndicators, travelIndicators, travelMultiplier)
+        val diff = month.workDurationDifference(breakIndicators, travelIndicators, travelMultiplier)
+        monthPart = with(month) { mkShortSummary("Monat", expectedWorkDuration(), actualWorkDuration(breakIndicators, travelIndicators, travelMultiplier), diff) }
     }
 
     private fun readWeek(anyDayInWeek: LocalDate, breakIndicators: List<String>, travelIndicators: List<String>, travelMultiplier: Float) {
         val week = fileLoader.loadWeek(anyDayInWeek, preferencesController.getBaseDir(), breakIndicators, travelIndicators, travelMultiplier)
         val diff = week.workDurationDifference(breakIndicators, travelIndicators, travelMultiplier)
-        weekPart = """
-            |Woche
-            |Soll: ${week.expectedWorkDuration().toHours()}
-            |Ist: ${week.actualWorkDuration(breakIndicators, travelIndicators, travelMultiplier).formatDefault()}
-            |Differenz: ${diff.formatDefault()}
-            """.trimMargin()
+        weekPart = with(week) { mkShortSummary("Woche", expectedWorkDuration(), actualWorkDuration(breakIndicators, travelIndicators, travelMultiplier), diff) }
     }
 
     private fun readDay(day: LocalDate, breakIndicators: List<String>, travelIndicators: List<String>, travelMultiplier: Float) {
@@ -111,7 +95,7 @@ class MainController(lineNums: String = "", dayPart: String = "", weekPart: Stri
         val actualDuration = if (parseResult.dayModel != null) parseResult.dayModel.duration(breakIndicators, travelIndicators, travelMultiplier) else Duration.ZERO
         val expectedDuration = if (day.dayOfWeek.isWeekend()) Duration.ZERO else Duration.ofHours(8)
         val diff = expectedDuration.minus(actualDuration)
-        dayPart = "Tag\nSoll: ${expectedDuration.toHours()}\nIst: ${actualDuration.formatDefault()}\nDifferenz: ${diff.formatDefault()}"
+        dayPart = mkShortSummary("Tag", expectedDuration, actualDuration, diff)
         mainModel.errors = parseResult.errors.fold("", { msg, (severity, line, message) ->
             msg + "${severity.toString().padEnd(5)} Zeile $line: $message\n"
         })
@@ -121,5 +105,12 @@ class MainController(lineNums: String = "", dayPart: String = "", weekPart: Stri
             ""
         }
     }
+
+    private fun mkShortSummary(header: String, expected: Duration, actual: Duration, diff: Duration) = """
+        |$header
+        |Soll: ${expected.toHours()}
+        |Ist: ${actual.formatDefault()}
+        |Differenz: ${diff.formatDefault()}
+        """.trimMargin()
 
 }

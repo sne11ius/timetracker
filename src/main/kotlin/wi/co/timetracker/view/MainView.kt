@@ -62,8 +62,11 @@ class MainView : View() {
                 }
                 tab("FI-Summary") {
                     isClosable = false
-                    textarea {
-                        bind(controller.fiSummaryProperty())
+                    borderpane {
+                        center = textarea {
+                            bind(controller.fiSummaryProperty())
+                        }
+                        right = listview(controller.projectsInMonth)
                     }
                 }
             }
