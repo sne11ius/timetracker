@@ -11,7 +11,7 @@ import wi.co.timetracker.extensions.isWorkDay
 import wi.co.timetracker.model.DayModel
 import wi.co.timetracker.model.MainModel
 import wi.co.timetracker.model.WeekModel
-import wi.co.timetracker.service.PersistenceService
+import wi.co.timetracker.service.FileLoader
 import java.time.DayOfWeek
 import java.time.Duration
 import java.time.LocalDate
@@ -20,7 +20,7 @@ class MainController(lineNums: String = "", dayPart: String = "", weekPart: Stri
 
     private val logger = KotlinLogging.logger {}
 
-    private val persistenceService: PersistenceService by di()
+    private val fileLoader: FileLoader by di()
 
     private val preferencesController: PreferencesController by inject()
 
@@ -76,7 +76,7 @@ class MainController(lineNums: String = "", dayPart: String = "", weekPart: Stri
             logger.debug { day }
             if (day.dayOfWeek.isWorkDay()) {
                 exptectedWorkTime = exptectedWorkTime.plusHours(8)
-                val (_, _, dayModel) = persistenceService.loadData(day, preferencesController.getBaseDir(), breakIndicators, travelIndicators, travelMultiplier)
+                val (_, _, dayModel) = fileLoader.loadDay(day, preferencesController.getBaseDir(), breakIndicators, travelIndicators, travelMultiplier)
                 if (null != dayModel) {
                     actualWorkTime = actualWorkTime.plus(dayModel.duration(breakIndicators, travelIndicators, travelMultiplier))
                 }
@@ -88,18 +88,7 @@ class MainController(lineNums: String = "", dayPart: String = "", weekPart: Stri
     }
 
     private fun readWeek(anyDayInWeek: LocalDate, breakIndicators: List<String>, travelIndicators: List<String>, travelMultiplier: Float) {
-        var day = anyDayInWeek
-        while (day.dayOfWeek != DayOfWeek.MONDAY)
-            day = day.minusDays(1)
-        val entries = mutableListOf<DayModel>()
-        for (index in 0 until 7) {
-            val (_, _, dayModel) = persistenceService.loadData(day, preferencesController.getBaseDir(), breakIndicators, travelIndicators, travelMultiplier)
-            if (null != dayModel) {
-                entries += dayModel
-            }
-            day = day.plusDays(1)
-        }
-        val week = WeekModel(entries)
+        val week = fileLoader.loadWeek(anyDayInWeek, preferencesController.getBaseDir(), breakIndicators, travelIndicators, travelMultiplier)
         val diff = week.workDurationDifference(breakIndicators, travelIndicators, travelMultiplier)
         weekPart = """
             |Woche
@@ -110,7 +99,7 @@ class MainController(lineNums: String = "", dayPart: String = "", weekPart: Stri
     }
 
     private fun readDay(day: LocalDate, breakIndicators: List<String>, travelIndicators: List<String>, travelMultiplier: Float) {
-        val parseResult = persistenceService.loadData(day, preferencesController.getBaseDir(), breakIndicators, travelIndicators, travelMultiplier)
+        val parseResult = fileLoader.loadDay(day, preferencesController.getBaseDir(), breakIndicators, travelIndicators, travelMultiplier)
         lineNumbers = if (parseResult.file.exists()) {
             (1..parseResult.file.readLines().size).fold("", { str, index ->
                 "$str$index\n"

@@ -7,20 +7,21 @@ import wi.co.timetracker.model.*
 import wi.co.timetracker.parser.LineParser
 import java.io.File
 import java.io.File.separator
+import java.time.DayOfWeek
 import java.time.Duration
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 
 @Service
-class PersistenceService {
+class FileLoader {
 
     private val log = KotlinLogging.logger {}
 
     @Autowired
     lateinit private var lineParser: LineParser
 
-    fun loadData(date: LocalDate, baseDir: File, breakIndicators: List<String>, travelIndicators: List<String>, travelMultiplier: Float): ParseResult {
+    fun loadDay(date: LocalDate, baseDir: File, breakIndicators: List<String>, travelIndicators: List<String>, travelMultiplier: Float): ParseResult {
         log.debug { "Load data for $date from $baseDir" }
         val file = mkFile(date, baseDir)
         if (file.exists()) {
@@ -28,14 +29,33 @@ class PersistenceService {
                 log.debug { "File empty" }
                 return ParseResult(file, listOf(info(0, "No file for this date")), null)
             }
-            return loadDayModel(date, file, breakIndicators, travelIndicators, travelMultiplier)
+            return loadDayFromFile(date, file, breakIndicators, travelIndicators, travelMultiplier)
         } else {
             log.debug { "No file" }
             return ParseResult(file, listOf(info(0, "No file for this date")), null)
         }
     }
 
-    private fun loadDayModel(date: LocalDate, file: File, breakIndicators: List<String>, travelIndicators: List<String>, travelMultiplier: Float): ParseResult {
+    fun loadWeek(anyDayInWeek: LocalDate, baseDir: File, breakIndicators: List<String>, travelIndicators: List<String>, travelMultiplier: Float): WeekModel {
+        var day = anyDayInWeek
+        while (day.dayOfWeek != DayOfWeek.MONDAY)
+            day = day.minusDays(1)
+        val entries = mutableListOf<DayModel>()
+        for (index in 0 until 7) {
+            val (_, _, dayModel) = loadDay(day, baseDir, breakIndicators, travelIndicators, travelMultiplier)
+            if (null != dayModel) {
+                entries += dayModel
+            }
+            day = day.plusDays(1)
+        }
+        return WeekModel(entries)
+    }
+
+    //fun loadMonth(anyDayInWeek: LocalDate, baseDir: File, breakIndicators: List<String>, travelIndicators: List<String>, travelMultiplier: Float): MonthModel {
+    //
+    //}
+
+    private fun loadDayFromFile(date: LocalDate, file: File, breakIndicators: List<String>, travelIndicators: List<String>, travelMultiplier: Float): ParseResult {
         val totalLines = file.readLines().size
         val entries = mutableListOf<EntryModel>()
         val errors = mutableListOf<ParseError>()
