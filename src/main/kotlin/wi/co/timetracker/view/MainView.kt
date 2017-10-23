@@ -7,6 +7,7 @@ import javafx.geometry.Orientation
 import jfxtras.scene.control.LocalDatePicker
 import tornadofx.*
 import wi.co.timetracker.controller.MainController
+import java.time.LocalDate
 
 class MainView : View() {
 
@@ -61,10 +62,16 @@ class MainView : View() {
             padding = Insets(10.0)
             this += LocalDatePicker().apply {
                 prefWidth = 250.0
-                prefHeight = 250.0
+                //prefHeight = 250.0
                 allowNull = false
                 mode = LocalDatePicker.Mode.SINGLE
                 bindBidirectional(localDateProperty(), controller.mainModel.currentDateProperty())
+            }
+            button("Heute") {
+                prefWidth = 250.0
+                action {
+                    controller.mainModel.currentDate = LocalDate.now()
+                }
             }
         }
     }
