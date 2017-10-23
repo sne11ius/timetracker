@@ -30,30 +30,41 @@ class MainView : View() {
                 label { prefWidth = 160.0 }.bind(controller.weekPartProperty())
                 label { prefWidth = 160.0 }.bind(controller.monthPartProperty())
             }
-            center = splitpane {
-                splitpane(Orientation.VERTICAL) {
-                    borderpane {
-                        left = textarea {
-                            prefWidth = 40.0
-                            minWidth = 40.0
-                            isEditable = false
-                            isDisable = true
-                            bind(controller.lineNumbersProperty())
-                            nodeOrientation = NodeOrientation.RIGHT_TO_LEFT
+            center = tabpane {
+                tab("Daten eingeben") {
+                    isClosable = false
+                    splitpane {
+                        splitpane(Orientation.VERTICAL) {
+                            borderpane {
+                                left = textarea {
+                                    prefWidth = 40.0
+                                    minWidth = 40.0
+                                    isEditable = false
+                                    isDisable = true
+                                    bind(controller.lineNumbersProperty())
+                                    nodeOrientation = NodeOrientation.RIGHT_TO_LEFT
+                                }
+                                center = textarea {
+                                    bind(controller.mainModel.fileContentProperty())
+                                }
+                            }
+                            textarea {
+                                isEditable = false
+                            }.bind(controller.mainModel.errorsProperty())
                         }
-                        center = textarea {
-                            bind(controller.mainModel.fileContentProperty())
+                        textarea {
+                            prefWidth = 300.0
+                            minWidth = 300.0
+                            isEditable = false
+                            bind(controller.summaryProperty())
                         }
                     }
-                    textarea {
-                        isEditable = false
-                    }.bind(controller.mainModel.errorsProperty())
                 }
-                textarea {
-                    prefWidth = 300.0
-                    minWidth = 300.0
-                    isEditable = false
-                    bind(controller.summaryProperty())
+                tab("FI-Summary") {
+                    isClosable = false
+                    textarea {
+                        bind(controller.fiSummaryProperty())
+                    }
                 }
             }
         }
