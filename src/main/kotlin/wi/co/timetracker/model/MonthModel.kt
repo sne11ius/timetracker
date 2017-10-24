@@ -7,8 +7,8 @@ import java.time.LocalDate
 
 data class MonthModel(private val firstDayOfMonth: LocalDate, private val entries: List<DayModel>) {
 
-    fun projectNames(): List<String> {
-        return entries.flatMap { it.entries }.map { it.text }.toSet().sorted()
+    fun projectNames(breakIndicators: List<String>): List<String> {
+        return entries.flatMap { it.entries }.map { it.text }.toSet().filter { !breakIndicators.any { indicator -> it.contains(indicator) } }.sorted()
     }
 
     fun workDurationDifference(breakIndicators: List<String>, travelIndicators: List<String>, travelMultiplier: Float): Duration {
@@ -33,12 +33,12 @@ data class MonthModel(private val firstDayOfMonth: LocalDate, private val entrie
         })
     }
 
-    fun getSummary(projectName: String, breakIndicators: List<String>, travelIndicators: List<String>, travelMultiplier: Float): String {
+    fun getSummary(projectName: String, breakIndicators: List<String>, travelIndicators: List<String>, travelMultiplier: Float, excelCorrection: Duration): String {
         val daySummaries = entries.map { it.toDaySummaryModel(breakIndicators, travelIndicators, travelMultiplier) }
         val entrySummaryModels = daySummaries.map { it.entries.firstOrNull { it.text == projectName } }
         return entrySummaryModels.fold("", { s, m ->
             if (null != m) {
-                "$s${m.formatFiExcelStyle()}\n"
+                "$s${m.formatFiExcelStyle(excelCorrection)}\n"
             } else s
         }).trim()
     }

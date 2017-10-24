@@ -48,7 +48,18 @@ class PreferencesView : View() {
                         minorTickCount = 0
                         blockIncrement = 0.1
                     }.bind(preferences.travelMultiplierProperty())
-                    label().bind(preferences.travelMultiplierProperty())
+                }
+                field("Excel-Korrektur in Minuten") {
+                    slider {
+                        min = 0.0
+                        max = 60.0
+                        isShowTickLabels = true
+                        isShowTickMarks = true
+                        isSnapToTicks = true
+                        majorTickUnit = 15.0
+                        minorTickCount = 0
+                        blockIncrement = 15.0
+                    }.bind(preferences.excelCorrectionProperty())
                 }
             }
             hbox {

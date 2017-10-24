@@ -4,6 +4,7 @@ import tornadofx.Controller
 import wi.co.timetracker.extensions.toFile
 import wi.co.timetracker.model.Preferences
 import java.io.File
+import java.time.Duration
 
 
 class PreferencesController : Controller() {
@@ -30,6 +31,7 @@ class PreferencesController : Controller() {
             put(BREAK_INDICATORS, preferences.breakIndicators)
             put(TRAVEL_INDICATORS, preferences.travelIndicators)
             put(TRAVEL_MULTIPLIER, preferences.travelMultiplier.toString())
+            put(EXCEL_CORRECTION, preferences.excelCorrection.toString())
         }
         prefsUpdateListener?.onPreferencesUpdated()
     }
@@ -46,12 +48,14 @@ class PreferencesController : Controller() {
         return preferences.travelMultiplier.toFloat()
     }
 
+    fun getExcelCorrection(): Duration {
+        return Duration.ofMinutes(preferences.excelCorrection.toFloat().toLong())
+    }
+
     fun getBaseDir(): File = preferences.baseDir.toFile()
 
     private fun splitItems(pref: String): List<String> {
-        return pref.split(",").map { s ->
-            s.trim()
-        }.filter { it.isNotBlank() }
+        return pref.split(",").map { it.trim() }.filter { it.isNotBlank() }
     }
 
     private fun resetPreferences() {
@@ -60,6 +64,7 @@ class PreferencesController : Controller() {
             preferences.breakIndicators = get(BREAK_INDICATORS, "")
             preferences.travelIndicators = get(TRAVEL_INDICATORS, "")
             preferences.travelMultiplier = get(TRAVEL_MULTIPLIER, "1.0").toFloat()
+            preferences.excelCorrection = get(EXCEL_CORRECTION, "30.0").toFloat()
         }
     }
 
@@ -69,6 +74,7 @@ class PreferencesController : Controller() {
         val BREAK_INDICATORS = "breakIndicators"
         val TRAVEL_INDICATORS = "travelIndicators"
         val TRAVEL_MULTIPLIER = "travelMultiplier"
+        val EXCEL_CORRECTION = "excelCorrection"
     }
 
 }

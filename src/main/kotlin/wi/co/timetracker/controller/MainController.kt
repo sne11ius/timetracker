@@ -67,7 +67,9 @@ class MainController(lineNums: String = "", dayPart: String = "", weekPart: Stri
             if (new != null) {
                 val m = currentMonth
                 if (null != m) {
-                    this.fiSummary = m.getSummary(new, preferencesController.getBreakIndicators(), preferencesController.getTravelIndicators(), preferencesController.getTravelMultiplier())
+                    this.fiSummary = with(preferencesController) {
+                        m.getSummary(new, getBreakIndicators(), getTravelIndicators(), getTravelMultiplier(), getExcelCorrection())
+                    }
                 }
             } else this.fiSummary = ""
         })
@@ -84,8 +86,12 @@ class MainController(lineNums: String = "", dayPart: String = "", weekPart: Stri
 
     private fun readMonth(anyDayInMonth: LocalDate, breakIndicators: List<String>, travelIndicators: List<String>, travelMultiplier: Float) {
         val month = fileLoader.loadMonth(anyDayInMonth, preferencesController.getBaseDir(), breakIndicators, travelIndicators, travelMultiplier)
+        val oldSelection = currentFiSummaryProject
         projectsInMonth.clear()
-        projectsInMonth.addAll(month.projectNames())
+        projectsInMonth.addAll(month.projectNames(preferencesController.getBreakIndicators()))
+        if (projectsInMonth.contains(oldSelection)) {
+            currentFiSummaryProject = oldSelection
+        }
         val diff = month.workDurationDifference(breakIndicators, travelIndicators, travelMultiplier)
         monthPart = with(month) { mkShortSummary("Monat", expectedWorkDuration(), actualWorkDuration(breakIndicators, travelIndicators, travelMultiplier), diff) }
         currentMonth = month
