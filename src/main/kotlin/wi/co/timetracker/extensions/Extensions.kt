@@ -16,7 +16,7 @@ fun DayOfWeek.isWeekend(): Boolean = this == DayOfWeek.SATURDAY || this == DayOf
 fun DayOfWeek.isWorkDay(): Boolean = !isWeekend()
 fun DayOfWeek.getExpectedWorkDuration(): Duration = if (this.isWorkDay()) Duration.ofHours(8) else Duration.ZERO
 
-fun LocalDate.format(format: String) = this.format(java.time.format.DateTimeFormatter.ofPattern(format))
+fun LocalDate.format(format: String): String = this.format(java.time.format.DateTimeFormatter.ofPattern(format))
 
 fun Duration.formatDefault(): String {
     return if (this.isNegative) {

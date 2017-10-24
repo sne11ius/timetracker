@@ -1,6 +1,5 @@
 package wi.co.timetracker.model
 
-import wi.co.timetracker.extensions.format
 import wi.co.timetracker.extensions.getExpectedWorkDuration
 import wi.co.timetracker.extensions.isWorkDay
 import java.time.Duration
@@ -35,15 +34,12 @@ data class MonthModel(private val firstDayOfMonth: LocalDate, private val entrie
     }
 
     fun getSummary(projectName: String, breakIndicators: List<String>, travelIndicators: List<String>, travelMultiplier: Float): String {
-        val daySummaries = entries
-                .map { it.toDaySummaryModel(breakIndicators, travelIndicators, travelMultiplier) }
-        //.map { it.entries.filter { it.text == projectName } .first() }
-        val entries = daySummaries.map { it.entries.firstOrNull { it.text == projectName } }
-        return entries.fold("", { summaryString, m ->
+        val daySummaries = entries.map { it.toDaySummaryModel(breakIndicators, travelIndicators, travelMultiplier) }
+        val entrySummaryModels = daySummaries.map { it.entries.firstOrNull { it.text == projectName } }
+        return entrySummaryModels.fold("", { s, m ->
             if (null != m) {
-                val newLine = m.date.format("dd.MM.yyyy") + "\t09:00\t${m.text}\t${m.comment}"
-                "$summaryString$newLine\n"
-            } else summaryString
+                "$s${m.formatFiExcelStyle()}\n"
+            } else s
         }).trim()
     }
 
