@@ -7,13 +7,11 @@ data class DayModel(val date: LocalDate, val entries: List<EntryModel>) {
 
     fun duration(excludes: List<String>, travelIndicators: List<String>, travelMultiplier: Float): Duration {
         return entries.fold(Duration.ZERO, { d, m ->
-            d.plus(
-                    if (excludes.any { m.text.contains(it) }) {
-                        Duration.ZERO
-                } else {
-                        m.computeDuration(travelIndicators, travelMultiplier)
-                }
-            )
+            d.plus(if (excludes.any { m.text.contains(it) }) {
+                Duration.ZERO
+            } else {
+                m.computeDuration(travelIndicators, travelMultiplier)
+            })
         })
     }
 
