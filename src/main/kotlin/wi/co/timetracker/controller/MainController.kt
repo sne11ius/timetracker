@@ -14,7 +14,18 @@ import wi.co.timetracker.service.FileLoader
 import java.time.Duration
 import java.time.LocalDate
 
-class MainController(lineNums: String = "", dayPart: String = "", weekPart: String = "", monthPart: String = "", summary: String = "", fiSummary: String = "", currentFiSummaryProject: String = "") : Controller() {
+class MainController(
+        lineNums: String = "",
+        dayPart: String = "",
+        weekPart: String = "",
+        monthPart: String = "",
+        summary: String = "",
+        currentExcelSummaryProject: String = "",
+        excelSummaryDate: String = "",
+        excelSummaryTime: String = "",
+        excelSummaryDescription: String = "",
+        excelSummarySum: String = ""
+) : Controller() {
 
     private val logger = KotlinLogging.logger {}
 
@@ -39,11 +50,20 @@ class MainController(lineNums: String = "", dayPart: String = "", weekPart: Stri
     private var summary: String by property(summary)
     fun summaryProperty() = getProperty(MainController::summary)
 
-    private var fiSummary: String by property(fiSummary)
-    fun fiSummaryProperty() = getProperty(MainController::fiSummary)
+    private var currentExcelSummaryProject: String by property(currentExcelSummaryProject)
+    fun currentExcelSummaryProjectProperty() = getProperty(MainController::currentExcelSummaryProject)
 
-    private var currentFiSummaryProject: String by property(currentFiSummaryProject)
-    fun currentFiSummaryProjectProperty() = getProperty(MainController::currentFiSummaryProject)
+    private var excelSummaryDate: String by property(excelSummaryDate)
+    fun excelSummaryDateProperty() = getProperty(MainController::excelSummaryDate)
+
+    private var excelSummaryTime: String by property(excelSummaryTime)
+    fun excelSummaryTimeProperty() = getProperty(MainController::excelSummaryTime)
+
+    private var excelSummaryDescription: String by property(excelSummaryDescription)
+    fun excelSummaryDescriptionProperty() = getProperty(MainController::excelSummaryDescription)
+
+    private var excelSummarySum: String by property(excelSummarySum)
+    fun excelSummarySumProperty() = getProperty(MainController::excelSummarySum)
 
     val projectsInMonth = mutableListOf<String>().observable()
 
@@ -63,21 +83,29 @@ class MainController(lineNums: String = "", dayPart: String = "", weekPart: Stri
             reload(new)
         })
 
-        currentFiSummaryProjectProperty().addListener({ _, _, new ->
+        currentExcelSummaryProjectProperty().addListener({ _, _, new ->
             if (new != null) {
                 val m = currentMonth
                 if (null != m) {
-                    this.fiSummary = with(preferencesController) {
-                        m.getSummary(new, getBreakIndicators(), getTravelIndicators(), getTravelMultiplier(), getExcelCorrection())
+                    val (date, time, description, sum) = with(preferencesController) {
+                        m.getExcelSummary(new, getBreakIndicators(), getTravelIndicators(), getTravelMultiplier(), getExcelCorrection())
                     }
+                    this.excelSummaryDate = date
+                    this.excelSummaryTime = time
+                    this.excelSummaryDescription = description
+                    this.excelSummarySum = "Summe: " + sum.formatDefault()
                 }
-            } else this.fiSummary = ""
+            } else {
+                this.excelSummaryDate = ""
+                this.excelSummaryTime = ""
+                this.excelSummaryDescription = ""
+            }
         })
         reload(LocalDate.now())
     }
 
     private fun reload(date: LocalDate) {
-        with(preferencesController) {
+        with (preferencesController) {
             readDay(date, getBreakIndicators(), getTravelIndicators(), getTravelMultiplier())
             readWeek(date, getBreakIndicators(), getTravelIndicators(), getTravelMultiplier())
             readMonth(date, getBreakIndicators(), getTravelIndicators(), getTravelMultiplier())
@@ -86,11 +114,11 @@ class MainController(lineNums: String = "", dayPart: String = "", weekPart: Stri
 
     private fun readMonth(anyDayInMonth: LocalDate, breakIndicators: List<String>, travelIndicators: List<String>, travelMultiplier: Float) {
         val month = fileLoader.loadMonth(anyDayInMonth, preferencesController.getBaseDir(), breakIndicators, travelIndicators, travelMultiplier)
-        val oldSelection = currentFiSummaryProject
+        val oldSelection = currentExcelSummaryProject
         projectsInMonth.clear()
         projectsInMonth.addAll(month.projectNames(preferencesController.getBreakIndicators()))
         if (projectsInMonth.contains(oldSelection)) {
-            currentFiSummaryProject = oldSelection
+            currentExcelSummaryProject = oldSelection
         }
         val diff = month.workDurationDifference(breakIndicators, travelIndicators, travelMultiplier)
         monthPart = with(month) { mkShortSummary("Monat", expectedWorkDuration(), actualWorkDuration(breakIndicators, travelIndicators, travelMultiplier), diff) }

@@ -64,12 +64,48 @@ class MainView : View() {
                 tab("FI-Summary") {
                     isClosable = false
                     borderpane {
-                        center = textarea {
-                            bind(controller.fiSummaryProperty())
+                        top = label("Summe (ohne Excel-Korrektur): 50") {
+                            padding = Insets(10.0)
+                            bind(controller.excelSummarySumProperty())
+                        }
+                        center = borderpane {
+                            center = hbox {
+                                prefWidth  = 500.0
+                                borderpane {
+                                    padding = Insets(10.0)
+                                    top = label("Tag") {
+                                        padding = Insets(10.0)
+                                    }
+                                    center = textarea {
+                                        isEditable = false
+                                        bind(controller.excelSummaryDateProperty())
+                                    }
+                                }
+                                borderpane {
+                                    padding = Insets(10.0)
+                                    top = label("Uhrzeit") {
+                                        padding = Insets(10.0)
+                                    }
+                                    center = textarea {
+                                        isEditable = false
+                                        bind(controller.excelSummaryTimeProperty())
+                                    }
+                                }
+                                borderpane {
+                                    padding = Insets(10.0)
+                                    top = label("Beschreibung") {
+                                        padding = Insets(10.0)
+                                    }
+                                    center = textarea {
+                                        isEditable = false
+                                        bind(controller.excelSummaryDescriptionProperty())
+                                    }
+                                }
+                            }
                         }
                         right = listview(controller.projectsInMonth) {
                             selectionModel.selectionMode = SelectionMode.SINGLE
-                            bindSelected(controller.currentFiSummaryProjectProperty())
+                            bindSelected(controller.currentExcelSummaryProjectProperty())
                         }
                     }
                 }
