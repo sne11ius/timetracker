@@ -9,9 +9,6 @@ import jfxtras.scene.control.LocalDatePicker
 import tornadofx.*
 import wi.co.timetracker.controller.MainController
 import java.time.LocalDate
-import mmarquee.automation.UIAutomation
-
-
 
 class MainView : View() {
 

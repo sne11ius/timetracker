@@ -1,7 +1,6 @@
 package wi.co.timetracker.view
 
 import javafx.geometry.Pos
-import javafx.stage.FileChooser
 import tornadofx.*
 import wi.co.timetracker.controller.PreferencesController
 
@@ -28,20 +27,6 @@ class PreferencesView : View() {
                             val newDir = chooseDirectory("Basisverzeichnis wählen")
                             if (null != newDir) {
                                 preferences.baseDir = newDir.absolutePath
-                            }
-                        }
-                    }
-                }
-                field("SAP") {
-                    textfield {
-                        isEditable = false
-                        isDisable = true
-                    }.bind(preferences.sapExecutablePathProperty())
-                    button("Ändern") {
-                        action {
-                            val newSapExecutablePaths = chooseFile("Basisverzeichnis wählen", arrayOf(FileChooser.ExtensionFilter("Programme", "*.exe"), FileChooser.ExtensionFilter("Alle Dateien", "*.*")))
-                            if (newSapExecutablePaths.isNotEmpty()) {
-                                preferences.sapExecutablePath = newSapExecutablePaths[0].absolutePath
                             }
                         }
                     }

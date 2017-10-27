@@ -1,0 +1,11 @@
+<component name="libraryTable">
+  <library name="Gradle: com.sikulix:sikulixapi:1.1.2-SNAPSHOT">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.sikulix/sikulixapi/1.1.2-SNAPSHOT/5fb3aa4a3d684d47c25c16ea5a5f081ccac53342/sikulixapi-1.1.2-SNAPSHOT.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.sikulix/sikulixapi/1.1.2-SNAPSHOT/a22b4f36189846cc929d2aa52cf01939b4016df5/sikulixapi-1.1.2-SNAPSHOT-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>
