@@ -47,4 +47,17 @@ data class MonthModel(private val firstDayOfMonth: LocalDate, private val entrie
         }
     }
 
+    fun getProjectDurations(breakIndicators: List<String>, travelIndicators: List<String>, travelMultiplier: Float): Map<String, Duration> {
+        return projectNames(breakIndicators).map { projectName ->
+            val daySummaries = entries.map { it.toDaySummaryModel(breakIndicators, travelIndicators, travelMultiplier) }
+            val entrySummaryModels = daySummaries.map { it.entries.firstOrNull { it.text == projectName } }
+            val totalDuration = entrySummaryModels.fold(Duration.ZERO, {d, m ->
+                if (null != m) {
+                    d.plus(m.duration)
+                } else d
+            })
+            projectName to totalDuration
+        }.toMap()
+    }
+
 }

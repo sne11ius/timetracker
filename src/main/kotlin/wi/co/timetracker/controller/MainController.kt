@@ -1,15 +1,15 @@
 package wi.co.timetracker.controller
 
+import javafx.scene.chart.PieChart
 import mu.KotlinLogging
 import tornadofx.Controller
 import tornadofx.getProperty
 import tornadofx.observable
 import tornadofx.property
-import wi.co.timetracker.extensions.existsAndBlank
-import wi.co.timetracker.extensions.formatDefault
-import wi.co.timetracker.extensions.isWeekend
+import wi.co.timetracker.extensions.*
 import wi.co.timetracker.model.MainModel
 import wi.co.timetracker.model.MonthModel
+import wi.co.timetracker.sap.SapControl
 import wi.co.timetracker.service.FileLoader
 import java.time.Duration
 import java.time.LocalDate
@@ -69,6 +69,8 @@ class MainController(
 
     var currentMonth: MonthModel? = null
 
+    val monthChartData = mutableListOf<PieChart.Data>().observable()
+
     init {
         preferencesController.setOnPreferencesUpdatedListener(object : PreferencesController.OnPreferencesUpdatedListener {
             override fun onPreferencesUpdated() {
@@ -123,6 +125,12 @@ class MainController(
         val diff = month.workDurationDifference(breakIndicators, travelIndicators, travelMultiplier)
         monthPart = with(month) { mkShortSummary("Monat", expectedWorkDuration(), actualWorkDuration(breakIndicators, travelIndicators, travelMultiplier), diff) }
         currentMonth = month
+        monthChartData.clear()
+        monthChartData.addAll(mkChartData(month, breakIndicators, travelIndicators, travelMultiplier))
+    }
+
+    private fun mkChartData(month: MonthModel, breakIndicators: List<String>, travelIndicators: List<String>, travelMultiplier: Float): List<PieChart.Data> {
+        return month.getProjectDurations(breakIndicators, travelIndicators, travelMultiplier).map { (k, v) -> PieChart.Data(k + " (${v.formatDecimal(2)}h)", v.toDouble(2)) }
     }
 
     private fun readWeek(anyDayInWeek: LocalDate, breakIndicators: List<String>, travelIndicators: List<String>, travelMultiplier: Float) {
@@ -164,5 +172,11 @@ class MainController(
         |Ist: ${actual.formatDefault()}
         |Differenz: ${diff.formatDefault()}
         """.trimMargin()
+
+    fun fillSapGui() {
+        with (preferencesController.preferences) {
+            SapControl.doStuff(sapExecutablePath, sapUsername, sapPassword)
+        }
+    }
 
 }

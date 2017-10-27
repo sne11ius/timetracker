@@ -9,6 +9,9 @@ import jfxtras.scene.control.LocalDatePicker
 import tornadofx.*
 import wi.co.timetracker.controller.MainController
 import java.time.LocalDate
+import mmarquee.automation.UIAutomation
+
+
 
 class MainView : View() {
 
@@ -19,6 +22,11 @@ class MainView : View() {
         minHeight = 500.0
         padding = Insets(10.0)
         top = buttonbar {
+            button("SAP it!") {
+                action {
+                    controller.fillSapGui()
+                }
+            }
             button("Einstellungen") {
                 action {
                     find(PreferencesView::class).openModal()
@@ -108,6 +116,10 @@ class MainView : View() {
                             bindSelected(controller.currentExcelSummaryProjectProperty())
                         }
                     }
+                }
+                tab("Charts") {
+                    isClosable = false
+                    piechart("Monat", controller.monthChartData)
                 }
             }
         }

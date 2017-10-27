@@ -31,3 +31,7 @@ fun Duration.formatDecimal(roundDigits: Int): String {
     val millisPerHour = BigDecimal.valueOf(Duration.ofHours(1).toMillis())
     return base.divide(millisPerHour, 5 * roundDigits, RoundingMode.UP).setScale(roundDigits, RoundingMode.CEILING).toFloat().toString().replace(".", ",")
 }
+
+fun Duration.toDouble(roundDigits: Int): Double {
+    return formatDecimal(roundDigits).replace(",", ".").toDouble()
+}

@@ -3,10 +3,19 @@ package wi.co.timetracker.model
 import tornadofx.getProperty
 import tornadofx.property
 
-class Preferences(baseDir: String = System.getProperty("user.home"), breakIndicators: String = "", travelIndicators: String = "", travelMultiplier: Number = 1.0f, excelCorrection: Number = 30.0f) {
+class Preferences(baseDir: String = System.getProperty("user.home"), sapExecutablePath: String = "", sapUsername: String = "", sapPassword: String = "", breakIndicators: String = "", travelIndicators: String = "", travelMultiplier: Number = 1.0f, excelCorrection: Number = 30.0f) {
 
     var baseDir: String by property(baseDir)
     fun baseDirProperty() = getProperty(Preferences::baseDir)
+
+    var sapExecutablePath: String by property(sapExecutablePath)
+    fun sapExecutablePathProperty() = getProperty(Preferences::sapExecutablePath)
+
+    var sapUsername: String by property(sapUsername)
+    fun sapUsernameProperty() = getProperty(Preferences::sapUsername)
+
+    var sapPassword: String by property(sapPassword)
+    fun sapPasswordProperty() = getProperty(Preferences::sapPassword)
 
     var breakIndicators: String by property(breakIndicators)
     fun breakIndicatorsProperty() = getProperty(Preferences::breakIndicators)

@@ -28,6 +28,9 @@ class PreferencesController : Controller() {
     fun save() {
         preferences(PREFS_NAME) {
             put(BASE_DIR, preferences.baseDir)
+            put(SAP_EXECUTABLE_PATH, preferences.sapExecutablePath)
+            put(SAP_USERNAME, preferences.sapUsername)
+            put(SAP_PASSWORD, preferences.sapPassword)
             put(BREAK_INDICATORS, preferences.breakIndicators)
             put(TRAVEL_INDICATORS, preferences.travelIndicators)
             put(TRAVEL_MULTIPLIER, preferences.travelMultiplier.toString())
@@ -61,6 +64,9 @@ class PreferencesController : Controller() {
     private fun resetPreferences() {
         preferences(PREFS_NAME) {
             preferences.baseDir = get(BASE_DIR, System.getProperty("user.home"))
+            preferences.sapExecutablePath = get(SAP_EXECUTABLE_PATH, "")
+            preferences.sapUsername = get(SAP_USERNAME, "")
+            preferences.sapPassword = get(SAP_PASSWORD, "")
             preferences.breakIndicators = get(BREAK_INDICATORS, "")
             preferences.travelIndicators = get(TRAVEL_INDICATORS, "")
             preferences.travelMultiplier = get(TRAVEL_MULTIPLIER, "1.0").toFloat()
@@ -71,6 +77,9 @@ class PreferencesController : Controller() {
     companion object {
         val PREFS_NAME = "timetracker"
         val BASE_DIR = "baseDir"
+        val SAP_EXECUTABLE_PATH = "sapExecutablepath"
+        val SAP_USERNAME = "sapUsername"
+        val SAP_PASSWORD = "sapPassword"
         val BREAK_INDICATORS = "breakIndicators"
         val TRAVEL_INDICATORS = "travelIndicators"
         val TRAVEL_MULTIPLIER = "travelMultiplier"
