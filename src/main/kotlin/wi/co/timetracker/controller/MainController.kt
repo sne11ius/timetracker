@@ -175,7 +175,9 @@ class MainController(
 
     fun fillSapGui() {
         with (preferencesController.preferences) {
-            SapControl.doStuff(sapExecutablePath, sapUsername, sapPassword)
+            primaryStage.isIconified = true
+            SapControl.doStuff(sapUsername, sapPassword)
+            primaryStage.isIconified = false
         }
     }
 

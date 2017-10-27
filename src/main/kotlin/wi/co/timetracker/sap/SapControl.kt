@@ -9,8 +9,14 @@ import org.springframework.core.io.ClassPathResource
 object SapControl {
 
     private val log = KotlinLogging.logger {}
+    private val s = Screen()
 
-    fun doStuff(sapExecutablePath: String, sapUsername: String, sapPassword: String) {
+    init {
+        ImagePath.add(ClassPathResource("images").url)
+        s.autoWaitTimeout = 20.0
+    }
+
+    fun doStuff(sapUsername: String, sapPassword: String) {
         if (sapUsername.isBlank()) {
             Alert(Alert.AlertType.ERROR, "Bitte gültigen SAP-Benutzernamen angeben.").show()
             return
@@ -19,12 +25,23 @@ object SapControl {
             Alert(Alert.AlertType.ERROR, "Bitte gültiges SAP-Kennwort angeben.").show()
             return
         }
-        if (null == SapControl::class.java.getResourceAsStream("/images/1509091819886.png")) {
-            log.error { "No image" }
-        } else {
-            ImagePath.add(ClassPathResource("images").url)
-            val s = Screen()
-            s.click("1509091819886.png")
+        launchSap(sapUsername, sapPassword)
+    }
+
+    fun launchSap(sapUsername: String, sapPassword: String) {
+        with(s) {
+            autoWaitTimeout
+            click("windows_start_button.png")
+            wait(1.0)
+            type("sap")
+            click("sap_gui_logo.png")
+            click("login_button.png")
+            click("username_field.png")
+            type(sapUsername)
+            click("password_field.png")
+            type(sapPassword + "\n")
+            doubleClick("tree_zeiterfassung.png")
+            doubleClick("tree_zeiten_pflegen.png")
         }
     }
 
