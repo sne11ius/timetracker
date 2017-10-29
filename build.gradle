@@ -35,8 +35,8 @@ dependencies {
         exclude module: '${sikulix.libs}'
         exclude module: 'jadb'
     }
-    //compile "com.sikulix:sikulixlibswin:1.1.0"
     compile "com.sikulix:sikulixlibswin:1.1.2-SNAPSHOT"
+    compile "com.fasterxml.jackson.core:jackson-core:2.9.2"
 
     // Logging ftw!!!
     compile "io.github.microutils:kotlin-logging:1.4.6"

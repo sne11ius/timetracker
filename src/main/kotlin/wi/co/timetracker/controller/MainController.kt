@@ -9,7 +9,6 @@ import tornadofx.property
 import wi.co.timetracker.extensions.*
 import wi.co.timetracker.model.MainModel
 import wi.co.timetracker.model.MonthModel
-import wi.co.timetracker.sap.SapControl
 import wi.co.timetracker.service.FileLoader
 import java.time.Duration
 import java.time.LocalDate
@@ -172,13 +171,5 @@ class MainController(
         |Ist: ${actual.formatDefault()}
         |Differenz: ${diff.formatDefault()}
         """.trimMargin()
-
-    fun fillSapGui() {
-        with (preferencesController.preferences) {
-            primaryStage.isIconified = true
-            SapControl.doStuff(sapUsername, sapPassword)
-            primaryStage.isIconified = false
-        }
-    }
 
 }

@@ -21,7 +21,7 @@ class MainView : View() {
         top = buttonbar {
             button("SAP it!") {
                 action {
-                    controller.fillSapGui()
+                    find(SapFillPreparationView::class).openModal()
                 }
             }
             button("Einstellungen") {
@@ -125,7 +125,6 @@ class MainView : View() {
             padding = Insets(10.0)
             this += LocalDatePicker().apply {
                 prefWidth = 250.0
-                //prefHeight = 250.0
                 allowNull = false
                 mode = LocalDatePicker.Mode.SINGLE
                 bindBidirectional(localDateProperty(), controller.mainModel.currentDateProperty())

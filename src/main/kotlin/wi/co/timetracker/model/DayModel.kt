@@ -16,7 +16,7 @@ data class DayModel(val date: LocalDate, val entries: List<EntryModel>) {
     }
 
     fun toDaySummaryModel(breakIndicators: List<String>, travelIndicators: List<String>, travelMultiplier: Float): DaySummaryModel {
-        return DaySummaryModel(entries
+        return DaySummaryModel(date, entries
                 .filter { !breakIndicators.any { indicator -> it.text.contains(indicator) } }
                 .groupBy({ m ->
                     m.text

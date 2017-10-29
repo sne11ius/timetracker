@@ -1,8 +1,9 @@
 package wi.co.timetracker.model
 
 import wi.co.timetracker.extensions.formatDecimal
+import java.time.LocalDate
 
-data class DaySummaryModel(val entries: List<EntrySummaryModel>) {
+data class DaySummaryModel(val day: LocalDate, val entries: List<EntrySummaryModel>) {
 
     override fun toString(): String {
         return entries.fold("", { s, (_, text, comments, total) ->
