@@ -10,9 +10,13 @@ import tornadofx.getProperty
 import tornadofx.property
 import wi.co.timetracker.extensions.formatDefault
 import wi.co.timetracker.model.DaySummaryModel
+import wi.co.timetracker.model.SapProjectAssignment
 import wi.co.timetracker.model.Severity
 import wi.co.timetracker.sap.SapControl
 import wi.co.timetracker.service.FileLoader
+import wi.co.timetracker.view.AssignSapProjectsView
+import wi.co.timetracker.view.SapFillPreparationView
+import java.io.File
 import java.time.LocalDate
 import java.util.*
 
@@ -28,6 +32,8 @@ class SapController(
     private val fileLoader: FileLoader by di()
 
     private val preferencesController: PreferencesController by inject()
+
+    private val assignSapProjectsController: AssignSapProjectsController by inject()
 
     private var dateBegin: LocalDate by property(dateBegin)
     fun dateBeginProperty() = getProperty(SapController::dateBegin)
@@ -118,12 +124,29 @@ class SapController(
             if (result.isPresent) {
                 if (result.get() == ButtonType.OK) {
                     logger.debug { "yap" }
-                    with(preferencesController.preferences) {
-                        primaryStage.isIconified = true
-                        val sapProjectNames = SapControl.findAllProjectNames(sapUsername, sapPassword, firstDay)
-                        logger.debug { "Project names: $sapProjectNames" }
-                        primaryStage.isIconified = false
-                    }
+                    val tempFilename = projects.joinToString().hashCode().toString()
+                    val cacheFile = File(preferencesController.getBaseDir(), "$tempFilename.timetracker.sapcache.txt")
+                    val sapProjectNames =
+                            if (cacheFile.exists()) {
+                                logger.debug { "Skipping this step since we found a cache file @ $cacheFile" }
+                                val names = cacheFile.readText().split(",").map { it.trim() }
+                                logger.debug { "Found sap project names: $names" }
+                                names
+                            } else {
+                                with(preferencesController.preferences) {
+                                    primaryStage.isIconified = true
+                                    val names = SapControl.findAllProjectNames(sapUsername, sapPassword, firstDay)
+                                    logger.debug { "Project names: $names" }
+                                    cacheFile.writeText(names.joinToString())
+                                    primaryStage.isIconified = false
+                                    names
+                                }
+                            }
+                    assignSapProjectsController.availableSapProjects.clear()
+                    assignSapProjectsController.availableSapProjects.addAll(sapProjectNames.sorted())
+                    assignSapProjectsController.assignments.clear()
+                    assignSapProjectsController.assignments.addAll(projects.sorted().map { SapProjectAssignment(it, "Klicken zum Ändern") })
+                    find(AssignSapProjectsView::class).openModal()
                 } else {
                     logger.debug { "nope" }
                 }

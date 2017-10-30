@@ -19,14 +19,14 @@ object SapControl {
     }
 
     fun findAllProjectNames(sapUsername: String, sapPassword: String, day: LocalDate): List<String> {
-        // if (!isSapRunning()) {
-        //     launchSap()
-        // }
-        // if (!isLoggedIn()) {
-        //     goToTop()
-        // }
-        // doLogin(sapUsername, sapPassword)
-        // openTimetracking(day)
+        if (!isSapRunning()) {
+            launchSap()
+        }
+        if (!isLoggedIn()) {
+            goToTop()
+        }
+        doLogin(sapUsername, sapPassword)
+        openTimetracking(day)
         val projectNames = mutableListOf<String>()
         with(s) {
             val begin = find("arbeitsvorrat.png").right(169).below(60)
@@ -40,7 +40,7 @@ object SapControl {
                 log.debug { "Found project $projectName" }
                 projectNames += projectName
                 try {
-                    val scrolledDownRegion = wait("projects_scrolled_down_indicator.png", 1.0)
+                    wait("projects_scrolled_down_indicator.png", 1.0)
                     return projectNames
                 } catch (e: FindFailed) {
                     find("scroll_projects_down_indicator.png").left(-10).above(-15).click()
@@ -51,6 +51,7 @@ object SapControl {
         return projectNames
     }
 
+    /*
     fun doStuff(sapUsername: String, sapPassword: String, summaries: List<DaySummaryModel>) {
         if (sapUsername.isBlank()) {
             Alert(Alert.AlertType.ERROR, "Bitte gültigen SAP-Benutzernamen angeben.").show()
@@ -63,6 +64,7 @@ object SapControl {
         //launchSap(sapUsername, sapPassword)
         //openTimetracking()
     }
+    */
 
     private fun isSapRunning(): Boolean {
         with(s) {
