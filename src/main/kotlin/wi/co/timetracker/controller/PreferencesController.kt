@@ -68,7 +68,7 @@ class PreferencesController : Controller() {
             preferences.breakIndicators = get(BREAK_INDICATORS, "")
             preferences.travelIndicators = get(TRAVEL_INDICATORS, "")
             preferences.travelMultiplier = get(TRAVEL_MULTIPLIER, "1.0").toFloat()
-            preferences.excelCorrection = get(EXCEL_CORRECTION, "30.0").toFloat()
+            preferences.excelCorrection = get(EXCEL_CORRECTION, "50.0").toFloat()
         }
     }
 

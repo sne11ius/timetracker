@@ -10,7 +10,7 @@ class Preferences(
         breakIndicators: String = "",
         travelIndicators: String = "",
         travelMultiplier: Number = 1.0f,
-        excelCorrection: Number = 30.0f
+        excelCorrection: Number = 50.0f
 ) {
 
     var baseDir: String by property(baseDir)

@@ -1,7 +1,6 @@
 package wi.co.timetracker.model
 
 import javafx.beans.property.SimpleStringProperty
-import tornadofx.getProperty
 import tornadofx.property
 
 class SapProjectAssignment(userProjectName: String, sapProjectName: String) {

@@ -10,12 +10,10 @@ import tornadofx.getProperty
 import tornadofx.property
 import wi.co.timetracker.extensions.formatDefault
 import wi.co.timetracker.model.DaySummaryModel
-import wi.co.timetracker.model.SapProjectAssignment
 import wi.co.timetracker.model.Severity
 import wi.co.timetracker.sap.SapControl
 import wi.co.timetracker.service.FileLoader
 import wi.co.timetracker.view.AssignSapProjectsView
-import wi.co.timetracker.view.SapFillPreparationView
 import java.io.File
 import java.time.LocalDate
 import java.util.*
@@ -124,12 +122,12 @@ class SapController(
             if (result.isPresent) {
                 if (result.get() == ButtonType.OK) {
                     logger.debug { "yap" }
-                    val tempFilename = projects.joinToString().hashCode().toString()
+                    val tempFilename = projects.joinToString(PROJECT_SEPARATOR).hashCode().toString()
                     val cacheFile = File(preferencesController.getBaseDir(), "$tempFilename.timetracker.sapcache.txt")
                     val sapProjectNames =
                             if (cacheFile.exists()) {
                                 logger.debug { "Skipping this step since we found a cache file @ $cacheFile" }
-                                val names = cacheFile.readText().split(",").map { it.trim() }
+                                val names = cacheFile.readText().split(PROJECT_SEPARATOR).map { it.trim() }
                                 logger.debug { "Found sap project names: $names" }
                                 names
                             } else {
@@ -137,29 +135,37 @@ class SapController(
                                     primaryStage.isIconified = true
                                     val names = SapControl.findAllProjectNames(sapUsername, sapPassword, firstDay)
                                     logger.debug { "Project names: $names" }
-                                    cacheFile.writeText(names.joinToString())
+                                    cacheFile.writeText(names.joinToString(PROJECT_SEPARATOR))
                                     primaryStage.isIconified = false
+                                    primaryStage.toFront()
                                     names
                                 }
                             }
-                    assignSapProjectsController.availableSapProjects.clear()
-                    assignSapProjectsController.availableSapProjects.addAll(sapProjectNames.sorted())
-                    assignSapProjectsController.assignments.clear()
-                    assignSapProjectsController.assignments.addAll(projects.sorted().map { SapProjectAssignment(it, "Klicken zum Ändern") })
-                    find(AssignSapProjectsView::class).openModal()
+                    assignSapProjectsController.reset(projects, sapProjectNames)
+                    find(AssignSapProjectsView::class).openModal(block = true)
+                    if (assignSapProjectsController.mappingComplete) {
+                        val createdMapping: Map<String, String> = assignSapProjectsController.getMapping()
+                        val mergedMapping = mutableMapOf<String, String>()
+                        mergedMapping.putAll(mapping)
+                        mergedMapping.putAll(createdMapping)
+                        logger.debug {
+                            "Merged mapping: \n" + mergedMapping.map { (k, v) ->
+                                "$k -> $v"
+                            }.joinToString("\n")
+                        }
+                        setProjectMapping(mergedMapping)
+                    } else {
+                        logger.debug { "Mapping not complete" }
+                    }
                 } else {
                     logger.debug { "nope" }
                 }
             }
         }
-        // with (preferencesController.preferences) {
-        //     primaryStage.isIconified = true
-        //     wi.co.timetracker.sap.SapControl.doStuff(sapUsername, sapPassword, summaries)
-        //     primaryStage.isIconified = false
-        // }
     }
 
     companion object {
         val PROJECT_MAPPING = "projectMapping"
+        val PROJECT_SEPARATOR = "<|>"
     }
 }

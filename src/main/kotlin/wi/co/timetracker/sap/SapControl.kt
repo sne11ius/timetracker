@@ -1,11 +1,9 @@
 package wi.co.timetracker.sap
 
-import javafx.scene.control.Alert
 import mu.KotlinLogging
 import org.sikuli.script.*
 import org.springframework.core.io.ClassPathResource
 import wi.co.timetracker.extensions.formatDefault
-import wi.co.timetracker.model.DaySummaryModel
 import java.time.LocalDate
 
 object SapControl {
@@ -90,6 +88,13 @@ object SapControl {
 
     private fun isLoggedIn(): Boolean = !isNotLoggedIn()
 
+    private fun maximize() {
+        with(s) {
+            click("system_menu_button.png")
+            find("system_menu.png").above(-50).click()
+        }
+    }
+
     private fun openTimetracking(day: LocalDate) {
         with(s) {
             doubleClick("tree_zeiterfassung.png")
@@ -117,6 +122,7 @@ object SapControl {
             type(sapUsername)
             click("password_field.png")
             type(sapPassword + "\n")
+            maximize()
         }
     }
 
