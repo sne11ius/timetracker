@@ -1,5 +1,5 @@
 Configuration:
-  status: debug
+  status: warn
 
   Appenders:
     Console:
@@ -18,27 +18,17 @@ Configuration:
         level: debug
         AppenderRef:
           - ref: CONSOLE
-      - name: wi.co.timetracker.parser
+      - name: wi.co.timetracker.service.FileLoader
         additivity: false
         level: info
         AppenderRef:
           - ref: CONSOLE
-      - name: wi.co.timetracker.model
+      - name: wi.co.timetracker.parser.LineParser
         additivity: false
         level: info
         AppenderRef:
           - ref: CONSOLE
-      - name: wi.co.timetracker.controller.MainController
-        additivity: false
-        level: info
-        AppenderRef:
-          - ref: CONSOLE
-      - name: wi.co.timetracker.service
-        additivity: false
-        level: info
-        AppenderRef:
-          - ref: CONSOLE
-      - name: "JavaFX Application Thread"
+      - name: org.springframework
         additivity: false
         level: warn
         AppenderRef:
