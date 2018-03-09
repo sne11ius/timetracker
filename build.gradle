@@ -22,6 +22,7 @@ apply plugin: 'com.github.ben-manes.versions'
 
 repositories {
     mavenCentral()
+    jcenter()
     maven {
         url "https://oss.sonatype.org/content/groups/public"
     }
@@ -42,6 +43,7 @@ dependencies {
     }
     compile "com.sikulix:sikulixlibswin:1.1.2-SNAPSHOT"
     compile "com.fasterxml.jackson.core:jackson-core:$jackson_version"
+    compile "com.github.h0tk3y.betterParse:better-parse:0.3.2"
 
     // Logging ftw!!!
     compile "io.github.microutils:kotlin-logging:1.5.3"
@@ -50,6 +52,8 @@ dependencies {
     compile "org.apache.logging.log4j:log4j-slf4j-impl:$log4j_version"
     compile "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:$jackson_version"
     compile "com.fasterxml.jackson.core:jackson-databind:$jackson_version"
+
+    testCompile "io.kotlintest:kotlintest:2.0.7"
 }
 
 compileKotlin {
