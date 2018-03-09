@@ -79,7 +79,7 @@ class FileLoader {
                 if (index == totalLines - 1 && it.startsWith("=")) {
                     total = it.substringAfterLast("=").trim()
                 } else {
-                    val parseResult = lineParser.parseLine(date, it, travelIndicators, travelMultiplier)
+                    val parseResult = lineParser.parseLine(date, it)
                     for (err in parseResult.errors)
                         errors += ParseError(err.severity, line, "Column ${err.index + 1}: ${err.message}")
                     if (null != parseResult.entry)

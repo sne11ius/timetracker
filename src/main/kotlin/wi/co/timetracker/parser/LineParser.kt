@@ -4,11 +4,9 @@ import mu.KotlinLogging
 import org.springframework.stereotype.Component
 import wi.co.timetracker.model.EntryModel
 import wi.co.timetracker.model.ParseError
-import java.time.Duration
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
-import java.time.format.DateTimeFormatter
 import java.util.Collections.emptyList
 
 const val MAX_TEXT_LENGTH = 200
@@ -250,7 +248,7 @@ class LineParser {
             }
     )
 
-    fun parseLine(baseDate: LocalDate, line: String, travelIndicators: List<String>, travelMultiplier: Float): SingleLineParseResult {
+    fun parseLine(baseDate: LocalDate, line: String): SingleLineParseResult {
         var state: ParseResult = ParseResult.ParserState()
         log.debug { "Parse line $line" }
         for (i in 0 until line.length) {
@@ -263,25 +261,26 @@ class LineParser {
             }
         }
 
-        when ((state as ParseResult.ParserState).state) {
-            State.TEXT, State.SKIP_TO_SUM_FROM_TEXT, State.SKIP_TO_SUM_FROM_COMMENT, State.SUM_HOURS, State.SUM_MINUTE_PART -> {
-                return mkEntry(
-                        baseDate,
-                        state.hoursStart,
-                        state.minutesStart,
-                        state.hoursEnd,
-                        state.minutesEnd,
-                        state.text,
-                        state.comment,
-                        state.sumHours,
-                        state.sumMinutePart,
-                        travelIndicators,
-                        travelMultiplier
-                )
+        when (state) {
+            is ParseResult.ParserState -> {
+                when (state.state) {
+                    State.TEXT, State.SKIP_TO_SUM_FROM_TEXT, State.SKIP_TO_SUM_FROM_COMMENT, State.SUM_HOURS, State.SUM_MINUTE_PART -> {
+                        return mkEntry(
+                                baseDate,
+                                state.hoursStart,
+                                state.minutesStart,
+                                state.hoursEnd,
+                                state.minutesEnd,
+                                state.text,
+                                state.comment
+                        )
+                    }
+                    else -> {
+                        return err(line.length, "Incomplete entry, please finish $state.")
+                    }
+                }
             }
-            else -> {
-                return err(line.length, "Incomplete entry, please finish $state.")
-            }
+            else -> return err(line.length, "$state.")
         }
     }
 
@@ -289,7 +288,7 @@ class LineParser {
         return SingleLineParseResult(listOf(wi.co.timetracker.model.error(index, msg)), null)
     }
 
-    private fun mkEntry(baseDate: LocalDate, hoursStart: String, minutesStart: String, hoursEnd: String, minutesEnd: String, text: String, comment: String, sumHours: String, sumMinutePart: String, travelIndicators: List<String>, travelMultiplier: Float): SingleLineParseResult {
+    private fun mkEntry(baseDate: LocalDate, hoursStart: String, minutesStart: String, hoursEnd: String, minutesEnd: String, text: String, comment: String): SingleLineParseResult {
         val baseTime = LocalDateTime.of(baseDate, LocalTime.now()).withHour(0).withMinute(0).withSecond(0).withNano(0)
         val start = try {
             baseTime.withHour(hoursStart.toInt()).withMinute(minutesStart.toInt())
@@ -304,25 +303,7 @@ class LineParser {
         if (text.isBlank()) {
             return err(-1, "Empty text")
         }
-        val minutes = "0.${if (sumMinutePart.isEmpty()) "0" else sumMinutePart}".toFloat() * 60
-        val secondsPart = minutes.toString().substringAfter(".")
-        val seconds = "0.${if (secondsPart.isBlank()) "0" else secondsPart}".toFloat() * 60
-        val notedDuration = if (sumHours.isNotBlank() || sumMinutePart.isNotBlank()) {
-            try {
-                Duration
-                        .ofHours(if (sumHours.isBlank()) 0 else sumHours.toLong())
-                        .plusMinutes(minutes.toLong())
-                        .plusSeconds(seconds.toLong())
-            } catch (e: Exception) {
-                return err(-1, "Could not parse sum $sumHours,$sumMinutePart: ${e.message}")
-            }
-        } else null
-        val model = EntryModel(start, end, text.trim(), notedDuration, comment.trim())
-        val durationDifference = model.computeDurationDifference(travelIndicators, travelMultiplier)
-        if (durationDifference != Duration.ZERO) {
-            val diffString = LocalTime.MIDNIGHT.plus(durationDifference).format(DateTimeFormatter.ofPattern("HH:mm:ss"))
-            return err(-1, "Duration mismatch of (HH:mm:ss) $diffString.")
-        }
+        val model = EntryModel(start, end, text.trim(), comment.trim())
         return SingleLineParseResult(emptyList(), model)
     }
 

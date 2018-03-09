@@ -40,7 +40,7 @@ class LineParser2 : Grammar<EntryModel>() {
             = entry and optional(comment) map { (e, c) ->
         val (begin, end) = e.first
         val text = e.second
-        EntryModel(begin, end, text.trim(), null, c.orEmpty().trim())
+        EntryModel(begin, end, text.trim(), c.orEmpty().trim())
     }
 
     override val rootParser = entryWithComment

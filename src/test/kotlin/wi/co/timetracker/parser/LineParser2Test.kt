@@ -18,28 +18,24 @@ class LineParser2Test : StringSpec() {
                     baseTime.withHour(1).withMinute(15),
                     baseTime.withHour(13).withMinute(30),
                     "project",
-                    null,
                     "comment"
             )
             parser.parseToEnd("23:23 - 13:30: project 1 (comment)") shouldBe EntryModel(
                     baseTime.withHour(23).withMinute(23),
                     baseTime.withHour(13).withMinute(30),
                     "project 1",
-                    null,
                     "comment"
             )
             parser.parseToEnd("12:15 - 19:59: project (comment 1)") shouldBe EntryModel(
                     baseTime.withHour(12).withMinute(15),
                     baseTime.withHour(19).withMinute(59),
                     "project",
-                    null,
                     "comment 1"
             )
             parser.parseToEnd("12:15 - 13:30: project 1 (comment 1)") shouldBe EntryModel(
                     baseTime.withHour(12).withMinute(15),
                     baseTime.withHour(13).withMinute(30),
                     "project 1",
-                    null,
                     "comment 1"
             )
         }
