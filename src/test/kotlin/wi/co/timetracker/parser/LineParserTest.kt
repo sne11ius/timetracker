@@ -7,13 +7,19 @@ import wi.co.timetracker.model.EntryModel
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
 
-class LineParser2Test : StringSpec() {
+class LineParserTest : StringSpec() {
     init {
-        val parser = LineParser2()
+        val parser = LineParser()
 
         "Should parse stuff" {
             val baseTime = LocalDateTime.now().truncatedTo(ChronoUnit.MINUTES)
 
+            parser.parseToEnd("01:15 - 13:30: project") shouldBe EntryModel(
+                    baseTime.withHour(1).withMinute(15),
+                    baseTime.withHour(13).withMinute(30),
+                    "project",
+                    ""
+            )
             parser.parseToEnd("01:15 - 13:30: project (comment)") shouldBe EntryModel(
                     baseTime.withHour(1).withMinute(15),
                     baseTime.withHour(13).withMinute(30),
@@ -32,11 +38,11 @@ class LineParser2Test : StringSpec() {
                     "project",
                     "comment 1"
             )
-            parser.parseToEnd("12:15 - 13:30: project 1 (comment 1)") shouldBe EntryModel(
+            parser.parseToEnd("12:15 - 13:30: project ßü+äö#ä 1 (comß´öä#0ment 1)") shouldBe EntryModel(
                     baseTime.withHour(12).withMinute(15),
                     baseTime.withHour(13).withMinute(30),
-                    "project 1",
-                    "comment 1"
+                    "project ßü+äö#ä 1",
+                    "comß´öä#0ment 1"
             )
         }
     }

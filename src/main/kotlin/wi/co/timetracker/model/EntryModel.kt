@@ -4,8 +4,8 @@ import java.time.Duration
 import java.time.LocalDateTime
 
 data class EntryModel(
-        private val begin: LocalDateTime,
-        private val end: LocalDateTime,
+        val begin: LocalDateTime,
+        val end: LocalDateTime,
         val text: String,
         val comment: String = ""
 ) {
