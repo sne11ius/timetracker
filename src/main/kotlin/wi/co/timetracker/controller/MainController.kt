@@ -1,7 +1,6 @@
 package wi.co.timetracker.controller
 
 import javafx.scene.chart.PieChart
-import mu.KotlinLogging
 import tornadofx.Controller
 import tornadofx.getProperty
 import tornadofx.observable
@@ -25,8 +24,6 @@ class MainController(
         excelSummaryDescription: String = "",
         excelSummarySum: String = ""
 ) : Controller() {
-
-    private val logger = KotlinLogging.logger {}
 
     private val fileLoader: FileLoader by di()
 
@@ -66,7 +63,7 @@ class MainController(
 
     val projectsInMonth = mutableListOf<String>().observable()
 
-    var currentMonth: MonthModel? = null
+    private var currentMonth: MonthModel? = null
 
     val monthChartData = mutableListOf<PieChart.Data>().observable()
 
@@ -114,7 +111,7 @@ class MainController(
     }
 
     private fun readMonth(anyDayInMonth: LocalDate, breakIndicators: List<String>, travelIndicators: List<String>, travelMultiplier: Float) {
-        val month = fileLoader.loadMonth(anyDayInMonth, preferencesController.getBaseDir(), breakIndicators, travelIndicators, travelMultiplier)
+        val month = fileLoader.loadMonth(anyDayInMonth, preferencesController.getBaseDir())
         val oldSelection = currentExcelSummaryProject
         projectsInMonth.clear()
         projectsInMonth.addAll(month.projectNames(preferencesController.getBreakIndicators()))
@@ -133,13 +130,13 @@ class MainController(
     }
 
     private fun readWeek(anyDayInWeek: LocalDate, breakIndicators: List<String>, travelIndicators: List<String>, travelMultiplier: Float) {
-        val week = fileLoader.loadWeek(anyDayInWeek, preferencesController.getBaseDir(), breakIndicators, travelIndicators, travelMultiplier)
+        val week = fileLoader.loadWeek(anyDayInWeek, preferencesController.getBaseDir())
         val diff = week.workDurationDifference(breakIndicators, travelIndicators, travelMultiplier)
         weekPart = with(week) { mkShortSummary("Woche", expectedWorkDuration(), actualWorkDuration(breakIndicators, travelIndicators, travelMultiplier), diff) }
     }
 
     private fun readDay(day: LocalDate, breakIndicators: List<String>, travelIndicators: List<String>, travelMultiplier: Float) {
-        val parseResult = fileLoader.loadDay(day, preferencesController.getBaseDir(), breakIndicators, travelIndicators, travelMultiplier)
+        val parseResult = fileLoader.loadDay(day, preferencesController.getBaseDir())
         lineNumbers = if (parseResult.file.exists()) {
             (1..parseResult.file.readLines().size).fold("", { str, index ->
                 "$str$index\n"

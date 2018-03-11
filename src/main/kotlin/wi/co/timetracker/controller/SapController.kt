@@ -79,8 +79,8 @@ class SapController(
         val summaries = mutableListOf<DaySummaryModel>()
         var currentDate = dateBegin
         while (currentDate != dateEnd.plusDays(1)) {
-            logger.debug { "Now at " + currentDate }
-            val parseResult = with(preferencesController) { fileLoader.loadDay(currentDate, getBaseDir(), getBreakIndicators(), getTravelIndicators(), getTravelMultiplier()) }
+            logger.debug { "Now at $currentDate" }
+            val parseResult = with(preferencesController) { fileLoader.loadDay(currentDate, getBaseDir()) }
             val errors = parseResult.errors.fold("", { msg, (severity, line, message) ->
                 if (severity != Severity.INFO)
                     msg + "${severity.toString().padEnd(5)} Zeile $line: $message\n"
@@ -116,7 +116,7 @@ class SapController(
         }
         if (missing.isNotEmpty()) {
             var msg = "Nicht alle Einträge konnten SAP-Projekten zugewiesen werden:\n\n"
-            missing.forEach { msg += " - " + it + "\n" }
+            missing.forEach { msg += " - $it\n" }
             msg += "\nSoll im SAP nach Einträgen gesucht werden?"
             val result = Alert(Alert.AlertType.CONFIRMATION, msg).showAndWait()
             if (result.isPresent) {
@@ -165,7 +165,7 @@ class SapController(
     }
 
     companion object {
-        val PROJECT_MAPPING = "projectMapping"
-        val PROJECT_SEPARATOR = "<|>"
+        const val PROJECT_MAPPING = "projectMapping"
+        const val PROJECT_SEPARATOR = "<|>"
     }
 }
