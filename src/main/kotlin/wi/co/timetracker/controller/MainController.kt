@@ -11,6 +11,7 @@ import wi.co.timetracker.model.MonthModel
 import wi.co.timetracker.service.FileLoader
 import java.time.Duration
 import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
 class MainController(
         lineNums: String = "",
@@ -63,6 +64,8 @@ class MainController(
 
     val projectsInMonth = mutableListOf<String>().observable()
 
+    val daysWithErrors = mutableListOf<LocalDate>().observable()
+
     private var currentMonth: MonthModel? = null
 
     val monthChartData = mutableListOf<PieChart.Data>().observable()
@@ -107,6 +110,7 @@ class MainController(
             readDay(date, getBreakIndicators(), getTravelIndicators(), getTravelMultiplier())
             readWeek(date, getBreakIndicators(), getTravelIndicators(), getTravelMultiplier())
             readMonth(date, getBreakIndicators(), getTravelIndicators(), getTravelMultiplier())
+            readDatesWithErrors()
         }
     }
 
@@ -123,6 +127,24 @@ class MainController(
         currentMonth = month
         monthChartData.clear()
         monthChartData.addAll(mkChartData(month, breakIndicators, travelIndicators, travelMultiplier))
+    }
+
+    private fun readDatesWithErrors() {
+        daysWithErrors.clear()
+        daysWithErrors += preferencesController.getBaseDir().walkTopDown()
+                .filter { it.isFile }
+                .filter {it.nameWithoutExtension.contains("Zeiten ")}
+                .map { fileLoader.loadDay(it) }
+                .filter { !it.errors.isEmpty() }
+                .map { entry ->
+                    try {
+                        LocalDate.parse(entry.file.nameWithoutExtension.replace("Zeiten ", ""), DateTimeFormatter.ofPattern("yyyy-MM-dd"))
+                    } catch (e: Exception) {
+                        LocalDate.now().withYear(1999).withMonth(1).withDayOfMonth(1)
+                    }
+                }
+                .toList()
+                .sorted()
     }
 
     private fun mkChartData(month: MonthModel, breakIndicators: List<String>, travelIndicators: List<String>, travelMultiplier: Float): List<PieChart.Data> {

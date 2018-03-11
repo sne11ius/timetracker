@@ -65,6 +65,29 @@ class FileLoader {
         return MonthModel(day, entries)
     }
 
+    fun loadDay(file: File): ParseResult {
+        val entries = mutableListOf<EntryModel>()
+        val errors = mutableListOf<ParseError>()
+        try {
+            val date: LocalDate = LocalDate.parse(file.nameWithoutExtension.replace("Zeiten ", ""), DateTimeFormatter.ofPattern("yyyy-MM-dd"))
+            file.readLines().forEachIndexed { index, it ->
+                val line = index + 1
+                if (!it.isBlank()) {
+                    log.debug { "Reading index: $it" }
+                    val parseResult = lineParser.parseLine(date, it)
+                    for (err in parseResult.errors)
+                        errors += ParseError(err.severity, line, "Column ${err.index + 1}: ${err.message}")
+                    if (null != parseResult.entry)
+                        entries += parseResult.entry
+                }
+            }
+            val dayModel = DayModel(date, entries)
+            return ParseResult(file, errors, dayModel)
+        } catch (e: Exception) {
+            return ParseResult(file, listOf(ParseError(Severity.ERROR, 0, "Could not parse file ${file.absolutePath}")), null)
+        }
+    }
+
     private fun loadDayFromFile(date: LocalDate, file: File): ParseResult {
         val entries = mutableListOf<EntryModel>()
         val errors = mutableListOf<ParseError>()
@@ -92,4 +115,5 @@ class FileLoader {
         log.debug { "Load file $file" }
         return file
     }
+
 }

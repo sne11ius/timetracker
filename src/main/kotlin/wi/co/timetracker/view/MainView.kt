@@ -118,6 +118,33 @@ class MainView : View() {
                     isClosable = false
                     piechart("Monat", controller.monthChartData)
                 }
+                tab("Fehler") {
+                    isClosable = false
+                    splitpane {
+                        splitpane(Orientation.VERTICAL) {
+                            borderpane {
+                                left = textarea {
+                                    prefWidth = 40.0
+                                    minWidth = 40.0
+                                    isEditable = false
+                                    isDisable = true
+                                    bind(controller.lineNumbersProperty())
+                                    nodeOrientation = NodeOrientation.RIGHT_TO_LEFT
+                                }
+                                center = textarea {
+                                    bind(controller.mainModel.fileContentProperty())
+                                }
+                            }
+                            textarea {
+                                isEditable = false
+                            }.bind(controller.mainModel.errorsProperty())
+                        }
+                        listview(controller.daysWithErrors) {
+                            selectionModel.selectionMode = SelectionMode.SINGLE
+                            bindSelected(controller.mainModel.currentDateProperty())
+                        }
+                    }
+                }
             }
         }
         right = vbox {
