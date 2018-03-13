@@ -51,7 +51,8 @@ class FileLoader {
     }
 
     fun loadMonth(anyDayInMonth: LocalDate, baseDir: File): MonthModel {
-        var day = anyDayInMonth.withDayOfMonth(1)
+        val firstDayOfMonth = anyDayInMonth.withDayOfMonth(1)
+        var day = firstDayOfMonth
         val entries = mutableListOf<DayModel>()
         while (day.month == anyDayInMonth.month) {
             if (day.dayOfWeek.isWorkDay()) {
@@ -62,7 +63,7 @@ class FileLoader {
             }
             day = day.plusDays(1)
         }
-        return MonthModel(day, entries)
+        return MonthModel(firstDayOfMonth, entries)
     }
 
     fun loadDay(file: File): ParseResult {
