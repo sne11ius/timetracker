@@ -30,7 +30,7 @@ data class DayModel(val date: LocalDate, val entries: List<EntryModel>) {
                     val comments = entries.map { m -> m.comment }.toSet().sorted().fold("", { string, comment ->
                         if (comment.isNotBlank()) {
                             anyNotEmpty = true
-                            string + comment + ", "
+                            "$string$comment, "
                         } else {
                             anyEmpty = true
                             string
