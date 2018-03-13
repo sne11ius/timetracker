@@ -88,6 +88,35 @@ class FileLoader {
         }
     }
 
+    fun autoFixFiles(baseDir: File, dryRun: Boolean = true): Pair<Int, Int> {
+        var totalFiles = 0
+        var changedFiles = 0
+        baseDir.walkTopDown()
+                .filter { it.isFile }
+                .filter {it.nameWithoutExtension.contains("Zeiten ")}
+                .forEach { file ->
+                    ++totalFiles
+                    val fixedContent = file.readLines()
+                            .filter { !it.trim().isBlank() && !it.trim().startsWith("=") }
+                            .map { it.substringBeforeLast("=").trim() }
+                            .joinToString("\n") + if (file.readText().endsWith("\n")) "\n" else ""
+                    if (fixedContent != file.readText()) {
+                        changedFiles++
+                        println("===================")
+                        println("==> File ${file.absolutePath}")
+                        println("==> Before:")
+                        println(file.readText())
+                        println("==> After:")
+                        println(fixedContent)
+                        if (!dryRun) {
+                            file.writeText(fixedContent)
+                        }
+                    }
+                }
+        println("$changedFiles of $totalFiles files fixed")
+        return Pair(changedFiles, totalFiles)
+    }
+
     private fun loadDayFromFile(date: LocalDate, file: File): ParseResult {
         val entries = mutableListOf<EntryModel>()
         val errors = mutableListOf<ParseError>()

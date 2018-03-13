@@ -1,10 +1,7 @@
 package wi.co.timetracker.controller
 
 import javafx.scene.chart.PieChart
-import tornadofx.Controller
-import tornadofx.getProperty
-import tornadofx.observable
-import tornadofx.property
+import tornadofx.*
 import wi.co.timetracker.extensions.*
 import wi.co.timetracker.model.MainModel
 import wi.co.timetracker.model.MonthModel
@@ -105,12 +102,20 @@ class MainController(
         reload(LocalDate.now())
     }
 
+    fun autoFixFiles() {
+        val baseDir = preferencesController.getBaseDir()
+        val (changed, total) = fileLoader.autoFixFiles(baseDir)
+        confirm("Änderungen durchführen?", "$changed von $total Dateien in $baseDir werden angepasst.\nMöchtest du das wirklich?", actionFn = {
+            fileLoader.autoFixFiles(baseDir, false)
+            readDatesWithErrors()
+        })
+    }
+
     private fun reload(date: LocalDate) {
         with (preferencesController) {
             readDay(date, getBreakIndicators(), getTravelIndicators(), getTravelMultiplier())
             readWeek(date, getBreakIndicators(), getTravelIndicators(), getTravelMultiplier())
             readMonth(date, getBreakIndicators(), getTravelIndicators(), getTravelMultiplier())
-            readDatesWithErrors()
         }
     }
 
@@ -129,7 +134,7 @@ class MainController(
         monthChartData.addAll(mkChartData(month, breakIndicators, travelIndicators, travelMultiplier))
     }
 
-    private fun readDatesWithErrors() {
+    fun readDatesWithErrors() {
         daysWithErrors.clear()
         daysWithErrors += preferencesController.getBaseDir().walkTopDown()
                 .filter { it.isFile }

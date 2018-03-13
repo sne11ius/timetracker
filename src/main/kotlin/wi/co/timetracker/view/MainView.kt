@@ -139,9 +139,24 @@ class MainView : View() {
                                 isEditable = false
                             }.bind(controller.mainModel.errorsProperty())
                         }
-                        listview(controller.daysWithErrors) {
-                            selectionModel.selectionMode = SelectionMode.SINGLE
-                            bindSelected(controller.mainModel.currentDateProperty())
+                        borderpane {
+                            center = listview(controller.daysWithErrors) {
+                                selectionModel.selectionMode = SelectionMode.SINGLE
+                                bindSelected(controller.mainModel.currentDateProperty())
+                            }
+                            bottom = buttonbar {
+                                padding = Insets(10.0, 0.0, 0.0, 0.0)
+                                button("Fehler suchen") {
+                                    action {
+                                        controller.readDatesWithErrors()
+                                    }
+                                }
+                                button("Auto fix") {
+                                    action {
+                                        controller.autoFixFiles()
+                                    }
+                                }
+                            }
                         }
                     }
                 }
