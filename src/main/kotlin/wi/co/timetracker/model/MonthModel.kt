@@ -5,7 +5,10 @@ import wi.co.timetracker.extensions.isWorkDay
 import java.time.Duration
 import java.time.LocalDate
 
-data class MonthModel(private val firstDayOfMonth: LocalDate, private val entries: List<DayModel>) {
+data class MonthModel(
+        private val firstDayOfMonth: LocalDate,
+        private val entries: List<DayModel>
+) {
 
     fun projectNames(breakIndicators: List<String>): List<String> {
         return entries.flatMap { it.entries }.map { it.text }.toSet().filter { !breakIndicators.any { indicator -> it.contains(indicator) } }.sorted()
