@@ -4,7 +4,6 @@ import javafx.beans.binding.Bindings
 import javafx.geometry.Insets
 import javafx.geometry.Pos
 import jfxtras.scene.control.LocalDatePicker
-import mu.KotlinLogging
 import tornadofx.*
 import wi.co.timetracker.controller.SapController
 import java.time.DayOfWeek
@@ -12,17 +11,15 @@ import java.time.LocalDate
 
 class SapFillPreparationView : View() {
 
-    private val logger = KotlinLogging.logger {}
-
     private val controller: SapController by inject()
 
-    val datePickerBegin = LocalDatePicker().apply {
+    private val datePickerBegin = LocalDatePicker().apply {
         prefWidth = 250.0
         allowNull = false
         mode = LocalDatePicker.Mode.SINGLE
         Bindings.bindBidirectional(localDateProperty(), controller.dateBeginProperty())
     }
-    val datePickerEnd = LocalDatePicker().apply {
+    private val datePickerEnd = LocalDatePicker().apply {
         prefWidth = 250.0
         allowNull = false
         mode = LocalDatePicker.Mode.SINGLE

@@ -6,10 +6,10 @@ import tornadofx.property
 class SapProjectAssignment(userProjectName: String, sapProjectName: String) {
 
     val userProjectNameProperty = SimpleStringProperty(userProjectName)
-    var userProjectName by property(userProjectName)
+    private var userProjectName: String by property(userProjectName)
 
     val sapProjectNameProperty = SimpleStringProperty(sapProjectName)
-    var sapProjectName by property(sapProjectName)
+    private var sapProjectName: String by property(sapProjectName)
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

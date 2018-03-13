@@ -9,9 +9,7 @@ import wi.co.timetracker.parser.LineParser
 import java.io.File
 import java.io.File.separator
 import java.time.DayOfWeek
-import java.time.Duration
 import java.time.LocalDate
-import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 
 @Service
@@ -20,9 +18,9 @@ class FileLoader {
     private val log = KotlinLogging.logger {}
 
     @Autowired
-    lateinit private var lineParser: LineParser
+    private lateinit var lineParser: LineParser
 
-    fun loadDay(date: LocalDate, baseDir: File, breakIndicators: List<String>, travelIndicators: List<String>, travelMultiplier: Float): ParseResult {
+    fun loadDay(date: LocalDate, baseDir: File): ParseResult {
         log.debug { "Load data for $date from $baseDir" }
         val file = mkFile(date, baseDir)
         if (file.exists()) {
@@ -30,20 +28,20 @@ class FileLoader {
                 log.debug { "File empty" }
                 return ParseResult(file, listOf(info(0, "No file for this date")), null)
             }
-            return loadDayFromFile(date, file, breakIndicators, travelIndicators, travelMultiplier)
+            return loadDayFromFile(date, file)
         } else {
             log.debug { "No file" }
             return ParseResult(file, listOf(info(0, "No file for this date")), null)
         }
     }
 
-    fun loadWeek(anyDayInWeek: LocalDate, baseDir: File, breakIndicators: List<String>, travelIndicators: List<String>, travelMultiplier: Float): WeekModel {
+    fun loadWeek(anyDayInWeek: LocalDate, baseDir: File): WeekModel {
         var day = anyDayInWeek
         while (day.dayOfWeek != DayOfWeek.MONDAY)
             day = day.minusDays(1)
         val entries = mutableListOf<DayModel>()
         for (index in 0 until 7) {
-            val (_, _, dayModel) = loadDay(day, baseDir, breakIndicators, travelIndicators, travelMultiplier)
+            val (_, _, dayModel) = loadDay(day, baseDir)
             if (null != dayModel) {
                 entries += dayModel
             }
@@ -52,12 +50,12 @@ class FileLoader {
         return WeekModel(entries)
     }
 
-    fun loadMonth(anyDayInMonth: LocalDate, baseDir: File, breakIndicators: List<String>, travelIndicators: List<String>, travelMultiplier: Float): MonthModel {
+    fun loadMonth(anyDayInMonth: LocalDate, baseDir: File): MonthModel {
         var day = anyDayInMonth.withDayOfMonth(1)
         val entries = mutableListOf<DayModel>()
         while (day.month == anyDayInMonth.month) {
             if (day.dayOfWeek.isWorkDay()) {
-                val (_, _, dayModel) = loadDay(day, baseDir, breakIndicators, travelIndicators, travelMultiplier)
+                val (_, _, dayModel) = loadDay(day, baseDir)
                 if (null != dayModel) {
                     entries += dayModel
                 }
@@ -67,52 +65,72 @@ class FileLoader {
         return MonthModel(day, entries)
     }
 
-    private fun loadDayFromFile(date: LocalDate, file: File, breakIndicators: List<String>, travelIndicators: List<String>, travelMultiplier: Float): ParseResult {
-        val totalLines = file.readLines().size
+    fun loadDay(file: File): ParseResult {
         val entries = mutableListOf<EntryModel>()
         val errors = mutableListOf<ParseError>()
-        var total: String? = null
-        file.readLines().forEachIndexed { index, it ->
-            val line = index + 1
-            if (!it.isBlank()) {
-                log.debug { "Reading index: $it" }
-                if (index == totalLines - 1 && it.startsWith("=")) {
-                    total = it.substringAfterLast("=").trim()
-                } else {
-                    val parseResult = lineParser.parseLine(date, it, travelIndicators, travelMultiplier)
+        try {
+            val date: LocalDate = LocalDate.parse(file.nameWithoutExtension.replace("Zeiten ", ""), DateTimeFormatter.ofPattern("yyyy-MM-dd"))
+            file.readLines().forEachIndexed { index, it ->
+                val line = index + 1
+                if (!it.isBlank()) {
+                    log.debug { "Reading index: $it" }
+                    val parseResult = lineParser.parseLine(date, it)
                     for (err in parseResult.errors)
                         errors += ParseError(err.severity, line, "Column ${err.index + 1}: ${err.message}")
                     if (null != parseResult.entry)
                         entries += parseResult.entry
                 }
             }
+            val dayModel = DayModel(date, entries)
+            return ParseResult(file, errors, dayModel)
+        } catch (e: Exception) {
+            return ParseResult(file, listOf(ParseError(Severity.ERROR, 0, "Could not parse file ${file.absolutePath}")), null)
         }
-        val dayModel = DayModel(date, entries)
+    }
 
-        if (total != null) {
-            try {
-                val totalHours = total!!.substringBefore(",")
-                val minutePart = if (total!!.contains(",")) total!!.substringAfter(",") else "0"
-                val minutes = "0.$minutePart".toFloat() * 60
-                val secondsPart = minutes.toString().substringAfter(".")
-                val seconds = "0.${if (secondsPart.isBlank()) "0" else secondsPart}".toFloat() * 60
-                val notedDuration = Duration
-                        .ofHours(totalHours.toLong())
-                        .plusMinutes(minutes.toLong())
-                        .plusSeconds(seconds.toLong())
-                val computedDuration = dayModel.duration(breakIndicators, travelIndicators, travelMultiplier)
-                if (computedDuration != notedDuration) {
-                    log.warn { "Workday computeDuration mismatch for $dayModel" }
-                    log.warn { "Noted: $notedDuration" }
-                    log.warn { "Computed: $computedDuration" }
-                    val diff = computedDuration.minus(notedDuration).abs()
-                    val diffString = LocalTime.MIDNIGHT.plus(diff).format(DateTimeFormatter.ofPattern("HH:mm:ss"))
-                    errors += warn(file.readLines().size, "Workday mismatch of $diffString")
+    fun autoFixFiles(baseDir: File, dryRun: Boolean = true): Pair<Int, Int> {
+        var totalFiles = 0
+        var changedFiles = 0
+        baseDir.walkTopDown()
+                .filter { it.isFile }
+                .filter {it.nameWithoutExtension.contains("Zeiten ")}
+                .forEach { file ->
+                    ++totalFiles
+                    val fixedContent = file.readLines()
+                            .filter { !it.trim().isBlank() && !it.trim().startsWith("=") }
+                            .joinToString("\n") { it.substringBeforeLast("=").trim() } + if (file.readText().endsWith("\n")) "\n" else ""
+                    if (fixedContent != file.readText()) {
+                        changedFiles++
+                        println("===================")
+                        println("==> File ${file.absolutePath}")
+                        println("==> Before:")
+                        println(file.readText())
+                        println("==> After:")
+                        println(fixedContent)
+                        if (!dryRun) {
+                            file.writeText(fixedContent)
+                        }
+                    }
                 }
-            } catch (e: NumberFormatException) {
-                errors += error(file.readLines().size, "Cannot parse total")
+        println("$changedFiles of $totalFiles files fixed")
+        return Pair(changedFiles, totalFiles)
+    }
+
+    private fun loadDayFromFile(date: LocalDate, file: File): ParseResult {
+        val entries = mutableListOf<EntryModel>()
+        val errors = mutableListOf<ParseError>()
+        file.readLines().forEachIndexed { index, it ->
+            val line = index + 1
+            if (!it.isBlank()) {
+                log.debug { "Reading index: $it" }
+                val parseResult = lineParser.parseLine(date, it)
+                for (err in parseResult.errors)
+                    errors += ParseError(err.severity, line, "Column ${err.index + 1}: ${err.message}")
+                if (null != parseResult.entry)
+                    entries += parseResult.entry
             }
         }
+        val dayModel = DayModel(date, entries)
         return ParseResult(file, errors, dayModel)
     }
 
@@ -125,4 +143,5 @@ class FileLoader {
         log.debug { "Load file $file" }
         return file
     }
+
 }

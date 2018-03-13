@@ -73,14 +73,14 @@ class PreferencesController : Controller() {
     }
 
     companion object {
-        val PREFS_NAME = "timetracker"
-        val BASE_DIR = "baseDir"
-        val SAP_USERNAME = "sapUsername"
-        val SAP_PASSWORD = "sapPassword"
-        val BREAK_INDICATORS = "breakIndicators"
-        val TRAVEL_INDICATORS = "travelIndicators"
-        val TRAVEL_MULTIPLIER = "travelMultiplier"
-        val EXCEL_CORRECTION = "excelCorrection"
+        const val PREFS_NAME = "timetracker"
+        const val BASE_DIR = "baseDir"
+        const val SAP_USERNAME = "sapUsername"
+        const val SAP_PASSWORD = "sapPassword"
+        const val BREAK_INDICATORS = "breakIndicators"
+        const val TRAVEL_INDICATORS = "travelIndicators"
+        const val TRAVEL_MULTIPLIER = "travelMultiplier"
+        const val EXCEL_CORRECTION = "excelCorrection"
     }
 
 }

@@ -2,14 +2,11 @@ package wi.co.timetracker.view
 
 import javafx.geometry.Insets
 import javafx.geometry.Pos
-import mu.KotlinLogging
 import tornadofx.*
 import wi.co.timetracker.controller.AssignSapProjectsController
 import wi.co.timetracker.model.SapProjectAssignment
 
 class AssignSapProjectsView : View() {
-
-    private val logger = KotlinLogging.logger {}
 
     private val controller: AssignSapProjectsController by inject()
 

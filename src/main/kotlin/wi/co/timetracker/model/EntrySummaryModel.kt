@@ -5,7 +5,12 @@ import wi.co.timetracker.extensions.formatDefault
 import java.time.Duration
 import java.time.LocalDate
 
-data class EntrySummaryModel(val date: LocalDate, val text: String, val comment: String, val duration: Duration) {
+data class EntrySummaryModel(
+        val date: LocalDate,
+        val text: String,
+        val comment: String,
+        val duration: Duration
+) {
 
     fun formatFiExcelStyle(excelCorrection: Duration): ExcelSummary {
         val theDate = date.format("dd.MM.yyyy")

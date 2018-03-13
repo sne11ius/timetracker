@@ -13,14 +13,14 @@ class AssignSapProjectsController(
 
     private val logger = KotlinLogging.logger {}
 
-    val none = "Klicken zum Ändern"
+    private val none = "Klicken zum Ändern"
 
     var mappingComplete: Boolean = false
 
     val assignments = mutableListOf<SapProjectAssignment>().observable()
     val availableSapProjects = mutableListOf<String>().observable()
 
-    var saveDisabled by property(saveDisabled)
+    private var saveDisabled: Boolean by property(saveDisabled)
     val saveDisabledProperty = getProperty(AssignSapProjectsController::saveDisabled)
 
     fun discard() {
@@ -43,10 +43,10 @@ class AssignSapProjectsController(
     }
 
     fun getMapping(): Map<String, String> {
-        return assignments.fold(mutableMapOf<String, String>(), { map, ass ->
+        return assignments.fold(mutableMapOf(), { map, ass ->
             val new = mutableMapOf<String, String>()
             new.putAll(map)
-            new.put(ass.userProjectNameProperty.get(), ass.sapProjectNameProperty.get())
+            new[ass.userProjectNameProperty.get()] = ass.sapProjectNameProperty.get()
             new
         })
     }

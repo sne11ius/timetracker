@@ -3,14 +3,12 @@ package wi.co.timetracker.model
 import java.time.Duration
 import java.time.LocalDateTime
 
-data class EntryModel(private val begin: LocalDateTime, private val end: LocalDateTime, val text: String, private val notedDuration: Duration? = null, val comment: String = "") {
-
-    fun computeDurationDifference(travelIndicators: List<String>, travelMultiplier: Float): Duration {
-        return if (null == notedDuration)
-            Duration.ZERO
-        else
-            notedDuration.minus(computeDuration(travelIndicators, travelMultiplier))
-    }
+data class EntryModel(
+        val begin: LocalDateTime,
+        val end: LocalDateTime,
+        val text: String,
+        val comment: String = ""
+) {
 
     fun computeDuration(travelIndicators: List<String>, travelMultiplier: Float): Duration {
         return if (travelIndicators.any { text.contains(it) || comment.contains(it) }) {
