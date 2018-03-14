@@ -99,7 +99,11 @@ class FileLoader {
                     ++totalFiles
                     val fixedContent = file.readLines()
                             .filter { !it.trim().isBlank() && !it.trim().startsWith("=") }
-                            .joinToString("\n") { it.substringBeforeLast("=").trim() } + if (file.readText().endsWith("\n")) "\n" else ""
+                            .map { it
+                                    .substringBeforeLast("=")
+                                    .removePrefix("\uFEFF")
+                                    .trim()}
+                            .joinToString("\n") + if (file.readText().endsWith("\n")) "\n" else ""
                     if (fixedContent != file.readText()) {
                         changedFiles++
                         println("===================")
