@@ -74,6 +74,9 @@ class MainController(
             }
         })
         mainModel.fileContentProperty().addListener({ _, _, new ->
+            if (!mainModel.file.parentFile.exists()) {
+                mainModel.file.parentFile.mkdirs()
+            }
             mainModel.file.writeText(new)
             reload(mainModel.currentDate)
         })
