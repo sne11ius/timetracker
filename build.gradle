@@ -2,9 +2,9 @@ group 'wi.co.timetracker'
 version '1.0-SNAPSHOT'
 
 buildscript {
-    ext.kotlin_version = '1.2.30'
-    ext.jackson_version = '2.9.4'
-    ext.log4j_version = '2.10.0'
+    ext.kotlin_version = '1.2.71'
+    ext.jackson_version = '2.9.7'
+    ext.log4j_version = '2.11.1'
 
     repositories {
         mavenCentral()
@@ -13,7 +13,7 @@ buildscript {
     dependencies {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
         classpath "de.dynamicfiles.projects.gradle.plugins:javafx-gradle-plugin:8.8.2"
-        classpath 'com.github.ben-manes:gradle-versions-plugin:0.17.0'
+        classpath 'com.github.ben-manes:gradle-versions-plugin:0.20.0'
     }
 }
 
@@ -33,20 +33,15 @@ repositories {
 
 dependencies {
     compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
-    compile "no.tornado:tornadofx:1.7.15"
-    compile "org.jfxtras:jfxtras-controls:8.0-r5"
-    compile "org.springframework:spring-context:5.0.4.RELEASE"
-    compile "org.apache.commons:commons-lang3:3.7"
-    compile ("com.sikulix:sikulixapi:1.1.2-SNAPSHOT") {
-        exclude module: '${sikulix.libs}'
-        exclude module: 'jadb'
-    }
-    compile "com.sikulix:sikulixlibswin:1.1.2-SNAPSHOT"
+    compile "no.tornado:tornadofx:1.7.17"
+    compile "org.jfxtras:jfxtras-controls:8.0-r6"
+    compile "org.springframework:spring-context:5.1.0.RELEASE"
+    compile "org.apache.commons:commons-lang3:3.8.1"
     compile "com.fasterxml.jackson.core:jackson-core:$jackson_version"
-    compile "com.github.h0tk3y.betterParse:better-parse:0.3.2"
+    compile "com.github.h0tk3y.betterParse:better-parse:0.3.5"
 
     // Logging ftw!!!
-    compile "io.github.microutils:kotlin-logging:1.5.3"
+    compile "io.github.microutils:kotlin-logging:1.6.10"
     compile "org.apache.logging.log4j:log4j-api:$log4j_version"
     compile "org.apache.logging.log4j:log4j-core:$log4j_version"
     compile "org.apache.logging.log4j:log4j-slf4j-impl:$log4j_version"
@@ -69,5 +64,5 @@ jfx {
     mainClass = 'wi.co.timetracker.TimetrackerKt'
 
     // minimal requirement for jfxNative-task
-    vendor = 'YourName'
+    vendor = 'Cornelius Wichering'
 }
