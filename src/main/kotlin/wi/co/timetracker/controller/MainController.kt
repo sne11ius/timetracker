@@ -73,18 +73,18 @@ class MainController(
                 reload(mainModel.currentDate)
             }
         })
-        mainModel.fileContentProperty().addListener({ _, _, new ->
+        mainModel.fileContentProperty().addListener { _, _, new ->
             if (!mainModel.file.parentFile.exists()) {
                 mainModel.file.parentFile.mkdirs()
             }
             mainModel.file.writeText(new)
             reload(mainModel.currentDate)
-        })
-        mainModel.currentDateProperty().addListener({ _, _, new ->
+        }
+        mainModel.currentDateProperty().addListener { _, _, new ->
             reload(new)
-        })
+        }
 
-        currentExcelSummaryProjectProperty().addListener({ _, _, new ->
+        currentExcelSummaryProjectProperty().addListener { _, _, new ->
             if (new != null) {
                 val m = currentMonth
                 if (null != m) {
@@ -101,7 +101,7 @@ class MainController(
                 this.excelSummaryTime = ""
                 this.excelSummaryDescription = ""
             }
-        })
+        }
         reload(LocalDate.now())
     }
 
@@ -168,9 +168,9 @@ class MainController(
     private fun readDay(day: LocalDate, breakIndicators: List<String>, travelIndicators: List<String>, travelMultiplier: Float) {
         val parseResult = fileLoader.loadDay(day, preferencesController.getBaseDir())
         lineNumbers = if (parseResult.file.exists()) {
-            (1..parseResult.file.readLines().size).fold("", { str, index ->
+            (1..parseResult.file.readLines().size).fold("") { str, index ->
                 "$str$index\n"
-            })
+            }
         } else ""
         mainModel.file = parseResult.file
         mainModel.fileContent = if (parseResult.file.exists()) parseResult.file.readText() else ""
@@ -182,9 +182,9 @@ class MainController(
         val expectedDuration = if (day.dayOfWeek.isWeekend()) Duration.ZERO else Duration.ofHours(8)
         val diff = expectedDuration.minus(actualDuration)
         dayPart = mkShortSummary("Tag", expectedDuration, actualDuration, diff)
-        mainModel.errors = parseResult.errors.fold("", { msg, (severity, line, message) ->
+        mainModel.errors = parseResult.errors.fold("") { msg, (severity, line, message) ->
             msg + "${severity.toString().padEnd(5)} Zeile $line: $message\n"
-        })
+        }
         summary = if (parseResult.dayModel != null) {
             parseResult.dayModel.toDaySummaryModel(breakIndicators, travelIndicators, travelMultiplier).toString()
         } else {

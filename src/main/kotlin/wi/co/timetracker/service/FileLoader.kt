@@ -97,6 +97,7 @@ class FileLoader {
                 .filter {it.nameWithoutExtension.contains("Zeiten ")}
                 .forEach { file ->
                     ++totalFiles
+                    @Suppress("SimplifiableCallChain")
                     val fixedContent = file.readLines()
                             .filter { !it.trim().isBlank() && !it.trim().startsWith("=") }
                             .map { it

@@ -11,9 +11,9 @@ data class WeekModel(private val entries: List<DayModel>) {
     fun expectedWorkDuration(): Duration = Duration.ofHours(40)
 
     fun actualWorkDuration(breakIndicators: List<String>, travelIndicators: List<String>, travelMultiplier: Float): Duration {
-        return entries.fold(Duration.ZERO, {d, m ->
+        return entries.fold(Duration.ZERO) { d, m ->
             d.plus(m.duration(breakIndicators, travelIndicators, travelMultiplier))
-        })
+        }
     }
 
 }

@@ -6,28 +6,27 @@ import java.time.LocalDate
 data class DayModel(val date: LocalDate, val entries: List<EntryModel>) {
 
     fun duration(excludes: List<String>, travelIndicators: List<String>, travelMultiplier: Float): Duration {
-        return entries.fold(Duration.ZERO, { d, m ->
+        return entries.fold(Duration.ZERO) { d, m ->
             d.plus(if (excludes.any { m.text.contains(it) }) {
                 Duration.ZERO
             } else {
                 m.computeDuration(travelIndicators, travelMultiplier)
             })
-        })
+        }
     }
 
     fun toDaySummaryModel(breakIndicators: List<String>, travelIndicators: List<String>, travelMultiplier: Float): DaySummaryModel {
         return DaySummaryModel(date, entries
+                .asSequence()
                 .filter { !breakIndicators.any { indicator -> it.text.contains(indicator) } }
-                .groupBy({ m ->
-                    m.text
-                })
+                .groupBy { it.text }
                 .map { (text, entries) ->
-                    val totalDuration = entries.fold(Duration.ZERO, { d, m ->
+                    val totalDuration = entries.fold(Duration.ZERO) { d, m ->
                         d.plus(m.computeDuration(travelIndicators, travelMultiplier))
-                    })
+                    }
                     var anyEmpty = false
                     var anyNotEmpty = false
-                    val comments = entries.map { m -> m.comment }.toSet().sorted().fold("", { string, comment ->
+                    val comments = entries.map { it.comment }.toSet().sorted().fold("") { string, comment ->
                         if (comment.isNotBlank()) {
                             anyNotEmpty = true
                             "$string$comment, "
@@ -35,10 +34,11 @@ data class DayModel(val date: LocalDate, val entries: List<EntryModel>) {
                             anyEmpty = true
                             string
                         }
-                    }).removeSuffix(", ")
+                    }.removeSuffix(", ")
                     EntrySummaryModel(date, text, (if (anyEmpty && anyNotEmpty) "u.a. " else "") + comments, totalDuration)
                 }
                 .sortedBy { it.text }
+                .toList()
         )
     }
 

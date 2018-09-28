@@ -29,22 +29,22 @@ data class MonthModel(
     }
 
     fun actualWorkDuration(breakIndicators: List<String>, travelIndicators: List<String>, travelMultiplier: Float): Duration {
-        return entries.fold(Duration.ZERO, { d, m ->
+        return entries.fold(Duration.ZERO) { d, m ->
             if (m.date.dayOfWeek.isWorkDay())
                 d.plus(m.duration(breakIndicators, travelIndicators, travelMultiplier))
             else d
-        })
+        }
     }
 
     fun getExcelSummary(projectName: String, breakIndicators: List<String>, travelIndicators: List<String>, travelMultiplier: Float, excelCorrection: Duration): ExcelSummary {
         val daySummaries = entries.map { it.toDaySummaryModel(breakIndicators, travelIndicators, travelMultiplier) }
-        val entrySummaryModels = daySummaries.map { it.entries.firstOrNull { it.text == projectName } }
-        val summary = entrySummaryModels.fold(ExcelSummary("", "", "", Duration.ZERO), { (date, time, description, duration), m ->
+        val entrySummaryModels = daySummaries.map { summary -> summary.entries.firstOrNull { it.text == projectName } }
+        val summary = entrySummaryModels.fold(ExcelSummary("", "", "", Duration.ZERO)) { (date, time, description, duration), m ->
             if (null != m) {
                 val (currentDate, currentTime, currentDescription, currentDuration) = m.formatFiExcelStyle(excelCorrection)
                 ExcelSummary(date + currentDate + "\n", time + currentTime + "\n", description + currentDescription + "\n", duration.plus(currentDuration))
             } else ExcelSummary(date, time, description, duration)
-        })
+        }
         return with (summary) {
             ExcelSummary(date.trim(), time.trim(), description.trim(), totalDuration)
         }
@@ -53,12 +53,12 @@ data class MonthModel(
     fun getProjectDurations(breakIndicators: List<String>, travelIndicators: List<String>, travelMultiplier: Float): Map<String, Duration> {
         return projectNames(breakIndicators).map { projectName ->
             val daySummaries = entries.map { it.toDaySummaryModel(breakIndicators, travelIndicators, travelMultiplier) }
-            val entrySummaryModels = daySummaries.map { it.entries.firstOrNull { it.text == projectName } }
-            val totalDuration = entrySummaryModels.fold(Duration.ZERO, {d, m ->
+            val entrySummaryModels = daySummaries.map { entrySummary -> entrySummary.entries.firstOrNull { it.text == projectName } }
+            val totalDuration = entrySummaryModels.fold(Duration.ZERO) { d, m ->
                 if (null != m) {
                     d.plus(m.duration)
                 } else d
-            })
+            }
             projectName to totalDuration
         }.toMap()
     }

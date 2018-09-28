@@ -31,11 +31,14 @@ class PreferencesView : View() {
                         }
                     }
                 }
-                field("SAP Benutzername") {
-                    textfield().bind(preferences.sapUsernameProperty())
+                field("BMZEF Benutzername") {
+                    textfield().bind(preferences.bmzefUsernameProperty())
                 }
-                field("SAP Kennwort") {
-                    passwordfield().bind(preferences.sapPasswordProperty())
+                field("BMZEF Kennwort") {
+                    passwordfield().bind(preferences.bmzefPasswordProperty())
+                }
+                field("BMZEF Url") {
+                    textfield().bind(preferences.bmzefUrlProperty())
                 }
                 field("Pausenindikatoren (getrennt durch Komma)") {
                     textfield().bind(preferences.breakIndicatorsProperty())

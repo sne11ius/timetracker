@@ -28,8 +28,8 @@ class PreferencesController : Controller() {
     fun save() {
         preferences(PREFS_NAME) {
             put(BASE_DIR, preferences.baseDir)
-            put(SAP_USERNAME, preferences.sapUsername)
-            put(SAP_PASSWORD, preferences.sapPassword)
+            put(BMZEF_USERNAME, preferences.bmzefUsername)
+            put(BMZEF_PASSWORD, preferences.bmzefPassword)
             put(BREAK_INDICATORS, preferences.breakIndicators)
             put(TRAVEL_INDICATORS, preferences.travelIndicators)
             put(TRAVEL_MULTIPLIER, preferences.travelMultiplier.toString())
@@ -63,8 +63,9 @@ class PreferencesController : Controller() {
     private fun resetPreferences() {
         preferences(PREFS_NAME) {
             preferences.baseDir = get(BASE_DIR, System.getProperty("user.home"))
-            preferences.sapUsername = get(SAP_USERNAME, "")
-            preferences.sapPassword = get(SAP_PASSWORD, "")
+            preferences.bmzefUsername = get(BMZEF_USERNAME, "")
+            preferences.bmzefPassword = get(BMZEF_PASSWORD, "")
+            preferences.bmzefUrl = get(BMZEF_URL, "")
             preferences.breakIndicators = get(BREAK_INDICATORS, "")
             preferences.travelIndicators = get(TRAVEL_INDICATORS, "")
             preferences.travelMultiplier = get(TRAVEL_MULTIPLIER, "1.0").toFloat()
@@ -75,8 +76,9 @@ class PreferencesController : Controller() {
     companion object {
         const val PREFS_NAME = "timetracker"
         const val BASE_DIR = "baseDir"
-        const val SAP_USERNAME = "sapUsername"
-        const val SAP_PASSWORD = "sapPassword"
+        const val BMZEF_USERNAME = "bmzefUsername"
+        const val BMZEF_PASSWORD = "bmzefPassword"
+        const val BMZEF_URL = "bmzefUrl"
         const val BREAK_INDICATORS = "breakIndicators"
         const val TRAVEL_INDICATORS = "travelIndicators"
         const val TRAVEL_MULTIPLIER = "travelMultiplier"

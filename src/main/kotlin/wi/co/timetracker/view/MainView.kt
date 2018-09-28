@@ -6,22 +6,26 @@ import javafx.geometry.NodeOrientation
 import javafx.geometry.Orientation
 import javafx.scene.control.SelectionMode
 import jfxtras.scene.control.LocalDatePicker
+import mu.KotlinLogging
 import tornadofx.*
 import wi.co.timetracker.controller.MainController
 import java.time.LocalDate
 
 class MainView : View() {
 
+    private val logger = KotlinLogging.logger {}
+
     private val controller: MainController by inject()
 
     override val root = borderpane {
         minWidth = 500.0
         minHeight = 500.0
-        padding = Insets(10.0)
+        paddingAll = 10.0
         top = buttonbar {
-            button("SAP it!") {
+            button("Zeit it!") {
                 action {
-                    find(SapFillPreparationView::class).openModal()
+                    //find(BMPreparationView::class).openModal()
+                    logger.debug { "Zeiterfassing now" }
                 }
             }
             button("Einstellungen") {
@@ -70,16 +74,16 @@ class MainView : View() {
                     isClosable = false
                     borderpane {
                         top = label("Summe (ohne Excel-Korrektur): 50") {
-                            padding = Insets(10.0)
+                            paddingAll = 10.0
                             bind(controller.excelSummarySumProperty())
                         }
                         center = borderpane {
                             center = hbox {
                                 prefWidth  = 500.0
                                 borderpane {
-                                    padding = Insets(10.0)
+                                    paddingAll = 10.0
                                     top = label("Tag") {
-                                        padding = Insets(10.0)
+                                        paddingAll = 10.0
                                     }
                                     center = textarea {
                                         isEditable = false
@@ -87,9 +91,9 @@ class MainView : View() {
                                     }
                                 }
                                 borderpane {
-                                    padding = Insets(10.0)
+                                    paddingAll = 10.0
                                     top = label("Uhrzeit") {
-                                        padding = Insets(10.0)
+                                        paddingAll = 10.0
                                     }
                                     center = textarea {
                                         isEditable = false
@@ -97,9 +101,9 @@ class MainView : View() {
                                     }
                                 }
                                 borderpane {
-                                    padding = Insets(10.0)
+                                    paddingAll = 10.0
                                     top = label("Beschreibung") {
-                                        padding = Insets(10.0)
+                                        paddingAll = 10.0
                                     }
                                     center = textarea {
                                         isEditable = false
@@ -164,7 +168,7 @@ class MainView : View() {
         }
         right = vbox {
             spacing = 10.0
-            padding = Insets(10.0)
+            paddingAll = 10.0
             this += LocalDatePicker().apply {
                 prefWidth = 250.0
                 allowNull = false

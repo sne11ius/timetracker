@@ -5,8 +5,9 @@ import tornadofx.property
 
 class Preferences(
         baseDir: String = System.getProperty("user.home"),
-        sapUsername: String = "",
-        sapPassword: String = "",
+        bmzefUsername: String = "",
+        bmzefPassword: String = "",
+        bmzefUrl: String = "",
         breakIndicators: String = "",
         travelIndicators: String = "",
         travelMultiplier: Number = 1.0f,
@@ -16,11 +17,14 @@ class Preferences(
     var baseDir: String by property(baseDir)
     fun baseDirProperty() = getProperty(Preferences::baseDir)
 
-    var sapUsername: String by property(sapUsername)
-    fun sapUsernameProperty() = getProperty(Preferences::sapUsername)
+    var bmzefUsername: String by property(bmzefUsername)
+    fun bmzefUsernameProperty() = getProperty(Preferences::bmzefUsername)
 
-    var sapPassword: String by property(sapPassword)
-    fun sapPasswordProperty() = getProperty(Preferences::sapPassword)
+    var bmzefPassword: String by property(bmzefPassword)
+    fun bmzefPasswordProperty() = getProperty(Preferences::bmzefPassword)
+
+    var bmzefUrl: String by property(bmzefUrl)
+    fun bmzefUrlProperty() = getProperty(Preferences::bmzefUrl)
 
     var breakIndicators: String by property(breakIndicators)
     fun breakIndicatorsProperty() = getProperty(Preferences::breakIndicators)
