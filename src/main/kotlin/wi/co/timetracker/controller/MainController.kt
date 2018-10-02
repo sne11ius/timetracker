@@ -89,7 +89,7 @@ class MainController(
                 val m = currentMonth
                 if (null != m) {
                     val (date, time, description, sum) = with(preferencesController) {
-                        m.getExcelSummary(new, getBreakIndicators(), getTravelIndicators(), getTravelMultiplier(), getExcelCorrection())
+                        m.getExcelSummary(new, breakIndicators, travelIndicators, travelMultiplier, excelCorrection)
                     }
                     this.excelSummaryDate = date
                     this.excelSummaryTime = time
@@ -106,7 +106,7 @@ class MainController(
     }
 
     fun autoFixFiles() {
-        val baseDir = preferencesController.getBaseDir()
+        val baseDir = preferencesController.baseDir
         val (changed, total) = fileLoader.autoFixFiles(baseDir)
         confirm("Änderungen durchführen?", "$changed von $total Dateien in $baseDir werden angepasst.\nMöchtest du das wirklich?", actionFn = {
             fileLoader.autoFixFiles(baseDir, false)
@@ -116,17 +116,17 @@ class MainController(
 
     private fun reload(date: LocalDate) {
         with (preferencesController) {
-            readDay(date, getBreakIndicators(), getTravelIndicators(), getTravelMultiplier())
-            readWeek(date, getBreakIndicators(), getTravelIndicators(), getTravelMultiplier())
-            readMonth(date, getBreakIndicators(), getTravelIndicators(), getTravelMultiplier())
+            readDay(date, breakIndicators, travelIndicators, travelMultiplier)
+            readWeek(date, breakIndicators, travelIndicators, travelMultiplier)
+            readMonth(date, breakIndicators, travelIndicators, travelMultiplier)
         }
     }
 
     private fun readMonth(anyDayInMonth: LocalDate, breakIndicators: List<String>, travelIndicators: List<String>, travelMultiplier: Float) {
-        val month = fileLoader.loadMonth(anyDayInMonth, preferencesController.getBaseDir())
+        val month = fileLoader.loadMonth(anyDayInMonth, preferencesController.baseDir)
         val oldSelection = currentExcelSummaryProject
         projectsInMonth.clear()
-        projectsInMonth.addAll(month.projectNames(preferencesController.getBreakIndicators()))
+        projectsInMonth.addAll(month.projectNames(preferencesController.breakIndicators))
         if (projectsInMonth.contains(oldSelection)) {
             currentExcelSummaryProject = oldSelection
         }
@@ -139,7 +139,7 @@ class MainController(
 
     fun readDatesWithErrors() {
         daysWithErrors.clear()
-        daysWithErrors += preferencesController.getBaseDir().walkTopDown()
+        daysWithErrors += preferencesController.baseDir.walkTopDown()
                 .filter { it.isFile }
                 .filter {it.nameWithoutExtension.contains("Zeiten ")}
                 .map { fileLoader.loadDay(it) }
@@ -160,13 +160,13 @@ class MainController(
     }
 
     private fun readWeek(anyDayInWeek: LocalDate, breakIndicators: List<String>, travelIndicators: List<String>, travelMultiplier: Float) {
-        val week = fileLoader.loadWeek(anyDayInWeek, preferencesController.getBaseDir())
+        val week = fileLoader.loadWeek(anyDayInWeek, preferencesController.baseDir)
         val diff = week.workDurationDifference(breakIndicators, travelIndicators, travelMultiplier)
         weekPart = with(week) { mkShortSummary("Woche", expectedWorkDuration(), actualWorkDuration(breakIndicators, travelIndicators, travelMultiplier), diff) }
     }
 
     private fun readDay(day: LocalDate, breakIndicators: List<String>, travelIndicators: List<String>, travelMultiplier: Float) {
-        val parseResult = fileLoader.loadDay(day, preferencesController.getBaseDir())
+        val parseResult = fileLoader.loadDay(day, preferencesController.baseDir)
         lineNumbers = if (parseResult.file.exists()) {
             (1..parseResult.file.readLines().size).fold("") { str, index ->
                 "$str$index\n"

@@ -1,6 +1,6 @@
 package wi.co.timetracker.controller
 
-import tornadofx.Controller
+import tornadofx.*
 import wi.co.timetracker.extensions.toFile
 import wi.co.timetracker.model.Preferences
 import java.io.File
@@ -42,19 +42,20 @@ class PreferencesController : Controller() {
         prefsUpdateListener = listener
     }
 
-    fun getBreakIndicators(): List<String> = splitItems(preferences.breakIndicators)
+    val breakIndicators: List<String> = splitItems(preferences.breakIndicators)
 
-    fun getTravelIndicators(): List<String> = splitItems(preferences.travelIndicators)
+    val travelIndicators: List<String> = splitItems(preferences.travelIndicators)
 
-    fun getTravelMultiplier(): Float {
-        return preferences.travelMultiplier.toFloat()
-    }
+    val travelMultiplier: Float = preferences.travelMultiplier.toFloat()
 
-    fun getExcelCorrection(): Duration {
-        return Duration.ofMinutes(preferences.excelCorrection.toFloat().toLong())
-    }
+    val excelCorrection: Duration = Duration.ofMinutes(preferences.excelCorrection.toFloat().toLong())
 
-    fun getBaseDir(): File = preferences.baseDir.toFile()
+    val baseDir: File = preferences.baseDir.toFile()
+
+    val baseUrl: String = if (preferences.bmzefUrl.endsWith("jsp/Default.jsp"))
+        preferences.bmzefUrl
+    else
+        preferences.bmzefUrl.removeSuffix("/") + "/jsp/Default.jsp"
 
     private fun splitItems(pref: String): List<String> {
         return pref.split(",").map { it.trim() }.filter { it.isNotBlank() }

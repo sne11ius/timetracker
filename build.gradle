@@ -39,6 +39,9 @@ dependencies {
     compile "org.apache.commons:commons-lang3:3.8.1"
     compile "com.fasterxml.jackson.core:jackson-core:$jackson_version"
     compile "com.github.h0tk3y.betterParse:better-parse:0.3.5"
+    compile "io.github.bonigarcia:webdrivermanager:3.0.0"
+    compile "org.seleniumhq.selenium:selenium-support:3.14.0"
+    compile "org.seleniumhq.selenium:selenium-chrome-driver:3.14.0"
 
     // Logging ftw!!!
     compile "io.github.microutils:kotlin-logging:1.6.10"
