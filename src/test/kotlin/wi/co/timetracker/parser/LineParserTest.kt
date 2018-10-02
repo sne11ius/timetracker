@@ -3,7 +3,7 @@ package wi.co.timetracker.parser
 import com.github.h0tk3y.betterParse.grammar.parseToEnd
 import io.kotlintest.matchers.shouldBe
 import io.kotlintest.specs.StringSpec
-import wi.co.timetracker.model.EntryModel
+import wi.co.timetracker.model.entry.EntryModel
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
 

@@ -4,7 +4,7 @@ import javafx.scene.chart.PieChart
 import tornadofx.*
 import wi.co.timetracker.extensions.*
 import wi.co.timetracker.model.MainModel
-import wi.co.timetracker.model.MonthModel
+import wi.co.timetracker.model.entry.MonthModel
 import wi.co.timetracker.service.FileLoader
 import java.time.Duration
 import java.time.LocalDate

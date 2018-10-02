@@ -1,4 +1,4 @@
-package wi.co.timetracker.model
+package wi.co.timetracker.model.entry
 
 import java.time.Duration
 

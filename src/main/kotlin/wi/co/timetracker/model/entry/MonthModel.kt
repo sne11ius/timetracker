@@ -1,7 +1,8 @@
-package wi.co.timetracker.model
+package wi.co.timetracker.model.entry
 
 import wi.co.timetracker.extensions.getExpectedWorkDuration
 import wi.co.timetracker.extensions.isWorkDay
+import wi.co.timetracker.model.summary.ExcelSummary
 import java.time.Duration
 import java.time.LocalDate
 

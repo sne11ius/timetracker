@@ -1,4 +1,4 @@
-package wi.co.timetracker.model
+package wi.co.timetracker.model.summary
 
 import wi.co.timetracker.extensions.format
 import wi.co.timetracker.extensions.formatDefault

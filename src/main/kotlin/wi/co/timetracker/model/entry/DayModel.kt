@@ -1,5 +1,7 @@
-package wi.co.timetracker.model
+package wi.co.timetracker.model.entry
 
+import wi.co.timetracker.model.summary.DaySummaryModel
+import wi.co.timetracker.model.summary.EntrySummaryModel
 import java.time.Duration
 import java.time.LocalDate
 

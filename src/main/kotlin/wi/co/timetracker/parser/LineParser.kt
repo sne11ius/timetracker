@@ -6,9 +6,9 @@ import com.github.h0tk3y.betterParse.grammar.tryParseToEnd
 import com.github.h0tk3y.betterParse.parser.ErrorResult
 import com.github.h0tk3y.betterParse.parser.Parsed
 import org.springframework.stereotype.Component
-import wi.co.timetracker.model.EntryModel
-import wi.co.timetracker.model.ParseError
-import wi.co.timetracker.model.Severity
+import wi.co.timetracker.model.entry.EntryModel
+import wi.co.timetracker.model.parser.ParseError
+import wi.co.timetracker.model.parser.Severity
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime

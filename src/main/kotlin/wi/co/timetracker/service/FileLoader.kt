@@ -4,7 +4,14 @@ import mu.KotlinLogging
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import wi.co.timetracker.extensions.isWorkDay
-import wi.co.timetracker.model.*
+import wi.co.timetracker.model.entry.DayModel
+import wi.co.timetracker.model.entry.EntryModel
+import wi.co.timetracker.model.entry.MonthModel
+import wi.co.timetracker.model.entry.WeekModel
+import wi.co.timetracker.model.parser.ParseError
+import wi.co.timetracker.model.parser.ParseResult
+import wi.co.timetracker.model.parser.Severity
+import wi.co.timetracker.model.parser.info
 import wi.co.timetracker.parser.LineParser
 import java.io.File
 import java.io.File.separator
