@@ -1,89 +1,95 @@
 package wi.co.timetracker.controller
 
+import jdk.nashorn.internal.runtime.regexp.joni.SearchAlgorithm.BM
+import org.springframework.stereotype.Component
 import tornadofx.*
 import wi.co.timetracker.extensions.toFile
 import wi.co.timetracker.model.Preferences
 import java.io.File
 import java.time.Duration
 
-
 class PreferencesController : Controller() {
 
-    interface OnPreferencesUpdatedListener {
-        fun onPreferencesUpdated()
+  interface OnPreferencesUpdatedListener {
+    fun onPreferencesUpdated()
+  }
+
+  val preferences = Preferences()
+
+  private var prefsUpdateListener: OnPreferencesUpdatedListener? = null
+
+  init {
+    resetPreferences()
+  }
+
+  fun discard() {
+    resetPreferences()
+  }
+
+  fun save() {
+    preferences(PREFS_NAME) {
+      put(BASE_DIR, preferences.baseDir)
+      put(BMZEF_USERNAME, preferences.bmzefUsername)
+      put(BMZEF_PASSWORD, preferences.bmzefPassword)
+      put(BMZEF_URL, preferences.bmzefUrl)
+      put(BREAK_INDICATORS, preferences.breakIndicators)
+      put(TRAVEL_INDICATORS, preferences.travelIndicators)
+      put(TRAVEL_MULTIPLIER, preferences.travelMultiplier.toString())
+      put(EXCEL_CORRECTION, preferences.excelCorrection.toString())
     }
+    prefsUpdateListener?.onPreferencesUpdated()
+  }
 
-    val preferences = Preferences()
+  fun setOnPreferencesUpdatedListener(listener: OnPreferencesUpdatedListener?) {
+    prefsUpdateListener = listener
+  }
 
-    private var prefsUpdateListener: OnPreferencesUpdatedListener? = null
+  val breakIndicators: List<String> = splitItems(preferences.breakIndicators)
 
-    init {
-        resetPreferences()
+  val travelIndicators: List<String> = splitItems(preferences.travelIndicators)
+
+  val travelMultiplier: Float = preferences.travelMultiplier.toFloat()
+
+  val excelCorrection: Duration = Duration.ofMinutes(preferences.excelCorrection.toFloat().toLong())
+
+  val baseDir: File = preferences.baseDir.toFile()
+
+  val bmzefUsername: String = preferences.bmzefUsername
+
+  val bmzefPassword: String = preferences.bmzefPassword
+
+  val bmzefBaseUrl: String = if (preferences.bmzefUrl.endsWith("jsp/Default.jsp"))
+    preferences.bmzefUrl
+  else
+    preferences.bmzefUrl.removeSuffix("/") + "/jsp/Default.jsp"
+
+  private fun splitItems(pref: String): List<String> {
+    return pref.split(",").map { it.trim() }.filter { it.isNotBlank() }
+  }
+
+  private fun resetPreferences() {
+    preferences(PREFS_NAME) {
+      preferences.baseDir = get(BASE_DIR, System.getProperty("user.home"))
+      preferences.bmzefUsername = get(BMZEF_USERNAME, "")
+      preferences.bmzefPassword = get(BMZEF_PASSWORD, "")
+      preferences.bmzefUrl = get(BMZEF_URL, "")
+      preferences.breakIndicators = get(BREAK_INDICATORS, "")
+      preferences.travelIndicators = get(TRAVEL_INDICATORS, "")
+      preferences.travelMultiplier = get(TRAVEL_MULTIPLIER, "1.0").toFloat()
+      preferences.excelCorrection = get(EXCEL_CORRECTION, "50.0").toFloat()
     }
+  }
 
-    fun discard() {
-        resetPreferences()
-    }
-
-    fun save() {
-        preferences(PREFS_NAME) {
-            put(BASE_DIR, preferences.baseDir)
-            put(BMZEF_USERNAME, preferences.bmzefUsername)
-            put(BMZEF_PASSWORD, preferences.bmzefPassword)
-            put(BREAK_INDICATORS, preferences.breakIndicators)
-            put(TRAVEL_INDICATORS, preferences.travelIndicators)
-            put(TRAVEL_MULTIPLIER, preferences.travelMultiplier.toString())
-            put(EXCEL_CORRECTION, preferences.excelCorrection.toString())
-        }
-        prefsUpdateListener?.onPreferencesUpdated()
-    }
-
-    fun setOnPreferencesUpdatedListener(listener: OnPreferencesUpdatedListener?) {
-        prefsUpdateListener = listener
-    }
-
-    val breakIndicators: List<String> = splitItems(preferences.breakIndicators)
-
-    val travelIndicators: List<String> = splitItems(preferences.travelIndicators)
-
-    val travelMultiplier: Float = preferences.travelMultiplier.toFloat()
-
-    val excelCorrection: Duration = Duration.ofMinutes(preferences.excelCorrection.toFloat().toLong())
-
-    val baseDir: File = preferences.baseDir.toFile()
-
-    val baseUrl: String = if (preferences.bmzefUrl.endsWith("jsp/Default.jsp"))
-        preferences.bmzefUrl
-    else
-        preferences.bmzefUrl.removeSuffix("/") + "/jsp/Default.jsp"
-
-    private fun splitItems(pref: String): List<String> {
-        return pref.split(",").map { it.trim() }.filter { it.isNotBlank() }
-    }
-
-    private fun resetPreferences() {
-        preferences(PREFS_NAME) {
-            preferences.baseDir = get(BASE_DIR, System.getProperty("user.home"))
-            preferences.bmzefUsername = get(BMZEF_USERNAME, "")
-            preferences.bmzefPassword = get(BMZEF_PASSWORD, "")
-            preferences.bmzefUrl = get(BMZEF_URL, "")
-            preferences.breakIndicators = get(BREAK_INDICATORS, "")
-            preferences.travelIndicators = get(TRAVEL_INDICATORS, "")
-            preferences.travelMultiplier = get(TRAVEL_MULTIPLIER, "1.0").toFloat()
-            preferences.excelCorrection = get(EXCEL_CORRECTION, "50.0").toFloat()
-        }
-    }
-
-    companion object {
-        const val PREFS_NAME = "timetracker"
-        const val BASE_DIR = "baseDir"
-        const val BMZEF_USERNAME = "bmzefUsername"
-        const val BMZEF_PASSWORD = "bmzefPassword"
-        const val BMZEF_URL = "bmzefUrl"
-        const val BREAK_INDICATORS = "breakIndicators"
-        const val TRAVEL_INDICATORS = "travelIndicators"
-        const val TRAVEL_MULTIPLIER = "travelMultiplier"
-        const val EXCEL_CORRECTION = "excelCorrection"
-    }
+  companion object {
+    const val PREFS_NAME = "timetracker"
+    const val BASE_DIR = "baseDir"
+    const val BMZEF_USERNAME = "bmzefUsername"
+    const val BMZEF_PASSWORD = "bmzefPassword"
+    const val BMZEF_URL = "bmzefUrl"
+    const val BREAK_INDICATORS = "breakIndicators"
+    const val TRAVEL_INDICATORS = "travelIndicators"
+    const val TRAVEL_MULTIPLIER = "travelMultiplier"
+    const val EXCEL_CORRECTION = "excelCorrection"
+  }
 
 }
