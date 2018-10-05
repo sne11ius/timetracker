@@ -1,14 +1,14 @@
 package wi.co.timetracker.controller
 
 import javafx.scene.chart.PieChart
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.stereotype.Component
 import tornadofx.*
 import wi.co.timetracker.extensions.*
 import wi.co.timetracker.model.MainModel
 import wi.co.timetracker.model.entry.MonthModel
-import wi.co.timetracker.service.BmzefService
+import wi.co.timetracker.service.mbzef.BmzefService
 import wi.co.timetracker.service.FileLoader
+import wi.co.timetracker.service.mapper
+import java.io.File
 import java.time.Duration
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -121,6 +121,8 @@ class MainController(
 
   fun runTimeTracking() {
     val availableEnterprises = bmzefService.readAvailableEnterprises()
+    val enterprisesCacheFile = File(preferencesController.baseDir, ".timetracker.projectcache.json")
+    mapper.writeValue(enterprisesCacheFile, availableEnterprises)
   }
 
   private fun reload(date: LocalDate) {

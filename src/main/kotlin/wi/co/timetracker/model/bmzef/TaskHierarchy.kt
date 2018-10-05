@@ -21,3 +21,10 @@ data class Enterprise(
   val title: String,
   val contracts: List<Contract>
 )
+
+data class ActivityPath(
+  val enterprise: String,
+  val contract: String? = null,
+  val kind: String? = null,
+  val activity: String? = null
+)
