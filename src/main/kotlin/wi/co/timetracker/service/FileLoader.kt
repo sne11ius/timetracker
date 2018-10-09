@@ -101,7 +101,7 @@ class FileLoader {
         var changedFiles = 0
         baseDir.walkTopDown()
                 .filter { it.isFile }
-                .filter {it.nameWithoutExtension.contains("Zeiten ")}
+                .filter { it.nameWithoutExtension.contains("Zeiten ") }
                 .forEach { file ->
                     ++totalFiles
                     @Suppress("SimplifiableCallChain")

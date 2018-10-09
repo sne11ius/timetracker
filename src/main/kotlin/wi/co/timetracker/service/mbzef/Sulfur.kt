@@ -10,9 +10,9 @@ data class WrappedElement(
   val sel: String,
   val preferredFrames: List<String>? = null
 ) {
-  val options: List<OptionElement>
+  val options: Set<OptionElement>
     get() {
-      return els(sel + " option").map { OptionElement(d, sel, it.text, preferredFrames) }
+      return els(sel + " option").map { OptionElement(d, sel, it.text, preferredFrames) }.toSet()
     }
 
   operator fun plusAssign(text: String) {

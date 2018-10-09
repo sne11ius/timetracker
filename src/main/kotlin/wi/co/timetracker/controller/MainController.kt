@@ -1,14 +1,17 @@
 package wi.co.timetracker.controller
 
 import javafx.scene.chart.PieChart
+import javafx.scene.control.Alert
+import mu.KotlinLogging
 import tornadofx.*
 import wi.co.timetracker.extensions.*
 import wi.co.timetracker.model.MainModel
 import wi.co.timetracker.model.entry.MonthModel
-import wi.co.timetracker.service.mbzef.BmzefService
+import wi.co.timetracker.model.parser.hasErrors
+import wi.co.timetracker.model.summary.DaySummaryModel
 import wi.co.timetracker.service.FileLoader
-import wi.co.timetracker.service.mapper
-import java.io.File
+import wi.co.timetracker.service.mbzef.BmzefService
+import wi.co.timetracker.view.BmzefWizard
 import java.time.Duration
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -25,6 +28,7 @@ class MainController(
   excelSummaryDescription: String = "",
   excelSummarySum: String = ""
 ) : Controller() {
+  private val logger = KotlinLogging.logger {}
 
   private val fileLoader: FileLoader by di()
 
@@ -120,9 +124,55 @@ class MainController(
   }
 
   fun runTimeTracking() {
-    val availableEnterprises = bmzefService.readAvailableEnterprises()
-    val enterprisesCacheFile = File(preferencesController.baseDir, ".timetracker.projectcache.json")
-    mapper.writeValue(enterprisesCacheFile, availableEnterprises)
+    /*
+    bmzefWizardModel.beginDate.value = LocalDate.now().minusDays(1)
+    bmzefWizardModel.endDate.value = LocalDate.now()
+    //bmzefWizardModel.entryTexts.value = mutableListOf()
+    bmzefWizardModel.projectMapping.value = BmzefService.ProjectMapping()
+    */
+    find<BmzefWizard> {
+      /*
+      onComplete {
+        logger.debug { "Trying to bmzef!" }
+        logger.debug { "From ${bmzefWizardModel.beginDate}" }
+        logger.debug { "To ${bmzefWizardModel.endDate}" }
+        if (bmzefWizardModel.beginDate.value.isAfter(bmzefWizardModel.endDate.value)) {
+          val end = bmzefWizardModel.endDate.value
+          bmzefWizardModel.endDate.value = bmzefWizardModel.beginDate.value
+          bmzefWizardModel.beginDate.value = end
+        }
+        val begin = bmzefWizardModel.beginDate.value
+        val end = bmzefWizardModel.endDate.value
+        var currentDay = begin
+        val models = mutableListOf<DaySummaryModel>()
+        while (currentDay != end.plusDays(1)) {
+          val (_, errors, entry) = fileLoader.loadDay(currentDay, preferencesController.baseDir)
+          if (errors.hasErrors) {
+            Alert(Alert.AlertType.ERROR, "Datei für $currentDay ist leider kaputt.").showAndWait()
+            throw RuntimeException()
+          }
+          if (entry != null) {
+            models += with (preferencesController) {
+              entry.toDaySummaryModel(
+                breakIndicators,
+                travelIndicators,
+                travelMultiplier
+              )
+            }
+          }
+          currentDay = currentDay.plusDays(1)
+        }
+        val allEntries = models.flatMap { it.entries }.map { it.text }.toSet()
+        val entryMapping = bmzefService.loadMapping(allEntries)
+        if (entryMapping.isIncomplete) {
+          logger.debug { "Mapping is incomplete: $entryMapping" }
+        } else {
+          logger.debug { "Mapping is complete: $entryMapping" }
+        }
+      }
+      */
+      openModal()
+    }
   }
 
   private fun reload(date: LocalDate) {
