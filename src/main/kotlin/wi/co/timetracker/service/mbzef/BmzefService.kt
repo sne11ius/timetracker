@@ -26,12 +26,12 @@ class BmzefService: Controller() {
 
   fun readAvailableEnterprises(forceUpdate: Boolean = false): Set<ActivityPathPart.Enterprise> {
     val enterprisesCacheFile = File(preferencesController.baseDir, ".timetracker.projectcache.json")
-    if (forceUpdate || !enterprisesCacheFile.exists()) {
+    return if (forceUpdate || !enterprisesCacheFile.exists()) {
       val availableEnterprises = readEnterprisesFromWeb()
       mapper.writeValue(enterprisesCacheFile, availableEnterprises)
-      return availableEnterprises
+      availableEnterprises
     } else
-      return mapper.readValue(enterprisesCacheFile)
+      mapper.readValue(enterprisesCacheFile)
   }
 
   data class ProjectMapping(

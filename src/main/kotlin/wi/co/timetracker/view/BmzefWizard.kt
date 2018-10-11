@@ -21,6 +21,7 @@ import wi.co.timetracker.service.mbzef.BmzefService
 import java.time.LocalDate
 
 class BmzefWizardData(
+  projectMapping: BmzefService.ProjectMapping = BmzefService.ProjectMapping(),
   beginDate: LocalDate = LocalDate.now().minusDays(1),
   endDate: LocalDate = LocalDate.now(),
   enterpriseTitles: List<String> = emptyList(),
@@ -34,6 +35,8 @@ class BmzefWizardData(
   selectedKind: String? = null,
   selectedActivity: String? = null
 ) {
+  var projectMapping: BmzefService.ProjectMapping by property(projectMapping)
+
   var beginDate: LocalDate by property(beginDate)
   fun beginDateProperty() = getProperty(BmzefWizardData::beginDate)
 
@@ -216,29 +219,29 @@ class BmzefWizard: Wizard("Bmzef all the things!") {
 
   private val String.checked
     get() = if (!this.endsWith(" ✔"))
-              "$this ✔"
-            else this
+      "$this ✔"
+    else this
 
   private val String.isChecked
     get() = this.endsWith(" ✔")
 
   private val String.unchecked
     get() = if (this.endsWith(" ✔"))
-              this.removeSuffix(" ✔")
-            else this
+      this.removeSuffix(" ✔")
+    else this
 
   private val String.isUnchecked
     get() = !this.isChecked
 
   private fun selectionChanged() {
     logger.debug { "Selected entry text: ${model.selectedEntryText}" }
-    val selectedPath: ActivityPath = with (model) {
+    val selectedPath: ActivityPath = with(model) {
       ActivityPath.Path(selectedEnterprise, selectedContract, selectedKind, selectedActivity)
     }
     logger.debug { selectedPath }
-    if (service.isValid(selectedPath)) {
-      logger.debug { "Path seems valid." }
-      if (model.selectedEntryText != null) {
+    if (model.selectedEntryText != null) {
+      if (service.isValid(selectedPath)) {
+        logger.debug { "Path seems valid." }
         if (model.selectedEntryText.isUnchecked) {
           val newEntryText = model.selectedEntryText.checked
           model.entryTexts.remove(model.selectedEntryText)
@@ -247,10 +250,14 @@ class BmzefWizard: Wizard("Bmzef all the things!") {
           model.selectedEntryText = newEntryText
           entriesListView!!.selectionModel.select(newEntryText)
         }
-      }
-    } else {
-      logger.debug { "Path is not valid." }
-      if (model.selectedEntryText != null) {
+        model.projectMapping = model.projectMapping.run {
+          copy(
+            mappedEntries = mappedEntries.filter { it.entryText != model.selectedEntryText.unchecked }.toSet() + BmzefService.EntryMapping(model.selectedEntryText.unchecked, selectedPath),
+            unmappedEntries = unmappedEntries - model.selectedEntryText.unchecked
+          )
+        }
+      } else {
+        logger.debug { "Path is not valid." }
         if (model.selectedEntryText.isChecked) {
           val newEntryText = model.selectedEntryText.unchecked
           model.entryTexts.remove(model.selectedEntryText)
@@ -259,7 +266,14 @@ class BmzefWizard: Wizard("Bmzef all the things!") {
           model.selectedEntryText = newEntryText
           entriesListView!!.selectionModel.select(newEntryText)
         }
+        model.projectMapping = model.projectMapping.run {
+          copy(
+            mappedEntries = mappedEntries.filter { it.entryText != model.selectedEntryText }.toSet(),
+            unmappedEntries = unmappedEntries + model.selectedEntryText
+          )
+        }
       }
+      logger.debug { model.projectMapping }
     }
   }
 
