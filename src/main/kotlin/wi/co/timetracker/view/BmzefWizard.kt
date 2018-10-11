@@ -4,6 +4,11 @@ import javafx.beans.binding.Bindings
 import javafx.collections.FXCollections
 import javafx.collections.ObservableList
 import javafx.scene.control.Alert
+import javafx.scene.control.ListView
+import javafx.scene.layout.Background
+import javafx.scene.layout.BackgroundFill
+import javafx.scene.paint.Color
+import javafx.scene.paint.Paint
 import jfxtras.scene.control.LocalDatePicker
 import mu.KotlinLogging
 import tornadofx.*
@@ -127,16 +132,22 @@ class SelectDateRange: View("Zeitraum wählen") {
   }
 }
 
+var entriesListView: ListView<String>? = null
+
 class CheckAssignments: View("Zuordnungen Prüfen") {
   override val root = borderpane {
-    // padding = tornadofx.insets(10)
-    top = label("Bitte ordne jeder von dir selbst aufgezeichneten Tätigkeit eine Tätigkeit aus der bmzef zu.") {
-      padding = tornadofx.insets(5)
+    prefWidth = 800.0
+    top = borderpane {
+      left = label("Bitte ordne jeder von dir selbst aufgezeichneten Tätigkeit eine Tätigkeit aus der bmzef zu.\nFalls du einen Eintrag aus dem bmzef vermisst oder diese Funktion zum ersten mal verwendest, klicke auf 'bmzef-Projekte aktualisieren'") {
+        padding = tornadofx.insets(5)
+      }
+      right = button("bmzef-Projekte aktualisieren")
     }
     center = hbox {
       vbox {
         label("Eigener Name")
-        listview(model.entryTexts).bindSelected(model.selectedEntryTextProperty())
+        entriesListView = listview(model.entryTexts)
+        entriesListView!!.bindSelected(model.selectedEntryTextProperty())
       }
       vbox {
         label("Vorhaben")
@@ -174,6 +185,7 @@ class BmzefWizard: Wizard("Bmzef all the things!") {
       model.contractTitles.setAll(enterprise.contracts.map { it.title }.sorted())
       model.kindTitles.clear()
       model.activityTitles.clear()
+      selectionChanged()
     }
     model.selectedContractProperty().onChange { newContract ->
       if (newContract != null) {
@@ -182,28 +194,72 @@ class BmzefWizard: Wizard("Bmzef all the things!") {
         model.kindTitles.setAll(contract.kinds.map { it.title }.sorted())
         model.activityTitles.clear()
       }
+      selectionChanged()
     }
-    /*
-    with (model) {
-      listOf(
-        selectedEnterpriseProperty(),
-        selectedContractProperty(),
-        selectedKindProperty(),
-        selectedActivityProperty()
-      ).forEach { it.onChange { _ -> selectionChanged() } }
+    model.selectedKindProperty().onChange { newKind ->
+      if (newKind != null) {
+        val enterprise = enterprises.first { it.title == model.selectedEnterprise }
+        val contract = enterprise.contracts.first { it.title == model.selectedContract }
+        val kind = contract.kinds.first { it.title == newKind }
+        model.activityTitles.setAll(kind.activities.map { it.title }.sorted())
+      }
+      selectionChanged()
     }
-    */
+    model.selectedActivityProperty().onChange { _ ->
+      selectionChanged()
+    }
+
+    model.selectedEntryTextProperty().onChange { newValue ->
+      logger.debug { "Selected text: $newValue" }
+    }
   }
 
+  private val String.checked
+    get() = if (!this.endsWith(" ✔"))
+              "$this ✔"
+            else this
+
+  private val String.isChecked
+    get() = this.endsWith(" ✔")
+
+  private val String.unchecked
+    get() = if (this.endsWith(" ✔"))
+              this.removeSuffix(" ✔")
+            else this
+
+  private val String.isUnchecked
+    get() = !this.isChecked
+
   private fun selectionChanged() {
+    logger.debug { "Selected entry text: ${model.selectedEntryText}" }
     val selectedPath: ActivityPath = with (model) {
       ActivityPath.Path(selectedEnterprise, selectedContract, selectedKind, selectedActivity)
     }
     logger.debug { selectedPath }
     if (service.isValid(selectedPath)) {
       logger.debug { "Path seems valid." }
+      if (model.selectedEntryText != null) {
+        if (model.selectedEntryText.isUnchecked) {
+          val newEntryText = model.selectedEntryText.checked
+          model.entryTexts.remove(model.selectedEntryText)
+          model.entryTexts.add(newEntryText)
+          model.entryTexts.sort()
+          model.selectedEntryText = newEntryText
+          entriesListView!!.selectionModel.select(newEntryText)
+        }
+      }
     } else {
       logger.debug { "Path is not valid." }
+      if (model.selectedEntryText != null) {
+        if (model.selectedEntryText.isChecked) {
+          val newEntryText = model.selectedEntryText.unchecked
+          model.entryTexts.remove(model.selectedEntryText)
+          model.entryTexts.add(newEntryText)
+          model.entryTexts.sort()
+          model.selectedEntryText = newEntryText
+          entriesListView!!.selectionModel.select(newEntryText)
+        }
+      }
     }
   }
 
