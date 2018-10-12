@@ -1,14 +1,15 @@
 package wi.co.timetracker.controller
 
 import javafx.scene.chart.PieChart
-import javafx.scene.control.Alert
 import mu.KotlinLogging
 import tornadofx.*
-import wi.co.timetracker.extensions.*
+import wi.co.timetracker.extensions.existsAndBlank
+import wi.co.timetracker.extensions.formatDecimal
+import wi.co.timetracker.extensions.formatDefault
+import wi.co.timetracker.extensions.isWeekend
+import wi.co.timetracker.extensions.toDouble
 import wi.co.timetracker.model.MainModel
 import wi.co.timetracker.model.entry.MonthModel
-import wi.co.timetracker.model.parser.hasErrors
-import wi.co.timetracker.model.summary.DaySummaryModel
 import wi.co.timetracker.service.FileLoader
 import wi.co.timetracker.service.mbzef.BmzefService
 import wi.co.timetracker.view.BmzefWizard
@@ -130,8 +131,9 @@ class MainController(
     model.beginDate = LocalDate.now().minusDays(1)
     model.endDate = LocalDate.now()
     model.projectMapping = BmzefService.ProjectMapping()
-    val wizard = find<BmzefWizard>()
-    wizard.openModal()
+    find<BmzefWizard>() {
+      openModal()
+    }
   }
 
   private fun reload(date: LocalDate) {
