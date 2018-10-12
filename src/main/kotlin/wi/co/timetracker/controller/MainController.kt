@@ -12,6 +12,7 @@ import wi.co.timetracker.model.summary.DaySummaryModel
 import wi.co.timetracker.service.FileLoader
 import wi.co.timetracker.service.mbzef.BmzefService
 import wi.co.timetracker.view.BmzefWizard
+import wi.co.timetracker.view.BmzefWizardData
 import java.time.Duration
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -35,6 +36,8 @@ class MainController(
   private val preferencesController: PreferencesController by inject()
 
   private val bmzefService: BmzefService by inject()
+
+  private val model: BmzefWizardData by inject()
 
   val mainModel = MainModel()
 
@@ -124,55 +127,11 @@ class MainController(
   }
 
   fun runTimeTracking() {
-    /*
-    bmzefWizardModel.beginDate.value = LocalDate.now().minusDays(1)
-    bmzefWizardModel.endDate.value = LocalDate.now()
-    //bmzefWizardModel.entryTexts.value = mutableListOf()
-    bmzefWizardModel.projectMapping.value = BmzefService.ProjectMapping()
-    */
-    find<BmzefWizard> {
-      /*
-      onComplete {
-        logger.debug { "Trying to bmzef!" }
-        logger.debug { "From ${bmzefWizardModel.beginDate}" }
-        logger.debug { "To ${bmzefWizardModel.endDate}" }
-        if (bmzefWizardModel.beginDate.value.isAfter(bmzefWizardModel.endDate.value)) {
-          val end = bmzefWizardModel.endDate.value
-          bmzefWizardModel.endDate.value = bmzefWizardModel.beginDate.value
-          bmzefWizardModel.beginDate.value = end
-        }
-        val begin = bmzefWizardModel.beginDate.value
-        val end = bmzefWizardModel.endDate.value
-        var currentDay = begin
-        val models = mutableListOf<DaySummaryModel>()
-        while (currentDay != end.plusDays(1)) {
-          val (_, errors, entry) = fileLoader.loadDay(currentDay, preferencesController.baseDir)
-          if (errors.hasErrors) {
-            Alert(Alert.AlertType.ERROR, "Datei für $currentDay ist leider kaputt.").showAndWait()
-            throw RuntimeException()
-          }
-          if (entry != null) {
-            models += with (preferencesController) {
-              entry.toDaySummaryModel(
-                breakIndicators,
-                travelIndicators,
-                travelMultiplier
-              )
-            }
-          }
-          currentDay = currentDay.plusDays(1)
-        }
-        val allEntries = models.flatMap { it.entries }.map { it.text }.toSet()
-        val entryMapping = bmzefService.loadMapping(allEntries)
-        if (entryMapping.isIncomplete) {
-          logger.debug { "Mapping is incomplete: $entryMapping" }
-        } else {
-          logger.debug { "Mapping is complete: $entryMapping" }
-        }
-      }
-      */
-      openModal()
-    }
+    model.beginDate = LocalDate.now().minusDays(1)
+    model.endDate = LocalDate.now()
+    model.projectMapping = BmzefService.ProjectMapping()
+    val wizard = find<BmzefWizard>()
+    wizard.openModal()
   }
 
   private fun reload(date: LocalDate) {

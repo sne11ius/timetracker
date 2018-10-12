@@ -5,10 +5,6 @@ import javafx.collections.FXCollections
 import javafx.collections.ObservableList
 import javafx.scene.control.Alert
 import javafx.scene.control.ListView
-import javafx.scene.layout.Background
-import javafx.scene.layout.BackgroundFill
-import javafx.scene.paint.Color
-import javafx.scene.paint.Paint
 import jfxtras.scene.control.LocalDatePicker
 import mu.KotlinLogging
 import tornadofx.*
@@ -34,7 +30,7 @@ class BmzefWizardData(
   selectedContract: String? = null,
   selectedKind: String? = null,
   selectedActivity: String? = null
-) {
+): ViewModel() {
   var projectMapping: BmzefService.ProjectMapping by property(projectMapping)
 
   var beginDate: LocalDate by property(beginDate)
@@ -74,12 +70,11 @@ class BmzefWizardData(
   fun selectedActivityProperty() = getProperty(BmzefWizardData::selectedActivity)
 }
 
-private val model = BmzefWizardData()
-
 class SelectDateRange: View("Zeitraum wählen") {
   private val preferencesController: PreferencesController by inject()
   private val service: BmzefService by inject()
   private val fileLoader: FileLoader by di()
+  private val model: BmzefWizardData by inject()
 
   override fun onSave() {
     if (model.beginDate.isAfter(model.endDate)) {
@@ -138,6 +133,9 @@ class SelectDateRange: View("Zeitraum wählen") {
 var entriesListView: ListView<String>? = null
 
 class CheckAssignments: View("Zuordnungen Prüfen") {
+
+  private val model: BmzefWizardData by inject()
+
   override val root = borderpane {
     prefWidth = 800.0
     top = borderpane {
@@ -176,6 +174,8 @@ class BmzefWizard: Wizard("Bmzef all the things!") {
   private val logger = KotlinLogging.logger {}
 
   private val service: BmzefService by inject()
+
+  private val model: BmzefWizardData by inject()
 
   init {
     val enterprises = service.readAvailableEnterprises()
@@ -218,7 +218,7 @@ class BmzefWizard: Wizard("Bmzef all the things!") {
   }
 
   private val String.checked
-    get() = if (!this.endsWith(" ✔"))
+    get() = if (isUnchecked)
       "$this ✔"
     else this
 
@@ -226,7 +226,7 @@ class BmzefWizard: Wizard("Bmzef all the things!") {
     get() = this.endsWith(" ✔")
 
   private val String.unchecked
-    get() = if (this.endsWith(" ✔"))
+    get() = if (isChecked)
       this.removeSuffix(" ✔")
     else this
 
