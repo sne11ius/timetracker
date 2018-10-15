@@ -38,6 +38,13 @@ class BmzefService: Controller() {
     val mappedEntries: Set<EntryMapping> = emptySet(),
     val unmappedEntries: Set<String> = emptySet()
   ) {
+    operator fun times(more: ProjectMapping): ProjectMapping {
+      return ProjectMapping(
+        more.mappedEntries.filter { mappedEntries.none { known -> known.entryText == it.entryText } }.toSet(),
+        more.unmappedEntries.filter { mappedEntries.none { known -> known.entryText == it } }.toSet()
+      )
+    }
+
     val isComplete = unmappedEntries.isEmpty()
     val isIncomplete = !isComplete
     val texts = mappedEntries.map { it.entryText } + unmappedEntries

@@ -12,8 +12,8 @@ import wi.co.timetracker.model.MainModel
 import wi.co.timetracker.model.entry.MonthModel
 import wi.co.timetracker.service.FileLoader
 import wi.co.timetracker.service.mbzef.BmzefService
-import wi.co.timetracker.view.BmzefWizard
-import wi.co.timetracker.view.BmzefWizardData
+import wi.co.timetracker.view.bmzef.BmzefWizard
+import wi.co.timetracker.view.bmzef.BmzefWizardData
 import java.time.Duration
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -130,7 +130,6 @@ class MainController(
   fun runTimeTracking() {
     model.beginDate = LocalDate.now().minusDays(1)
     model.endDate = LocalDate.now()
-    model.projectMapping = BmzefService.ProjectMapping()
     find<BmzefWizard>() {
       openModal()
     }
