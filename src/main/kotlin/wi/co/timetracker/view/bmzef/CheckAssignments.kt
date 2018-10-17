@@ -1,11 +1,14 @@
 package wi.co.timetracker.view.bmzef
 
-import mu.KotlinLogging
+import javafx.beans.binding.BooleanExpression
 import tornadofx.*
 
 class CheckAssignments: View("Zuordnungen Prüfen") {
 
   private val model: BmzefWizardData by inject()
+
+  override val complete: BooleanExpression
+    get() = model.projectMapping.isComplete.toProperty()
 
   override val root = borderpane {
     prefWidth = 800.0
@@ -20,22 +23,31 @@ class CheckAssignments: View("Zuordnungen Prüfen") {
         label("Eigener Name")
         entriesListView = listview(model.entryTexts)
         entriesListView!!.bindSelected(model.selectedEntryTextProperty())
+        model.selectedEntryTextProperty().onChange { entriesListView!!.selectionModel.select(it) }
       }
       vbox {
         label("Vorhaben")
-        listview(model.enterpriseTitles).bindSelected(model.selectedEnterpriseProperty())
+        enterprisesListView = listview(model.enterpriseTitles)
+        enterprisesListView!!.bindSelected(model.selectedEnterpriseProperty())
+        model.selectedEnterpriseProperty().onChange { enterprisesListView!!.selectionModel.select(it) }
       }
       vbox {
         label("Vertrag")
-        listview(model.contractTitles).bindSelected(model.selectedContractProperty())
+        contractsListView = listview(model.contractTitles)
+        contractsListView!!.bindSelected(model.selectedContractProperty())
+        model.selectedContractProperty().onChange { contractsListView!!.selectionModel.select(it) }
       }
       vbox {
         label("Tätigkeitsart")
-        listview(model.kindTitles).bindSelected(model.selectedKindProperty())
+        kindsListView = listview(model.kindTitles)
+        kindsListView!!.bindSelected(model.selectedKindProperty())
+        model.selectedKindProperty().onChange { kindsListView!!.selectionModel.select(it) }
       }
       vbox {
         label("Tätigkeit")
-        listview(model.activityTitles).bindSelected(model.selectedActivityProperty())
+        activitiesListView = listview(model.activityTitles)
+        activitiesListView!!.bindSelected(model.selectedActivityProperty())
+        model.selectedActivityProperty().onChange { activitiesListView!!.selectionModel.select(it) }
       }
     }
   }

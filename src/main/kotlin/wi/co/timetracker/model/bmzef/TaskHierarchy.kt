@@ -68,6 +68,10 @@ sealed class ActivityPathPart {
   }
 }
 
+fun Collection<ActivityPathPart>.sortedTitles(): List<String> {
+  return map { it.title }.sorted()
+}
+
 sealed class ActivityPath {
   object NoPath: ActivityPath()
   data class Path(

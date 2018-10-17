@@ -45,6 +45,8 @@ class BmzefService: Controller() {
       )
     }
 
+    fun pathFor(entry: String?): ActivityPath = mappedEntries.firstOrNull { it.entryText == entry }?.activity ?: ActivityPath.NoPath
+
     val isComplete = unmappedEntries.isEmpty()
     val isIncomplete = !isComplete
     val texts = mappedEntries.map { it.entryText } + unmappedEntries
