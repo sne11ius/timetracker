@@ -24,7 +24,7 @@ class BmzefWizardController : Controller() {
     val begin = model.beginDate
     val end = model.endDate
     var currentDay = begin
-    val models = mutableListOf<DaySummaryModel>()
+    var models = listOf<DaySummaryModel>()
     while (currentDay != end.plusDays(1)) {
       val (_, errors, entry) = fileLoader.loadDay(currentDay, preferencesController.baseDir)
       if (errors.hasErrors) {
@@ -42,6 +42,10 @@ class BmzefWizardController : Controller() {
       }
       currentDay = currentDay.plusDays(1)
     }
+    models = models
+      .map { m -> m.copy(entries = m.entries.filter { entry -> preferencesController.bmzefIgnoreIndicators.none { it == entry.text } }) }
+      .filter { m -> m.entries.isNotEmpty() }
+      .toMutableList()
     val allEntries = models.flatMap { it.entries }.map { it.text }.toSet()
     model.projectMapping *= service.loadMapping(allEntries)
     with (model) {
