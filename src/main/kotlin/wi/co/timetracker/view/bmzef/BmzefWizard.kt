@@ -124,7 +124,9 @@ class BmzefWizard: Wizard("Bmzef all the things!") {
         }
         model.projectMapping = model.projectMapping.run {
           copy(
-            mappedEntries = mappedEntries.filter { it.entryText != model.selectedEntryText.unchecked }.toSet() + BmzefService.EntryMapping(model.selectedEntryText.unchecked, selectedPath),
+            mappedEntries = mappedEntries
+              .filter { it.entryText != model.selectedEntryText.unchecked }
+              .toSet() + BmzefService.EntryMapping(model.selectedEntryText.unchecked, selectedPath.toPath()),
             unmappedEntries = unmappedEntries - model.selectedEntryText.unchecked
           )
         }
@@ -152,6 +154,11 @@ class BmzefWizard: Wizard("Bmzef all the things!") {
       logger.debug { "Mapping is complete" }
     }
     isComplete = model.projectMapping.isComplete
+  }
+
+  override fun onSave() {
+    logger.debug { "onSave" }
+    service.updateProjectMappingCache(model.projectMapping)
   }
 
   override val canFinish = allPagesComplete

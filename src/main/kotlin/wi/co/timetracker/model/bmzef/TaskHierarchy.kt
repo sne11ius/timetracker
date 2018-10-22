@@ -1,5 +1,7 @@
 package wi.co.timetracker.model.bmzef
 
+import java.lang.RuntimeException
+
 // Die Namen sind mehr oder weniger einfache Übersetzungen - inhaltlich sollte man da (bis auf die Hierarchie) nicht
 // zu viel reindeuten.
 // Jedenfalls:
@@ -73,11 +75,17 @@ fun Collection<ActivityPathPart>.sortedTitles(): List<String> {
 }
 
 sealed class ActivityPath {
-  object NoPath: ActivityPath()
+  abstract fun toPath(): ActivityPath.Path
+
+  object NoPath: ActivityPath() {
+    override fun toPath() = throw RuntimeException("Cannot make a path from a NoPath")
+  }
   data class Path(
     val enterprise: String,
     val contract: String? = null,
     val kind: String? = null,
     val activity: String? = null
-  ): ActivityPath()
+  ): ActivityPath() {
+    override fun toPath() = this
+  }
 }

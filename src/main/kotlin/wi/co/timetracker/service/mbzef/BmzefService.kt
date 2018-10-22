@@ -1,5 +1,7 @@
 package wi.co.timetracker.service.mbzef
 
+import com.fasterxml.jackson.annotation.JsonIgnore
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.module.kotlin.readValue
 import tornadofx.*
 import wi.co.timetracker.controller.PreferencesController
@@ -34,6 +36,7 @@ class BmzefService: Controller() {
       mapper.readValue(enterprisesCacheFile)
   }
 
+  @JsonIgnoreProperties(value = ["complete", "incomplete"])
   data class ProjectMapping(
     val mappedEntries: Set<EntryMapping> = emptySet(),
     val unmappedEntries: Set<String> = emptySet()
@@ -47,40 +50,29 @@ class BmzefService: Controller() {
 
     fun pathFor(entry: String?): ActivityPath = mappedEntries.firstOrNull { it.entryText == entry }?.activity ?: ActivityPath.NoPath
 
+    infix fun and(more: ProjectMapping): ProjectMapping {
+      return ProjectMapping(
+        mappedEntries + more.mappedEntries.filter { mappedEntries.none { known -> known.entryText == it.entryText } }.toSet()
+      )
+    }
+
+    @JsonIgnore
     val isComplete = unmappedEntries.isEmpty()
+    @JsonIgnore
     val isIncomplete = !isComplete
+    @JsonIgnore
     val texts = mappedEntries.map { it.entryText } + unmappedEntries
   }
 
   data class EntryMapping(
     val entryText: String,
-    val activity: ActivityPath
+    val activity: ActivityPath.Path
   )
 
   data class MappingCache(
     val mappedEntries: Set<EntryMapping>
   ) {
     val texts = mappedEntries.map { it.entryText }
-  }
-
-  fun loadMapping(allEntries: Set<String>): ProjectMapping {
-    val mappingCacheFile = File(preferencesController.baseDir, ".timetracker.mappingcache.json")
-    if (!mappingCacheFile.exists()) {
-      return ProjectMapping(emptySet(), allEntries)
-    }
-    val cachedMapping: MappingCache = mapper.readValue(mappingCacheFile)
-    val mappedEntries = allEntries.filter { entry ->
-        cachedMapping.texts.contains(entry)
-      }.map { entry ->
-        cachedMapping.mappedEntries.first { it.entryText == entry }
-      }.toSet()
-    val unmappedEntries = allEntries.filter { entry ->
-      !cachedMapping.texts.contains(entry)
-    }.toSet()
-    return ProjectMapping(
-      mappedEntries,
-      unmappedEntries
-    )
   }
 
   fun readEnterprisesFromWeb(): Set<ActivityPathPart.Enterprise> {
@@ -130,6 +122,37 @@ class BmzefService: Controller() {
     }
     driver.quit()
     return enterprises
+  }
+
+  fun updateProjectMappingCache(projectMapping: BmzefService.ProjectMapping) {
+    val cachedMapping: ProjectMapping = loadCachedMapping()
+    val updatedMapping = projectMapping and cachedMapping
+    val mappingCacheFile = File(preferencesController.baseDir, ".timetracker.mappingcache.json")
+    mapper.writeValue(mappingCacheFile, updatedMapping)
+  }
+
+  private fun loadCachedMapping(): BmzefService.ProjectMapping {
+    val mappingCacheFile = File(preferencesController.baseDir, ".timetracker.mappingcache.json")
+    if (!mappingCacheFile.exists()) {
+      return ProjectMapping()
+    }
+    return mapper.readValue(mappingCacheFile)
+  }
+
+  fun loadMapping(allEntries: Set<String>): ProjectMapping {
+    val cachedMapping = loadCachedMapping()
+    val mappedEntries = allEntries.filter { entry ->
+      cachedMapping.texts.contains(entry)
+    }.map { entry ->
+      cachedMapping.mappedEntries.first { it.entryText == entry }
+    }.toSet()
+    val unmappedEntries = allEntries.filter { entry ->
+      !cachedMapping.texts.contains(entry)
+    }.toSet()
+    return ProjectMapping(
+      mappedEntries,
+      unmappedEntries
+    )
   }
 
 }
