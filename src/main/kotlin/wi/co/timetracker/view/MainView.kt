@@ -175,6 +175,20 @@ class MainView : View() {
         mode = LocalDatePicker.Mode.SINGLE
         bindBidirectional(localDateProperty(), controller.mainModel.currentDateProperty())
       }
+      hbox {
+        button("\uD83E\uDC50") {
+          prefWidth = 125.0
+          action {
+            controller.mainModel.currentDate = controller.mainModel.currentDate.minusDays(1)
+          }
+        }
+        button("\uD83E\uDC52") {
+          prefWidth = 125.0
+          action {
+            controller.mainModel.currentDate = controller.mainModel.currentDate.plusDays(1)
+          }
+        }
+      }
       button("Heute") {
         prefWidth = 250.0
         action {
