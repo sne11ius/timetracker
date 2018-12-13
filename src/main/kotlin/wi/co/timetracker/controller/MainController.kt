@@ -1,14 +1,19 @@
 package wi.co.timetracker.controller
 
 import javafx.scene.chart.PieChart
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.stereotype.Component
+import mu.KotlinLogging
 import tornadofx.*
-import wi.co.timetracker.extensions.*
+import wi.co.timetracker.extensions.existsAndBlank
+import wi.co.timetracker.extensions.formatDecimal
+import wi.co.timetracker.extensions.formatDefault
+import wi.co.timetracker.extensions.isWeekend
+import wi.co.timetracker.extensions.toDouble
 import wi.co.timetracker.model.MainModel
 import wi.co.timetracker.model.entry.MonthModel
-import wi.co.timetracker.service.BmzefService
 import wi.co.timetracker.service.FileLoader
+import wi.co.timetracker.service.mbzef.BmzefService
+import wi.co.timetracker.view.bmzef.BmzefWizard
+import wi.co.timetracker.view.bmzef.BmzefWizardData
 import java.time.Duration
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -25,12 +30,15 @@ class MainController(
   excelSummaryDescription: String = "",
   excelSummarySum: String = ""
 ) : Controller() {
+  private val logger = KotlinLogging.logger {}
 
   private val fileLoader: FileLoader by di()
 
   private val preferencesController: PreferencesController by inject()
 
   private val bmzefService: BmzefService by inject()
+
+  private val model: BmzefWizardData by inject()
 
   val mainModel = MainModel()
 
@@ -120,7 +128,11 @@ class MainController(
   }
 
   fun runTimeTracking() {
-    val availableEnterprises = bmzefService.readAvailableEnterprises()
+    model.beginDate = LocalDate.now().minusDays(1)
+    model.endDate = LocalDate.now()
+    find<BmzefWizard>() {
+      openModal()
+    }
   }
 
   private fun reload(date: LocalDate) {

@@ -1,7 +1,5 @@
 package wi.co.timetracker.controller
 
-import jdk.nashorn.internal.runtime.regexp.joni.SearchAlgorithm.BM
-import org.springframework.stereotype.Component
 import tornadofx.*
 import wi.co.timetracker.extensions.toFile
 import wi.co.timetracker.model.Preferences
@@ -32,6 +30,7 @@ class PreferencesController : Controller() {
       put(BMZEF_USERNAME, preferences.bmzefUsername)
       put(BMZEF_PASSWORD, preferences.bmzefPassword)
       put(BMZEF_URL, preferences.bmzefUrl)
+      put(BMZEF_IGNORE_INDICATORS, preferences.bmzefIgnoreIndicators)
       put(BREAK_INDICATORS, preferences.breakIndicators)
       put(TRAVEL_INDICATORS, preferences.travelIndicators)
       put(TRAVEL_MULTIPLIER, preferences.travelMultiplier.toString())
@@ -63,6 +62,8 @@ class PreferencesController : Controller() {
   else
     preferences.bmzefUrl.removeSuffix("/") + "/jsp/Default.jsp"
 
+  val bmzefIgnoreIndicators: List<String> = splitItems(preferences.bmzefIgnoreIndicators)
+
   private fun splitItems(pref: String): List<String> {
     return pref.split(",").map { it.trim() }.filter { it.isNotBlank() }
   }
@@ -73,6 +74,7 @@ class PreferencesController : Controller() {
       preferences.bmzefUsername = get(BMZEF_USERNAME, "")
       preferences.bmzefPassword = get(BMZEF_PASSWORD, "")
       preferences.bmzefUrl = get(BMZEF_URL, "")
+      preferences.bmzefIgnoreIndicators = get(BMZEF_IGNORE_INDICATORS, "")
       preferences.breakIndicators = get(BREAK_INDICATORS, "")
       preferences.travelIndicators = get(TRAVEL_INDICATORS, "")
       preferences.travelMultiplier = get(TRAVEL_MULTIPLIER, "1.0").toFloat()
@@ -86,6 +88,7 @@ class PreferencesController : Controller() {
     const val BMZEF_USERNAME = "bmzefUsername"
     const val BMZEF_PASSWORD = "bmzefPassword"
     const val BMZEF_URL = "bmzefUrl"
+    const val BMZEF_IGNORE_INDICATORS = "bmzefIgnoreIndicators"
     const val BREAK_INDICATORS = "breakIndicators"
     const val TRAVEL_INDICATORS = "travelIndicators"
     const val TRAVEL_MULTIPLIER = "travelMultiplier"

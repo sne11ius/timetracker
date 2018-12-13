@@ -36,3 +36,19 @@ fun Duration.formatDecimal(roundDigits: Int): String {
 fun Duration.toDouble(roundDigits: Int): Double {
     return formatDecimal(roundDigits).replace(",", ".").toDouble()
 }
+
+val String.checked
+  get() = if (isUnchecked)
+    "$this ✔"
+  else this
+
+val String.isChecked
+  get() = this.endsWith(" ✔")
+
+val String.unchecked
+  get() = if (isChecked)
+    this.removeSuffix(" ✔")
+  else this
+
+val String.isUnchecked
+  get() = !this.isChecked
