@@ -57,10 +57,7 @@ class PreferencesController : Controller() {
 
   val bmzefPassword: String = preferences.bmzefPassword
 
-  val bmzefBaseUrl: String = if (preferences.bmzefUrl.endsWith("jsp/Default.jsp"))
-    preferences.bmzefUrl
-  else
-    preferences.bmzefUrl.removeSuffix("/") + "/jsp/Default.jsp"
+  val bmzefBaseUrl: String = preferences.bmzefUrl.removeSuffix("/")
 
   val bmzefIgnoreIndicators: List<String> = splitItems(preferences.bmzefIgnoreIndicators)
 

@@ -1,7 +1,6 @@
 package wi.co.timetracker.model
 
-import tornadofx.getProperty
-import tornadofx.property
+import tornadofx.*
 
 class Preferences(
   baseDir: String = System.getProperty("user.home"),
@@ -30,7 +29,7 @@ class Preferences(
   var bmzefIgnoreIndicators: String by property(bmzefIgnoreIndicators)
   fun bmzefIgnoreIndicatorsProperty() = getProperty(Preferences::bmzefIgnoreIndicators)
 
-    var breakIndicators: String by property(breakIndicators)
+  var breakIndicators: String by property(breakIndicators)
   fun breakIndicatorsProperty() = getProperty(Preferences::breakIndicators)
 
   var travelIndicators: String by property(travelIndicators)

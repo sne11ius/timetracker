@@ -1,19 +1,21 @@
 package wi.co.timetracker.service.mbzef
 
+import arrow.core.Either
 import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.module.kotlin.readValue
 import tornadofx.*
 import wi.co.timetracker.controller.PreferencesController
-import wi.co.timetracker.model.bmzef.*
+import wi.co.timetracker.model.bmzef.ActivityPath
+import wi.co.timetracker.model.bmzef.ActivityPathPart
 import wi.co.timetracker.service.mapper
 import java.io.File
 
 class BmzefService: Controller() {
 
   private val preferencesController: PreferencesController by inject()
-
   private val driverProvider: WebDriverProvider by inject()
+  private val bmzefClient: BmzefClient by inject()
 
   fun isValid(path: ActivityPath): Boolean {
     return when (path) {
@@ -27,6 +29,12 @@ class BmzefService: Controller() {
   }
 
   fun readAvailableEnterprises(forceUpdate: Boolean = false): Set<ActivityPathPart.Enterprise> {
+    val enterprises = bmzefClient.readEnterprisesFromWeb()
+    when (enterprises) {
+      is Either.Right -> return enterprises.b
+      else -> throw RuntimeException("Could not bmzef")
+    }
+    /*
     val enterprisesCacheFile = File(preferencesController.baseDir, ".timetracker.projectcache.json")
     return if (forceUpdate || !enterprisesCacheFile.exists()) {
       val availableEnterprises = readEnterprisesFromWeb()
@@ -34,6 +42,7 @@ class BmzefService: Controller() {
       availableEnterprises
     } else
       mapper.readValue(enterprisesCacheFile)
+    */
   }
 
   @JsonIgnoreProperties(value = ["complete", "incomplete"])

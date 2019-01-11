@@ -64,8 +64,7 @@ class Sulfur(
 
   init {
     switchToFrame(driver, preferredFrames)
-    if (block != null)
-      block.invoke(this)
+    block?.invoke(this)
   }
 
   fun el(sel: String): WrappedElement {
