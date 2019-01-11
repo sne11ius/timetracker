@@ -110,7 +110,7 @@ class BmzefService: Controller() {
             .filter { it.isValidOption() }
             .map { vertragOption ->
               vertragOption.submit()
-              val arten = name("taetigkeitsartComboSelected")
+              val kinds = name("taetigkeitsartComboSelected")
                 .options
                 .filter { it.isValidOption() }
                 .map { artOption ->
@@ -123,7 +123,7 @@ class BmzefService: Controller() {
                   ActivityPathPart.Kind(artOption.text, activities)
                 }
                 .toSet()
-              ActivityPathPart.Contract(vertragOption.text, arten)
+              ActivityPathPart.Contract(vertragOption.text, kinds)
             }
             .toSet()
           ActivityPathPart.Enterprise(vorhabenOption.text, contracts)

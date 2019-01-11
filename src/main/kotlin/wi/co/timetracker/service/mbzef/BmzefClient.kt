@@ -35,16 +35,16 @@ private class Bmzef(val baseUrl: String) {
     return response.parse()
   }
 
-  internal fun Document.frameSource(index: Int): String {
-    return select("frame")[index].attr("src")
+  internal fun Document.frameSource(frameIndex: Int): String {
+    return select("frame")[frameIndex].attr("src")
   }
 
-  internal fun Document.frameSource(name: String): String {
-    return select("frame[name=\"$name\"]").attr("src")
+  internal fun Document.frameSource(frameName: String): String {
+    return select("frame[name=\"$frameName\"]").attr("src")
   }
 
-  internal fun Document.formAction(index: Int): String {
-    return select("form")[index].attr("action")
+  internal fun Document.formAction(formIndex: Int): String {
+    return select("form")[formIndex].attr("action")
   }
 }
 
@@ -91,24 +91,59 @@ class BmzefClient : Controller() {
         }
         val enterprises = options
           .filter { it.isValid }
-          .map { (value, name) ->
-            println("POSTing $name")
+          .map { (vorhabenValue, vorhabenName) ->
             val postPath = mainForm.formAction(0)
             val postUrl = "$baseUrl$postPath"
             mainForm = post(postUrl,
               "REQUEST.EVENT", "vorhabenSelektiert",
-              "vorhabenComboSelected", value
+              "vorhabenComboSelected", vorhabenValue
             )
             mainFormLink = mainForm.frameSource("Content")
             mainForm = get(mainFormLink)
-            val contracts = mainForm.select("select[name=\"vertragComboSelected\"] option").map { el ->
-              // Pair(el.attr("value"), el.text())
-              ActivityPathPart.Contract(el.text(), emptySet())
-            }.toSet()
-            println("Verträge für $name: $contracts")
-            ActivityPathPart.Enterprise(name, contracts)
-          }
-          .toSet()
+            val options = mainForm.select("select[name=\"vertragComboSelected\"] option").map { el ->
+              Pair(el.attr("value"), el.text())
+            }
+            val contracts = options
+              .filter { it.isValid }
+              .map { (vertragValue, vertragName) ->
+                val postPath = mainForm.formAction(0)
+                val postUrl = "$baseUrl$postPath"
+                mainForm = post(postUrl,
+                  "REQUEST.EVENT", "taetigkeitsartSelektiert",
+                  "taetigkeitsartComboSelected", vertragValue
+                )
+                mainFormLink = mainForm.frameSource("Content")
+                mainForm = get(mainFormLink)
+                val options = mainForm.select("select[name=\"taetigkeitsartComboSelected\"] option").map { el ->
+                  Pair(el.attr("value"), el.text())
+                }
+                val kinds = options
+                  .filter { it.isValid }
+                  .map { (taetigkeitValue, taetigkeitName) ->
+                    val postPath = mainForm.formAction(0)
+                    val postUrl = "$baseUrl$postPath"
+                    mainForm = post(postUrl,
+                      "REQUEST.EVENT", "taetigkeitSelektiert",
+                      "taetigkeitComboSelected", taetigkeitValue
+                    )
+                    mainFormLink = mainForm.frameSource("Content")
+                    mainForm = get(mainFormLink)
+                    val options = mainForm.select("select[name=\"taetigkeitComboSelected\"] option").map { el ->
+                      Pair(el.attr("value"), el.text())
+                    }
+                    val activities = options
+                      .filter { it.isValid }
+                      .map { (activityValue, activityName) ->
+                        ActivityPathPart.Activity(activityName)
+                      }
+                      .toSet()
+                    ActivityPathPart.Kind(taetigkeitName, activities)
+                  }
+                  .toSet()
+                ActivityPathPart.Contract(vertragName, kinds)
+                }.toSet()
+            ActivityPathPart.Enterprise(vorhabenName, contracts)
+              }.toSet()
         return Right(enterprises)
       }
     } catch (e: Exception) {
