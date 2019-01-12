@@ -100,44 +100,44 @@ class BmzefClient : Controller() {
             )
             mainFormLink = mainForm.frameSource("Content")
             mainForm = get(mainFormLink)
-            val options = mainForm.select("select[name=\"vertragComboSelected\"] option").map { el ->
+            val vertragOptions = mainForm.select("select[name=\"vertragComboSelected\"] option").map { el ->
               Pair(el.attr("value"), el.text())
             }
-            val contracts = options
+            val contracts = vertragOptions
               .filter { it.isValid }
               .map { (vertragValue, vertragName) ->
                 val postPath = mainForm.formAction(0)
                 val postUrl = "$baseUrl$postPath"
                 mainForm = post(postUrl,
-                  "REQUEST.EVENT", "taetigkeitsartSelektiert",
-                  "taetigkeitsartComboSelected", vertragValue
+                  "REQUEST.EVENT", "vertragSelektiert",
+                  "vertragComboSelected", vertragValue
                 )
                 mainFormLink = mainForm.frameSource("Content")
                 mainForm = get(mainFormLink)
-                val options = mainForm.select("select[name=\"taetigkeitsartComboSelected\"] option").map { el ->
+                val taetigkeitsartOptions = mainForm.select("select[name=\"taetigkeitsartComboSelected\"] option").map { el ->
                   Pair(el.attr("value"), el.text())
                 }
-                val kinds = options
+                val kinds = taetigkeitsartOptions
                   .filter { it.isValid }
-                  .map { (taetigkeitValue, taetigkeitName) ->
+                  .map { (taetigkeitsartValue, taetigkeitsartName) ->
                     val postPath = mainForm.formAction(0)
                     val postUrl = "$baseUrl$postPath"
                     mainForm = post(postUrl,
-                      "REQUEST.EVENT", "taetigkeitSelektiert",
-                      "taetigkeitComboSelected", taetigkeitValue
+                      "REQUEST.EVENT", "taetigkeitsartSelektiert",
+                      "taetigkeitsartComboSelected", taetigkeitsartValue
                     )
                     mainFormLink = mainForm.frameSource("Content")
                     mainForm = get(mainFormLink)
-                    val options = mainForm.select("select[name=\"taetigkeitComboSelected\"] option").map { el ->
+                    val taetigkeitOptions = mainForm.select("select[name=\"taetigkeitComboSelected\"] option").map { el ->
                       Pair(el.attr("value"), el.text())
                     }
-                    val activities = options
+                    val activities = taetigkeitOptions
                       .filter { it.isValid }
                       .map { (activityValue, activityName) ->
                         ActivityPathPart.Activity(activityName)
                       }
                       .toSet()
-                    ActivityPathPart.Kind(taetigkeitName, activities)
+                    ActivityPathPart.Kind(taetigkeitsartName, activities)
                   }
                   .toSet()
                 ActivityPathPart.Contract(vertragName, kinds)
