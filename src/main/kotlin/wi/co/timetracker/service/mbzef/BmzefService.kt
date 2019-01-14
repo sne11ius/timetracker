@@ -14,14 +14,13 @@ import java.io.File
 class BmzefService: Controller() {
 
   private val preferencesController: PreferencesController by inject()
-  private val driverProvider: WebDriverProvider by inject()
   private val bmzefClient: BmzefClient by inject()
 
   fun isValid(path: ActivityPath): Boolean {
     return when (path) {
       is ActivityPath.NoPath -> false
       is ActivityPath.Path -> {
-        val (enterprise, contract, kind, activity) = path
+        // val (enterprise, contract, kind, activity) = path
         val possiblePaths = readAvailableEnterprises().flatMap { it.paths }
         possiblePaths.contains(path)
       }
@@ -82,55 +81,6 @@ class BmzefService: Controller() {
     val mappedEntries: Set<EntryMapping>
   ) {
     val texts = mappedEntries.map { it.entryText }
-  }
-
-  fun readEnterprisesFromWeb(): Set<ActivityPathPart.Enterprise> {
-    val driver = driverProvider.createDriver()
-    val baseUrl = preferencesController.bmzefBaseUrl
-    val winHandleBefore = driver.windowHandle
-    driver.get(baseUrl.removeSuffix("jsp/Default.jsp"))
-    val newHandle = driver.windowHandles.first { it != winHandleBefore }
-    driver.switchTo().window(winHandleBefore)
-    driver.close()
-    driver.switchTo().window(newHandle)
-    var enterprises: Set<ActivityPathPart.Enterprise> = emptySet()
-    Sulfur(driver, listOf("Main", "Content")) {
-      name("userNameField") += preferencesController.bmzefUsername
-      name("passwortField") += preferencesController.bmzefPassword
-      name("submitButton").submit()
-      href("zeitenErfassen").submit()
-      fun OptionElement.isValidOption() = this.text != "-- bitte selektieren --" && this.text.isNotBlank()
-      enterprises = name("vorhabenComboSelected")
-        .options
-        .filter { it.isValidOption() }
-        .map { vorhabenOption ->
-          vorhabenOption.submit()
-          val contracts = name("vertragComboSelected")
-            .options
-            .filter { it.isValidOption() }
-            .map { vertragOption ->
-              vertragOption.submit()
-              val kinds = name("taetigkeitsartComboSelected")
-                .options
-                .filter { it.isValidOption() }
-                .map { artOption ->
-                  artOption.submit()
-                  val activities = name("taetigkeitComboSelected")
-                    .options
-                    .filter { it.isValidOption() }
-                    .map { ActivityPathPart.Activity(it.text) }
-                    .toSet()
-                  ActivityPathPart.Kind(artOption.text, activities)
-                }
-                .toSet()
-              ActivityPathPart.Contract(vertragOption.text, kinds)
-            }
-            .toSet()
-          ActivityPathPart.Enterprise(vorhabenOption.text, contracts)
-        }.toSet()
-    }
-    driver.quit()
-    return enterprises
   }
 
   fun updateProjectMappingCache(projectMapping: BmzefService.ProjectMapping) {

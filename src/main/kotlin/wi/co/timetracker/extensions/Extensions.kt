@@ -1,5 +1,8 @@
 package wi.co.timetracker.extensions
 
+import kotlinx.coroutines.async
+import kotlinx.coroutines.newFixedThreadPoolContext
+import kotlinx.coroutines.runBlocking
 import org.apache.commons.lang3.time.DurationFormatUtils
 import java.io.File
 import java.math.BigDecimal
@@ -52,3 +55,15 @@ val String.unchecked
 
 val String.isUnchecked
   get() = !this.isChecked
+
+// Da wir im Allgemeinen auf IO warten, ist der Default-Pool viel zu klein
+private val fixedThreadPoolContext = newFixedThreadPoolContext(100, "background")
+
+// Parallel map ftw
+fun <A, B> Iterable<A>.pmap(f: suspend (A) -> B): List<B> = runBlocking {
+  map { async(fixedThreadPoolContext) { f(it) } }.map { it.await() }
+}
+
+fun <A, B> Iterable<A>.pflatMap(f: suspend (A) -> Iterable<B>): List<B> = runBlocking {
+  map { async(fixedThreadPoolContext) { f(it) } }.flatMap { it.await() }
+}
