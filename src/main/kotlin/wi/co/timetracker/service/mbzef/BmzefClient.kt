@@ -59,6 +59,8 @@ private class Sulfur(val baseUrl: String) {
 
 class BmzefClient : Controller() {
 
+  private val EVENT ="REQUEST.EVENT"
+
   private val preferencesController: PreferencesController by inject()
 
   private val logger = KotlinLogging.logger {}
@@ -79,7 +81,7 @@ class BmzefClient : Controller() {
     val loginPostLink = loginPage.formAction(0)
     val selectActionPage = post(
       loginPostLink,
-      "REQUEST.EVENT", "login",
+      EVENT, "login",
       "userNameField", username,
       "passwortField", password
     )
@@ -88,7 +90,7 @@ class BmzefClient : Controller() {
     val zeitenErfassenLink = auswahlPage.formAction(0)
     val zeitenErfassenPage = post(
       zeitenErfassenLink,
-      "REQUEST.EVENT", "zeitenErfassen"
+      EVENT, "zeitenErfassen"
     )
     val mainFormLink = zeitenErfassenPage.frameSource("Content")
     return get(mainFormLink)
@@ -98,7 +100,7 @@ class BmzefClient : Controller() {
     val postPath = document.formAction(0)
     val postUrl = "$baseUrl$postPath"
     val mainForm = post(postUrl,
-      "REQUEST.EVENT", event,
+      EVENT, event,
       fieldName, fieldValue
     )
     val mainFormLink = mainForm.frameSource("Content")
@@ -115,7 +117,8 @@ class BmzefClient : Controller() {
       val start = now()
       val enterpriseNames = readEnterpriseNames()
       logger.debug { "${enterpriseNames.size} enterprises found" }
-      // Tatsächlich ist es am schnellsten, wenn wir alle Daten möglichst parallel auslesen...
+      // Tatsächlich ist es am schnellsten, wenn wir alle Daten möglichst parallel auslesen. Hiermit werden ca. 2
+      // vollständige Vorhaben pro Sekunde ausgelesen.
       val chunkSize = 1
       val enterprises = enterpriseNames
         .chunked(chunkSize)
