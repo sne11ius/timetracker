@@ -16,32 +16,24 @@ class BmzefService: Controller() {
   private val preferencesController: PreferencesController by inject()
   private val bmzefClient: BmzefClient by inject()
 
-  fun isValid(path: ActivityPath): Boolean {
+  fun isValid(path: ActivityPath, avalailabledEnterprises: Set<ActivityPathPart.Enterprise>): Boolean {
     return when (path) {
       is ActivityPath.NoPath -> false
       is ActivityPath.Path -> {
-        // val (enterprise, contract, kind, activity) = path
-        val possiblePaths = readAvailableEnterprises().flatMap { it.paths }
+        val possiblePaths = avalailabledEnterprises.flatMap { it.paths }
         possiblePaths.contains(path)
       }
     }
   }
 
-  fun readAvailableEnterprises(forceUpdate: Boolean = false): Set<ActivityPathPart.Enterprise> {
-    val enterprises = bmzefClient.readEnterprisesFromWeb()
+  fun readEnterpriseCount() = bmzefClient.readEnterpriseCount()
+
+  fun readAvailableEnterprises(onStep: () -> Unit = {}): Set<ActivityPathPart.Enterprise> {
+    val enterprises = bmzefClient.readEnterprisesFromWeb(onStep)
     when (enterprises) {
       is Either.Right -> return enterprises.b
       else -> throw RuntimeException("Could not bmzef")
     }
-    /*
-    val enterprisesCacheFile = File(preferencesController.baseDir, ".timetracker.projectcache.json")
-    return if (forceUpdate || !enterprisesCacheFile.exists()) {
-      val availableEnterprises = readEnterprisesFromWeb()
-      mapper.writeValue(enterprisesCacheFile, availableEnterprises)
-      availableEnterprises
-    } else
-      mapper.readValue(enterprisesCacheFile)
-    */
   }
 
   @JsonIgnoreProperties(value = ["complete", "incomplete"])

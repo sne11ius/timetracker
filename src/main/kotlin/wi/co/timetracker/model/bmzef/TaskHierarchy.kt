@@ -75,17 +75,11 @@ fun Collection<ActivityPathPart>.sortedTitles(): List<String> {
 }
 
 sealed class ActivityPath {
-  abstract fun toPath(): ActivityPath.Path
-
-  object NoPath: ActivityPath() {
-    override fun toPath() = throw RuntimeException("Cannot make a path from a NoPath")
-  }
+  object NoPath: ActivityPath()
   data class Path(
     val enterprise: String,
     val contract: String? = null,
     val kind: String? = null,
     val activity: String? = null
-  ): ActivityPath() {
-    override fun toPath() = this
-  }
+  ): ActivityPath()
 }

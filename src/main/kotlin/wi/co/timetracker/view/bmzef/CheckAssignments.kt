@@ -16,7 +16,6 @@ class CheckAssignments: View("Zuordnungen Prüfen") {
       left = label("Bitte ordne jeder von dir selbst aufgezeichneten Tätigkeit eine Tätigkeit aus der bmzef zu.\nFalls du einen Eintrag aus dem bmzef vermisst oder diese Funktion zum ersten mal verwendest, klicke auf 'bmzef-Projekte aktualisieren'") {
         padding = tornadofx.insets(5)
       }
-      right = button("bmzef-Projekte aktualisieren")
     }
     center = hbox {
       vbox {

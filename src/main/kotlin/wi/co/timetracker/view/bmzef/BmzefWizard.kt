@@ -19,6 +19,7 @@ var kindsListView: ListView<String>? = null
 var activitiesListView: ListView<String>? = null
 
 class BmzefWizard: Wizard("Bmzef all the things!") {
+
   private val logger = KotlinLogging.logger {}
 
   private val service: BmzefService by inject()
@@ -31,7 +32,7 @@ class BmzefWizard: Wizard("Bmzef all the things!") {
     add(SelectDateRange::class)
     add(CheckAssignments::class)
 
-    val enterprises = service.readAvailableEnterprises()
+    val enterprises = model.avalailabledEnterprises
     model.enterpriseTitles.setAll(enterprises.sortedTitles())
     model.selectedEnterpriseProperty().onChange { newEnterprise ->
       logger.debug { "New enterprise: $newEnterprise" }
@@ -67,10 +68,10 @@ class BmzefWizard: Wizard("Bmzef all the things!") {
       selectedEntryTextProperty().onChange { selectedValue ->
         if (!updateSelection)
           return@onChange
-        val newValue = selectedValue?.unchecked ?: null
+        val newValue = selectedValue?.unchecked
         logger.debug { "Selected text: $newValue" }
         val path = projectMapping.pathFor(newValue)
-        val ent = enterprisesListView
+        enterprisesListView
         when (path) {
           is ActivityPath.NoPath -> {
             Platform.runLater {
@@ -109,47 +110,55 @@ class BmzefWizard: Wizard("Bmzef all the things!") {
       )
     }
     logger.debug { selectedPath }
-    if (model.selectedEntryText != null) {
-      if (service.isValid(selectedPath)) {
-        logger.debug { "Path seems valid." }
-        if (model.selectedEntryText.isUnchecked) {
-          updateSelection = false
-          val newEntryText = model.selectedEntryText.checked
-          model.entryTexts.remove(model.selectedEntryText)
-          model.entryTexts.add(newEntryText)
-          model.entryTexts.sort()
-          model.selectedEntryText = newEntryText
-          entriesListView!!.selectionModel.select(newEntryText)
-          updateSelection = true
-        }
-        model.projectMapping = model.projectMapping.run {
-          copy(
-            mappedEntries = mappedEntries
-              .filter { it.entryText != model.selectedEntryText.unchecked }
-              .toSet() + BmzefService.EntryMapping(model.selectedEntryText.unchecked, selectedPath.toPath()),
-            unmappedEntries = unmappedEntries - model.selectedEntryText.unchecked
-          )
-        }
-      } else {
-        logger.debug { "Path is not valid." }
-        if (model.selectedEntryText.isChecked) {
-          updateSelection = false
-          val newEntryText = model.selectedEntryText.unchecked
-          model.entryTexts.remove(model.selectedEntryText)
-          model.entryTexts.add(newEntryText)
-          model.entryTexts.sort()
-          model.selectedEntryText = newEntryText
-          entriesListView!!.selectionModel.select(newEntryText)
-          updateSelection = true
-        }
-        model.projectMapping = model.projectMapping.run {
-          copy(
-            mappedEntries = mappedEntries.filter { it.entryText != model.selectedEntryText }.toSet(),
-            unmappedEntries = unmappedEntries + model.selectedEntryText
-          )
+    when (selectedPath) {
+      is ActivityPath.NoPath -> {
+        logger.debug { "This is not a valid path :D" }
+      }
+      is ActivityPath.Path -> {
+        if (model.selectedEntryText != null) {
+          if (service.isValid(selectedPath, model.avalailabledEnterprises)) {
+            logger.debug { "Path seems valid." }
+            if (model.selectedEntryText.isUnchecked) {
+              updateSelection = false
+              val newEntryText = model.selectedEntryText.checked
+              model.entryTexts.remove(model.selectedEntryText)
+              model.entryTexts.add(newEntryText)
+              model.entryTexts.sort()
+              model.selectedEntryText = newEntryText
+              entriesListView!!.selectionModel.select(newEntryText)
+              updateSelection = true
+            }
+            model.projectMapping = model.projectMapping.run {
+              copy(
+                mappedEntries = mappedEntries
+                  .filter { it.entryText != model.selectedEntryText.unchecked }
+                  .toSet() + BmzefService.EntryMapping(model.selectedEntryText.unchecked, selectedPath),
+                unmappedEntries = unmappedEntries - model.selectedEntryText.unchecked
+              )
+            }
+          } else {
+            logger.debug { "Path is not valid." }
+            if (model.selectedEntryText.isChecked) {
+              updateSelection = false
+              val newEntryText = model.selectedEntryText.unchecked
+              model.entryTexts.remove(model.selectedEntryText)
+              model.entryTexts.add(newEntryText)
+              model.entryTexts.sort()
+              model.selectedEntryText = newEntryText
+              entriesListView!!.selectionModel.select(newEntryText)
+              updateSelection = true
+            }
+            model.projectMapping = model.projectMapping.run {
+              copy(
+                mappedEntries = mappedEntries.filter { it.entryText != model.selectedEntryText }.toSet(),
+                unmappedEntries = unmappedEntries + model.selectedEntryText
+              )
+            }
+          }
         }
       }
     }
+
     if (model.projectMapping.isComplete) {
       logger.debug { "Mapping is complete" }
     }
@@ -161,7 +170,8 @@ class BmzefWizard: Wizard("Bmzef all the things!") {
     service.updateProjectMappingCache(model.projectMapping)
   }
 
-  override val canFinish = allPagesComplete
+  // override val canFinish = allPagesComplete
+  override val canFinish = isComplete.toProperty()
   override val canGoNext = currentPageComplete
 
 }

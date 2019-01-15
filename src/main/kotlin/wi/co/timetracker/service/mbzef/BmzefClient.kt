@@ -59,7 +59,7 @@ private class Sulfur(val baseUrl: String) {
 
 class BmzefClient : Controller() {
 
-  private val EVENT ="REQUEST.EVENT"
+  private val event ="REQUEST.EVENT"
 
   private val preferencesController: PreferencesController by inject()
 
@@ -81,7 +81,7 @@ class BmzefClient : Controller() {
     val loginPostLink = loginPage.formAction(0)
     val selectActionPage = post(
       loginPostLink,
-      EVENT, "login",
+      event, "login",
       "userNameField", username,
       "passwortField", password
     )
@@ -90,7 +90,7 @@ class BmzefClient : Controller() {
     val zeitenErfassenLink = auswahlPage.formAction(0)
     val zeitenErfassenPage = post(
       zeitenErfassenLink,
-      EVENT, "zeitenErfassen"
+      event, "zeitenErfassen"
     )
     val mainFormLink = zeitenErfassenPage.frameSource("Content")
     return get(mainFormLink)
@@ -100,7 +100,7 @@ class BmzefClient : Controller() {
     val postPath = document.formAction(0)
     val postUrl = "$baseUrl$postPath"
     val mainForm = post(postUrl,
-      EVENT, event,
+      this@BmzefClient.event, event,
       fieldName, fieldValue
     )
     val mainFormLink = mainForm.frameSource("Content")
@@ -112,7 +112,7 @@ class BmzefClient : Controller() {
     .replace(Regex("(\\d[HMS])(?!$)"), "$1 ")
     .toLowerCase()
 
-  fun readEnterprisesFromWeb(): Either<String, Set<ActivityPathPart.Enterprise>> {
+  fun readEnterprisesFromWeb(onStep: () -> Unit = {}): Either<String, Set<ActivityPathPart.Enterprise>> {
     try {
       val start = now()
       val enterpriseNames = readEnterpriseNames()
@@ -123,7 +123,7 @@ class BmzefClient : Controller() {
       val enterprises = enterpriseNames
         .chunked(chunkSize)
         .pflatMap { names ->
-          readEnterprises(names)
+          readEnterprises(names, onStep)
         }
         .toSet()
       val end = now()
@@ -136,6 +136,8 @@ class BmzefClient : Controller() {
     }
   }
 
+  fun readEnterpriseCount(): Int = readEnterpriseNames().size
+
   private fun readEnterpriseNames(): List<String> {
     logger.debug { "Reading enterprise names..." }
     val baseUrl = preferencesController.bmzefBaseUrl
@@ -146,7 +148,7 @@ class BmzefClient : Controller() {
     }
   }
 
-  private fun readEnterprises(enterpriseNames: List<String>): Set<ActivityPathPart.Enterprise> {
+  private fun readEnterprises(enterpriseNames: List<String>, onStep: () -> Unit = {}): Set<ActivityPathPart.Enterprise> {
     val baseUrl = preferencesController.bmzefBaseUrl
 
     return Sulfur(baseUrl).run {
@@ -179,6 +181,7 @@ class BmzefClient : Controller() {
                 .toSet()
               ActivityPathPart.Contract(vertragName, kinds)
             }.toSet()
+          onStep()
           ActivityPathPart.Enterprise(vorhabenName, contracts)
         }.toSet()
     }
