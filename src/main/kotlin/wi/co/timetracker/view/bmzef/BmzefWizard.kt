@@ -60,9 +60,7 @@ class BmzefWizard: Wizard("Bmzef all the things!") {
       }
       selectionChanged()
     }
-    model.selectedActivityProperty().onChange { _ ->
-      selectionChanged()
-    }
+    model.selectedActivityProperty().onChange { selectionChanged() }
 
     with (model) {
       selectedEntryTextProperty().onChange { selectedValue ->

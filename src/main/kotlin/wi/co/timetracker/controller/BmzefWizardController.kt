@@ -5,6 +5,7 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import javafx.application.Platform
 import javafx.scene.control.Alert
 import javafx.stage.StageStyle
+import mu.KotlinLogging
 import tornadofx.*
 import wi.co.timetracker.extensions.checked
 import wi.co.timetracker.model.parser.hasErrors
@@ -22,6 +23,8 @@ import java.time.LocalDate
 import kotlin.concurrent.thread
 
 class BmzefWizardController : Controller() {
+
+  private val logger = KotlinLogging.logger {}
 
   private val bmzefService: BmzefService by inject()
   private val model: BmzefWizardData by inject()
@@ -122,7 +125,9 @@ class BmzefWizardController : Controller() {
     val allEntries = models.flatMap { it.entries }.map { it.text }.toSet()
     model.projectMapping *= bmzefService.loadMapping(allEntries)
     with (model) {
-      entryTexts.setAll(allEntries.map { if (projectMapping.unmappedEntries.contains(it)) it else it.checked }.toList().sorted())
+      val entries = allEntries.map { if (projectMapping.unmappedEntries.contains(it)) it else it.checked }.toList().sorted()
+      logger.debug { "${entries.size} entries for ${model.beginDate} - ${model.endDate}" }
+      entryTexts.setAll(entries)
     }
   }
 

@@ -9,8 +9,15 @@ class SelectDateRange: View("Zeitraum wählen") {
   private val model: BmzefWizardData by inject()
   private val controller: BmzefWizardController by inject()
 
-  override fun onSave() {
-    controller.reloadEntries()
+  override val complete = booleanBinding(model.entryTexts) { isNotEmpty() }
+
+  init {
+    model.beginDateProperty().onChange {
+      controller.reloadEntries()
+    }
+    model.endDateProperty().onChange {
+      controller.reloadEntries()
+    }
   }
 
   override val root = form {
@@ -33,4 +40,5 @@ class SelectDateRange: View("Zeitraum wählen") {
       }
     }
   }
+
 }
