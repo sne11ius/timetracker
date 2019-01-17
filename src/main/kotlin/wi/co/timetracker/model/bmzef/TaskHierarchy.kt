@@ -1,6 +1,6 @@
 package wi.co.timetracker.model.bmzef
 
-import java.lang.RuntimeException
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 
 // Die Namen sind mehr oder weniger einfache Übersetzungen - inhaltlich sollte man da (bis auf die Hierarchie) nicht
 // zu viel reindeuten.
@@ -14,11 +14,13 @@ sealed class ActivityPathPart {
   abstract val title: String
   abstract val isComplete: Boolean
 
+  @JsonIgnoreProperties("complete")
   data class Activity(
     override val title: String,
     override val isComplete: Boolean = true
   ): ActivityPathPart()
 
+  @JsonIgnoreProperties(value = ["complete", "paths"])
   data class Kind(
     override val title: String,
     val activities: Set<Activity>,
@@ -33,6 +35,7 @@ sealed class ActivityPathPart {
       }
   }
 
+  @JsonIgnoreProperties(value = ["complete", "paths"])
   data class Contract(
     override val title: String,
     val kinds: Set<Kind>,
@@ -51,6 +54,7 @@ sealed class ActivityPathPart {
       }
   }
 
+  @JsonIgnoreProperties(value = ["complete", "paths"])
   data class Enterprise(
     override val title: String,
     val contracts: Set<Contract>,
