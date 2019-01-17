@@ -3,19 +3,26 @@ package wi.co.timetracker.view.bmzef
 import javafx.beans.binding.BooleanExpression
 import javafx.scene.layout.Priority.ALWAYS
 import tornadofx.*
+import wi.co.timetracker.controller.BmzefWizardController
 
 class CheckAssignments: View("Zuordnungen Prüfen") {
 
   private val model: BmzefWizardData by inject()
 
+  private val controller: BmzefWizardController by inject()
+
   override val complete: BooleanExpression
     get() = model.projectMapping.isComplete.toProperty()
 
   override val root = borderpane {
-    // prefWidth = 800.0
     top = borderpane {
       left = label("Bitte ordne jeder von dir selbst aufgezeichneten Tätigkeit eine Tätigkeit aus der bmzef zu.\nFalls du einen Eintrag aus dem bmzef vermisst oder diese Funktion zum ersten mal verwendest, klicke auf 'bmzef-Projekte aktualisieren'") {
         padding = tornadofx.insets(5)
+      }
+      right = button("bmzef-Projekte aktualisieren") {
+        action {
+          controller.reloadEnterprises()
+        }
       }
     }
     val sectionMargin = 10.0

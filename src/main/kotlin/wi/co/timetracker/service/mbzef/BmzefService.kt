@@ -1,6 +1,5 @@
 package wi.co.timetracker.service.mbzef
 
-import arrow.core.Either
 import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.module.kotlin.readValue
@@ -23,16 +22,6 @@ class BmzefService: Controller() {
         val possiblePaths = avalailabledEnterprises.flatMap { it.paths }
         possiblePaths.contains(path)
       }
-    }
-  }
-
-  fun readEnterpriseCount() = bmzefClient.readEnterpriseCount()
-
-  fun readAvailableEnterprises(onStep: () -> Unit = {}): Set<ActivityPathPart.Enterprise> {
-    val enterprises = bmzefClient.readEnterprisesFromWeb(onStep)
-    when (enterprises) {
-      is Either.Right -> return enterprises.b
-      else -> throw RuntimeException("Could not bmzef")
     }
   }
 

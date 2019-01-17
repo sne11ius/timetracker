@@ -1,23 +1,14 @@
 package wi.co.timetracker.controller
 
-import javafx.application.Platform
 import javafx.scene.chart.PieChart
-import javafx.stage.StageStyle.UNDECORATED
-import mu.KotlinLogging
 import tornadofx.*
 import wi.co.timetracker.extensions.*
 import wi.co.timetracker.model.MainModel
 import wi.co.timetracker.model.entry.MonthModel
 import wi.co.timetracker.service.FileLoader
-import wi.co.timetracker.service.mbzef.BmzefService
-import wi.co.timetracker.view.bmzef.BmzefWizard
-import wi.co.timetracker.view.bmzef.BmzefWizardData
-import wi.co.timetracker.view.bmzef.WaitController
-import wi.co.timetracker.view.bmzef.WaitDialog
 import java.time.Duration
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
-import kotlin.concurrent.thread
 
 class MainController(
   lineNums: String = "",
@@ -31,19 +22,10 @@ class MainController(
   excelSummaryDescription: String = "",
   excelSummarySum: String = ""
 ) : Controller() {
-  private val logger = KotlinLogging.logger {}
 
   private val fileLoader: FileLoader by di()
 
   private val preferencesController: PreferencesController by inject()
-
-  private val waitController: WaitController by inject()
-
-  private val bmzefWizardData: BmzefWizardData by inject()
-
-  private val bmzefService: BmzefService by inject()
-
-  private val model: BmzefWizardData by inject()
 
   val mainModel = MainModel()
 
@@ -130,32 +112,6 @@ class MainController(
       fileLoader.autoFixFiles(baseDir, false)
       readDatesWithErrors()
     })
-  }
-
-  fun runTimeTracking() {
-    model.beginDate = LocalDate.now().minusDays(1)
-    model.endDate = LocalDate.now()
-    find<WaitDialog>() {
-      openModal(stageStyle = UNDECORATED)
-      thread {
-        val enterpriseCount = bmzefService.readEnterpriseCount()
-        var count = 0.0
-        val allEnterpriseses = bmzefService.readAvailableEnterprises({
-          count += 1
-          Platform.runLater {
-            val currentProgress: Double = count / enterpriseCount
-            waitController.progressProperty().value = currentProgress
-          }
-        })
-        Platform.runLater {
-          close()
-          bmzefWizardData.avalailabledEnterprises = allEnterpriseses
-          find<BmzefWizard>() {
-            openModal()
-          }
-        }
-      }
-    }
   }
 
   private fun reload(date: LocalDate) {

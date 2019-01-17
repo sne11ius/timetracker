@@ -8,6 +8,7 @@ import javafx.scene.control.SelectionMode
 import jfxtras.scene.control.LocalDatePicker
 import mu.KotlinLogging
 import tornadofx.*
+import wi.co.timetracker.controller.BmzefWizardController
 import wi.co.timetracker.controller.MainController
 import java.time.LocalDate
 
@@ -15,7 +16,8 @@ class MainView : View() {
 
   private val logger = KotlinLogging.logger {}
 
-  private val controller: MainController by inject()
+  private val mainController: MainController by inject()
+  private val bmzefWizardController: BmzefWizardController by inject()
 
   override val root = borderpane {
     minWidth = 500.0
@@ -25,7 +27,7 @@ class MainView : View() {
       button("Zeit it!") {
         action {
           logger.debug { "Zeiterfassing now" }
-          controller.runTimeTracking()
+          bmzefWizardController.runTimeTracking()
         }
       }
       button("Einstellungen") {
@@ -36,9 +38,9 @@ class MainView : View() {
     }
     center = borderpane {
       top = hbox {
-        label { prefWidth = 160.0 }.bind(controller.dayPartProperty())
-        label { prefWidth = 160.0 }.bind(controller.weekPartProperty())
-        label { prefWidth = 160.0 }.bind(controller.monthPartProperty())
+        label { prefWidth = 160.0 }.bind(mainController.dayPartProperty())
+        label { prefWidth = 160.0 }.bind(mainController.weekPartProperty())
+        label { prefWidth = 160.0 }.bind(mainController.monthPartProperty())
       }
       center = tabpane {
         tab("Daten eingeben") {
@@ -51,22 +53,22 @@ class MainView : View() {
                   minWidth = 40.0
                   isEditable = false
                   isDisable = true
-                  bind(controller.lineNumbersProperty())
+                  bind(mainController.lineNumbersProperty())
                   nodeOrientation = NodeOrientation.RIGHT_TO_LEFT
                 }
                 center = textarea {
-                  bind(controller.mainModel.fileContentProperty())
+                  bind(mainController.mainModel.fileContentProperty())
                 }
               }
               textarea {
                 isEditable = false
-              }.bind(controller.mainModel.errorsProperty())
+              }.bind(mainController.mainModel.errorsProperty())
             }
             textarea {
               prefWidth = 300.0
               minWidth = 300.0
               isEditable = false
-              bind(controller.summaryProperty())
+              bind(mainController.summaryProperty())
             }
           }
         }
@@ -75,7 +77,7 @@ class MainView : View() {
           borderpane {
             top = label("Summe (ohne Excel-Korrektur): 50") {
               paddingAll = 10.0
-              bind(controller.excelSummarySumProperty())
+              bind(mainController.excelSummarySumProperty())
             }
             center = borderpane {
               center = hbox {
@@ -87,7 +89,7 @@ class MainView : View() {
                   }
                   center = textarea {
                     isEditable = false
-                    bind(controller.excelSummaryDateProperty())
+                    bind(mainController.excelSummaryDateProperty())
                   }
                 }
                 borderpane {
@@ -97,7 +99,7 @@ class MainView : View() {
                   }
                   center = textarea {
                     isEditable = false
-                    bind(controller.excelSummaryTimeProperty())
+                    bind(mainController.excelSummaryTimeProperty())
                   }
                 }
                 borderpane {
@@ -107,20 +109,20 @@ class MainView : View() {
                   }
                   center = textarea {
                     isEditable = false
-                    bind(controller.excelSummaryDescriptionProperty())
+                    bind(mainController.excelSummaryDescriptionProperty())
                   }
                 }
               }
             }
-            right = listview(controller.projectsInMonth) {
+            right = listview(mainController.projectsInMonth) {
               selectionModel.selectionMode = SelectionMode.SINGLE
-              bindSelected(controller.currentExcelSummaryProjectProperty())
+              bindSelected(mainController.currentExcelSummaryProjectProperty())
             }
           }
         }
         tab("Charts") {
           isClosable = false
-          piechart("Monat", controller.monthChartData)
+          piechart("Monat", mainController.monthChartData)
         }
         tab("Fehler") {
           isClosable = false
@@ -132,32 +134,32 @@ class MainView : View() {
                   minWidth = 40.0
                   isEditable = false
                   isDisable = true
-                  bind(controller.lineNumbersProperty())
+                  bind(mainController.lineNumbersProperty())
                   nodeOrientation = NodeOrientation.RIGHT_TO_LEFT
                 }
                 center = textarea {
-                  bind(controller.mainModel.fileContentProperty())
+                  bind(mainController.mainModel.fileContentProperty())
                 }
               }
               textarea {
                 isEditable = false
-              }.bind(controller.mainModel.errorsProperty())
+              }.bind(mainController.mainModel.errorsProperty())
             }
             borderpane {
-              center = listview(controller.daysWithErrors) {
+              center = listview(mainController.daysWithErrors) {
                 selectionModel.selectionMode = SelectionMode.SINGLE
-                bindSelected(controller.mainModel.currentDateProperty())
+                bindSelected(mainController.mainModel.currentDateProperty())
               }
               bottom = buttonbar {
                 padding = Insets(10.0, 0.0, 0.0, 0.0)
                 button("Fehler suchen") {
                   action {
-                    controller.readDatesWithErrors()
+                    mainController.readDatesWithErrors()
                   }
                 }
                 button("Auto fix") {
                   action {
-                    controller.autoFixFiles()
+                    mainController.autoFixFiles()
                   }
                 }
               }
@@ -173,26 +175,26 @@ class MainView : View() {
         prefWidth = 250.0
         allowNull = false
         mode = LocalDatePicker.Mode.SINGLE
-        bindBidirectional(localDateProperty(), controller.mainModel.currentDateProperty())
+        bindBidirectional(localDateProperty(), mainController.mainModel.currentDateProperty())
       }
       hbox {
         button("\uD83E\uDC50") {
           prefWidth = 125.0
           action {
-            controller.mainModel.currentDate = controller.mainModel.currentDate.minusDays(1)
+            mainController.mainModel.currentDate = mainController.mainModel.currentDate.minusDays(1)
           }
         }
         button("\uD83E\uDC52") {
           prefWidth = 125.0
           action {
-            controller.mainModel.currentDate = controller.mainModel.currentDate.plusDays(1)
+            mainController.mainModel.currentDate = mainController.mainModel.currentDate.plusDays(1)
           }
         }
       }
       button("Heute") {
         prefWidth = 250.0
         action {
-          controller.mainModel.currentDate = LocalDate.now()
+          mainController.mainModel.currentDate = LocalDate.now()
         }
       }
     }
