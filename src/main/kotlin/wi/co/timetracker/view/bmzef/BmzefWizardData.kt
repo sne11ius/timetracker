@@ -3,6 +3,7 @@ package wi.co.timetracker.view.bmzef
 import javafx.collections.FXCollections
 import javafx.collections.ObservableList
 import tornadofx.*
+import wi.co.timetracker.model.bmzef.ActivityPath
 import wi.co.timetracker.model.bmzef.ActivityPathPart
 import wi.co.timetracker.service.mbzef.BmzefService
 import java.time.LocalDate
@@ -22,7 +23,7 @@ class BmzefWizardData(
   selectedContract: String? = null,
   selectedKind: String? = null,
   selectedActivity: String? = null
-): ViewModel() {
+) : ViewModel() {
   var projectMapping: BmzefService.ProjectMapping by property(projectMapping)
 
   var avalailabledEnterprises: Set<ActivityPathPart.Enterprise> by property(avalailabledEnterprises)
@@ -62,4 +63,19 @@ class BmzefWizardData(
 
   var selectedActivity: String by property(selectedActivity)
   fun selectedActivityProperty() = getProperty(BmzefWizardData::selectedActivity)
+
+  val selectedPath: ActivityPath
+    get() {
+      val enterprise = selectedEnterprise
+      @Suppress("SENSELESS_COMPARISON") // "Wir können hier Niemandem trauen"
+      return if (null == enterprise)
+        ActivityPath.NoPath
+      else
+        ActivityPath.Path(
+          enterprise,
+          selectedContract,
+          selectedKind,
+          selectedActivity
+        )
+    }
 }

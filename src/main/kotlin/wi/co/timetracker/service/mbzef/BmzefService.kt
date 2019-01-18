@@ -45,6 +45,22 @@ class BmzefService: Controller() {
       )
     }
 
+    operator fun plus(mappedEntry: Pair<String, ActivityPath.Path>): ProjectMapping {
+      return copy(
+        mappedEntries = mappedEntries
+          .filter { it.entryText != mappedEntry.first }
+          .toSet() + BmzefService.EntryMapping(mappedEntry.first, mappedEntry.second),
+        unmappedEntries = unmappedEntries - mappedEntry.first
+      )
+    }
+
+    operator fun minus(unmappedEntryText: String): ProjectMapping {
+      return copy(
+        mappedEntries = mappedEntries.filter { it.entryText != unmappedEntryText }.toSet(),
+        unmappedEntries = unmappedEntries + unmappedEntryText
+      )
+    }
+
     @JsonIgnore
     val isComplete = unmappedEntries.isEmpty()
     @JsonIgnore

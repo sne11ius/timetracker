@@ -95,74 +95,51 @@ class BmzefWizard: Wizard("Bmzef all the things!") {
 
   private fun selectionChanged() {
     logger.debug { "Selected entry text: ${model.selectedEntryText}" }
-    val selectedPath: ActivityPath = with(model) {
-      val enterprise = selectedEnterprise
-      @Suppress("SENSELESS_COMPARISON") // "Wir können hier Niemandem trauen"
-      if (null == enterprise)
-        ActivityPath.NoPath
-      else
-      ActivityPath.Path(
-        enterprise,
-        selectedContract,
-        selectedKind,
-        selectedActivity
-      )
-    }
-    logger.debug { selectedPath }
+    val selectedPath = model.selectedPath
     when (selectedPath) {
-      is ActivityPath.NoPath -> {
-        logger.debug { "This is not a valid path :D" }
-      }
       is ActivityPath.Path -> {
         @Suppress("SENSELESS_COMPARISON") // "Wir können hier Niemandem trauen"
         if (model.selectedEntryText != null) {
           if (service.isValid(selectedPath, model.avalailabledEnterprises)) {
             logger.debug { "Path seems valid." }
             if (model.selectedEntryText.isUnchecked) {
-              updateSelection = false
-              val newEntryText = model.selectedEntryText.checked
-              model.entryTexts.remove(model.selectedEntryText)
-              model.entryTexts.add(newEntryText)
-              model.entryTexts.sort()
-              model.selectedEntryText = newEntryText
-              entriesListView!!.selectionModel.select(newEntryText)
-              updateSelection = true
+              checkSelectedEntry()
             }
-            model.projectMapping = model.projectMapping.run {
-              copy(
-                mappedEntries = mappedEntries
-                  .filter { it.entryText != model.selectedEntryText.unchecked }
-                  .toSet() + BmzefService.EntryMapping(model.selectedEntryText.unchecked, selectedPath),
-                unmappedEntries = unmappedEntries - model.selectedEntryText.unchecked
-              )
-            }
+            model.projectMapping += Pair(model.selectedEntryText.unchecked, selectedPath)
           } else {
             logger.debug { "Path is not valid." }
             if (model.selectedEntryText.isChecked) {
-              updateSelection = false
-              val newEntryText = model.selectedEntryText.unchecked
-              model.entryTexts.remove(model.selectedEntryText)
-              model.entryTexts.add(newEntryText)
-              model.entryTexts.sort()
-              model.selectedEntryText = newEntryText
-              entriesListView!!.selectionModel.select(newEntryText)
-              updateSelection = true
+              uncheckSelectedEntry()
             }
-            model.projectMapping = model.projectMapping.run {
-              copy(
-                mappedEntries = mappedEntries.filter { it.entryText != model.selectedEntryText }.toSet(),
-                unmappedEntries = unmappedEntries + model.selectedEntryText
-              )
-            }
+            model.projectMapping -= model.selectedEntryText
           }
         }
       }
     }
 
-    if (model.projectMapping.isComplete) {
-      logger.debug { "Mapping is complete" }
-    }
     find(CheckAssignments::class).complete.value = model.projectMapping.isComplete
+  }
+
+  private fun checkSelectedEntry() {
+    updateSelection = false
+    val newEntryText = model.selectedEntryText.checked
+    model.entryTexts.remove(model.selectedEntryText)
+    model.entryTexts.add(newEntryText)
+    model.entryTexts.sort()
+    model.selectedEntryText = newEntryText
+    entriesListView!!.selectionModel.select(newEntryText)
+    updateSelection = true
+  }
+
+  private fun uncheckSelectedEntry() {
+    updateSelection = false
+    val newEntryText = model.selectedEntryText.unchecked
+    model.entryTexts.remove(model.selectedEntryText)
+    model.entryTexts.add(newEntryText)
+    model.entryTexts.sort()
+    model.selectedEntryText = newEntryText
+    entriesListView!!.selectionModel.select(newEntryText)
+    updateSelection = true
   }
 
   override fun onSave() {
