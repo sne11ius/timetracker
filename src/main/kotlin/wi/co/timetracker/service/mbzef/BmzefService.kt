@@ -48,8 +48,6 @@ class BmzefService: Controller() {
     @JsonIgnore
     val isComplete = unmappedEntries.isEmpty()
     @JsonIgnore
-    val isIncomplete = !isComplete
-    @JsonIgnore
     val texts = mappedEntries.map { it.entryText } + unmappedEntries
   }
 
