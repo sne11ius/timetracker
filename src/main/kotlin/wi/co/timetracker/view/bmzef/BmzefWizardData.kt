@@ -5,12 +5,12 @@ import javafx.collections.ObservableList
 import tornadofx.*
 import wi.co.timetracker.model.bmzef.ActivityPath
 import wi.co.timetracker.model.bmzef.ActivityPathPart
-import wi.co.timetracker.service.mbzef.BmzefService
+import wi.co.timetracker.model.bmzef.ProjectMapping
 import java.time.LocalDate
 
 class BmzefWizardData(
   avalailabledEnterprises: Set<ActivityPathPart.Enterprise> = emptySet(),
-  projectMapping: BmzefService.ProjectMapping = BmzefService.ProjectMapping(),
+  projectMapping: ProjectMapping = ProjectMapping(),
   beginDate: LocalDate = LocalDate.now().minusDays(1),
   endDate: LocalDate = LocalDate.now(),
   enterpriseTitles: List<String> = emptyList(),
@@ -24,7 +24,7 @@ class BmzefWizardData(
   selectedKind: String? = null,
   selectedActivity: String? = null
 ) : ViewModel() {
-  var projectMapping: BmzefService.ProjectMapping by property(projectMapping)
+  var projectMapping: ProjectMapping by property(projectMapping)
 
   var avalailabledEnterprises: Set<ActivityPathPart.Enterprise> by property(avalailabledEnterprises)
 

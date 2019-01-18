@@ -1,6 +1,5 @@
 package wi.co.timetracker.view.bmzef
 
-import javafx.beans.binding.BooleanExpression
 import javafx.scene.layout.Priority.ALWAYS
 import tornadofx.*
 import wi.co.timetracker.controller.BmzefWizardController

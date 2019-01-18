@@ -69,7 +69,6 @@ class BmzefWizard: Wizard("Bmzef all the things!") {
         val newValue = selectedValue?.unchecked
         logger.debug { "Selected text: $newValue" }
         val path = projectMapping.pathFor(newValue)
-        enterprisesListView
         when (path) {
           is ActivityPath.NoPath -> {
             Platform.runLater {
@@ -91,28 +90,27 @@ class BmzefWizard: Wizard("Bmzef all the things!") {
         }
       }
     }
+    selectionChanged()
   }
 
   private fun selectionChanged() {
     logger.debug { "Selected entry text: ${model.selectedEntryText}" }
     val selectedPath = model.selectedPath
-    when (selectedPath) {
-      is ActivityPath.Path -> {
-        @Suppress("SENSELESS_COMPARISON") // "Wir können hier Niemandem trauen"
-        if (model.selectedEntryText != null) {
-          if (service.isValid(selectedPath, model.avalailabledEnterprises)) {
-            logger.debug { "Path seems valid." }
-            if (model.selectedEntryText.isUnchecked) {
-              checkSelectedEntry()
-            }
-            model.projectMapping += Pair(model.selectedEntryText.unchecked, selectedPath)
-          } else {
-            logger.debug { "Path is not valid." }
-            if (model.selectedEntryText.isChecked) {
-              uncheckSelectedEntry()
-            }
-            model.projectMapping -= model.selectedEntryText
+    if (selectedPath is ActivityPath.Path) {
+      @Suppress("SENSELESS_COMPARISON") // "Wir können hier Niemandem trauen"
+      if (model.selectedEntryText != null) {
+        if (service.isValid(selectedPath, model.avalailabledEnterprises)) {
+          logger.debug { "Path seems valid." }
+          if (model.selectedEntryText.isUnchecked) {
+            checkSelectedEntry()
           }
+          model.projectMapping += Pair(model.selectedEntryText.unchecked, selectedPath)
+        } else {
+          logger.debug { "Path is not valid." }
+          if (model.selectedEntryText.isChecked) {
+            uncheckSelectedEntry()
+          }
+          model.projectMapping -= model.selectedEntryText
         }
       }
     }

@@ -24,7 +24,7 @@ class MainView : View() {
     minHeight = 500.0
     paddingAll = 10.0
     top = buttonbar {
-      button("Zeit it!") {
+      button("bmzef it!") {
         action {
           logger.debug { "Zeiterfassing now" }
           bmzefWizardController.runTimeTracking()

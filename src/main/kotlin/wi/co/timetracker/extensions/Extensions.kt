@@ -1,5 +1,6 @@
 package wi.co.timetracker.extensions
 
+import kotlinx.coroutines.ObsoleteCoroutinesApi
 import kotlinx.coroutines.async
 import kotlinx.coroutines.newFixedThreadPoolContext
 import kotlinx.coroutines.runBlocking
@@ -19,7 +20,6 @@ fun DayOfWeek.isWeekend(): Boolean = this == DayOfWeek.SATURDAY || this == DayOf
 fun DayOfWeek.isWorkDay(): Boolean = !isWeekend()
 fun DayOfWeek.getExpectedWorkDuration(): Duration = if (this.isWorkDay()) Duration.ofHours(8) else Duration.ZERO
 
-// fun LocalDate.formatDefault(): String = format("dd.MM.YYYY")
 fun LocalDate.format(format: String): String = format(java.time.format.DateTimeFormatter.ofPattern(format))
 
 fun Duration.formatDefault(): String {
@@ -57,13 +57,10 @@ val String.isUnchecked
   get() = !this.isChecked
 
 // Da wir im Allgemeinen auf IO warten, ist der Default-Pool viel zu klein
+@ObsoleteCoroutinesApi
 private val fixedThreadPoolContext = newFixedThreadPoolContext(100, "background")
 
-// Parallel map ftw
-fun <A, B> Iterable<A>.pmap(f: suspend (A) -> B): List<B> = runBlocking {
-  map { async(fixedThreadPoolContext) { f(it) } }.map { it.await() }
-}
-
+@ObsoleteCoroutinesApi
 fun <A, B> Iterable<A>.pflatMap(f: suspend (A) -> Iterable<B>): List<B> = runBlocking {
   map { async(fixedThreadPoolContext) { f(it) } }.flatMap { it.await() }
 }

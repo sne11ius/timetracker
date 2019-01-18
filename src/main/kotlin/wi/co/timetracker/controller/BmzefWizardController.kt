@@ -36,6 +36,7 @@ class BmzefWizardController : Controller() {
   fun runTimeTracking() {
     model.beginDate = LocalDate.now().minusDays(1)
     model.endDate = LocalDate.now()
+    reloadEntries()
     loadEnterprises({
       find<BmzefWizard>() {
         openModal()
@@ -104,8 +105,9 @@ class BmzefWizardController : Controller() {
     while (currentDay != end.plusDays(1)) {
       val (_, errors, entry) = fileLoader.loadDay(currentDay, preferencesController.baseDir)
       if (errors.hasErrors) {
-        Alert(Alert.AlertType.ERROR, "Datei für $currentDay ist leider kaputt.").showAndWait()
-        throw RuntimeException()
+        val errorString = "\n\t- " + errors.joinToString("\n\t- ") { (_, message, severity) -> "$severity: $message" }
+        Alert(Alert.AlertType.ERROR, "Datei für $currentDay ist leider kaputt: $errorString").showAndWait()
+        return
       }
       if (entry != null) {
         models += with (preferencesController) {
