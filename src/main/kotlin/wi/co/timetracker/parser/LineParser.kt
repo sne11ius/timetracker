@@ -49,19 +49,23 @@ class LineParser : Grammar<EntryModel>() {
 
   override val rootParser = entryWithComment
 
-    fun parseLine(baseDate: LocalDate, line: String): SingleLineParseResult {
-        val res = tryParseToEnd(line)
-        return when (res) {
-            is Parsed -> {
-                val model = res.value
-                val baseTime = LocalDateTime.of(baseDate, LocalTime.now()).withHour(0).withMinute(0).truncatedTo(MINUTES)
-                val begin = baseTime.withHour(model.begin.hour).withMinute(model.begin.minute)
-                val end = baseTime.withHour(model.end.hour).withMinute(model.end.minute)
-                LineParser.SingleLineParseResult(emptyList(), model.copy(begin = begin, end = end))
-            }
-            is ErrorResult -> {
-                LineParser.SingleLineParseResult(listOf(ParseError(Severity.ERROR, 0, res.toString())))
-            }
-        }
+  fun parseLine(baseDate: LocalDate, line: String): SingleLineParseResult {
+    val script = line.substringBefore('#').trim()
+    if (script.isEmpty()) {
+      return SingleLineParseResult(emptyList())
     }
+    val res = tryParseToEnd(script)
+    return when (res) {
+      is Parsed -> {
+        val model = res.value
+        val baseTime = LocalDateTime.of(baseDate, LocalTime.now()).withHour(0).withMinute(0).truncatedTo(MINUTES)
+        val begin = baseTime.withHour(model.begin.hour).withMinute(model.begin.minute)
+        val end = baseTime.withHour(model.end.hour).withMinute(model.end.minute)
+        LineParser.SingleLineParseResult(emptyList(), model.copy(begin = begin, end = end))
+      }
+      is ErrorResult -> {
+        LineParser.SingleLineParseResult(listOf(ParseError(Severity.ERROR, 0, res.toString())))
+      }
+    }
+  }
 }
