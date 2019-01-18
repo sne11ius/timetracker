@@ -44,7 +44,7 @@ class BmzefWizardController : Controller() {
   }
 
   fun reloadEnterprises() {
-    loadEnterprises({}, true)
+    loadEnterprises({ reloadEntries() }, true)
   }
 
   private fun loadEnterprises(andThen: () -> Unit, forceUpdate: Boolean = false) {

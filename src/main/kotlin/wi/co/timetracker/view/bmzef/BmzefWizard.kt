@@ -97,6 +97,7 @@ class BmzefWizard: Wizard("Bmzef all the things!") {
     logger.debug { "Selected entry text: ${model.selectedEntryText}" }
     val selectedPath: ActivityPath = with(model) {
       val enterprise = selectedEnterprise
+      @Suppress("SENSELESS_COMPARISON") // "Wir können hier Niemandem trauen"
       if (null == enterprise)
         ActivityPath.NoPath
       else
@@ -113,6 +114,7 @@ class BmzefWizard: Wizard("Bmzef all the things!") {
         logger.debug { "This is not a valid path :D" }
       }
       is ActivityPath.Path -> {
+        @Suppress("SENSELESS_COMPARISON") // "Wir können hier Niemandem trauen"
         if (model.selectedEntryText != null) {
           if (service.isValid(selectedPath, model.avalailabledEnterprises)) {
             logger.debug { "Path seems valid." }
@@ -160,7 +162,7 @@ class BmzefWizard: Wizard("Bmzef all the things!") {
     if (model.projectMapping.isComplete) {
       logger.debug { "Mapping is complete" }
     }
-    isComplete = model.projectMapping.isComplete
+    find(CheckAssignments::class).complete.value = model.projectMapping.isComplete
   }
 
   override fun onSave() {
@@ -168,8 +170,7 @@ class BmzefWizard: Wizard("Bmzef all the things!") {
     service.updateProjectMappingCache(model.projectMapping)
   }
 
-  // override val canFinish = allPagesComplete
-  override val canFinish = isComplete.toProperty()
+  override val canFinish = allPagesComplete
   override val canGoNext = currentPageComplete
 
 }

@@ -11,8 +11,7 @@ class CheckAssignments: View("Zuordnungen Prüfen") {
 
   private val controller: BmzefWizardController by inject()
 
-  override val complete: BooleanExpression
-    get() = model.projectMapping.isComplete.toProperty()
+  override val complete = false.toProperty()
 
   override val root = borderpane {
     top = borderpane {
