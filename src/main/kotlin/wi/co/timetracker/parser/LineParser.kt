@@ -50,11 +50,10 @@ class LineParser : Grammar<EntryModel>() {
   override val rootParser = entryWithComment
 
   fun parseLine(baseDate: LocalDate, line: String): SingleLineParseResult {
-    val script = line.substringBefore('#').trim()
-    if (script.isEmpty()) {
+    if (line.trim().startsWith('#')) {
       return SingleLineParseResult(emptyList())
     }
-    val res = tryParseToEnd(script)
+    val res = tryParseToEnd(line)
     return when (res) {
       is Parsed -> {
         val model = res.value
