@@ -6,12 +6,14 @@ import wi.co.timetracker.controller.PreferencesController
 import wi.co.timetracker.model.bmzef.ActivityPath
 import wi.co.timetracker.model.bmzef.ActivityPathPart
 import wi.co.timetracker.model.bmzef.ProjectMapping
+import wi.co.timetracker.model.summary.DaySummaryModel
 import wi.co.timetracker.service.mapper
 import java.io.File
 
 class BmzefService: Controller() {
 
   private val preferencesController: PreferencesController by inject()
+  private val bmzefClient: BmzefClient by inject()
 
   fun isValid(path: ActivityPath, avalailabledEnterprises: Set<ActivityPathPart.Enterprise>): Boolean {
     return when (path) {
@@ -52,6 +54,12 @@ class BmzefService: Controller() {
       mappedEntries,
       unmappedEntries
     )
+  }
+
+  fun commit(summaryModels: List<DaySummaryModel>, projectMapping: ProjectMapping) {
+    summaryModels.forEach {
+      bmzefClient.commit(it, projectMapping)
+    }
   }
 
 }

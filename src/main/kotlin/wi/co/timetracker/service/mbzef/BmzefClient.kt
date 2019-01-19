@@ -9,8 +9,11 @@ import org.jsoup.Jsoup.connect
 import org.jsoup.nodes.Document
 import tornadofx.*
 import wi.co.timetracker.controller.PreferencesController
+import wi.co.timetracker.extensions.format
 import wi.co.timetracker.extensions.pflatMap
 import wi.co.timetracker.model.bmzef.ActivityPathPart
+import wi.co.timetracker.model.bmzef.ProjectMapping
+import wi.co.timetracker.model.summary.DaySummaryModel
 import java.time.Duration
 import java.time.LocalDateTime.now
 
@@ -59,7 +62,7 @@ private class Sulfur(val baseUrl: String) {
 
 class BmzefClient : Controller() {
 
-  private val event ="REQUEST.EVENT"
+  private val event = "REQUEST.EVENT"
 
   private val preferencesController: PreferencesController by inject()
 
@@ -184,6 +187,17 @@ class BmzefClient : Controller() {
           onStep()
           ActivityPathPart.Enterprise(vorhabenName, contracts)
         }.toSet()
+    }
+  }
+
+  fun commit(summaryModel: DaySummaryModel, projectMapping: ProjectMapping) {
+    val baseUrl = preferencesController.bmzefBaseUrl
+    val dateString = summaryModel.day.format("dd.MM.yyyy")
+
+    Sulfur(baseUrl).run {
+      val mainForm = loadMainPage()
+      val mainFormForDate = postMainForm(mainForm, "datumAuswaehlen", "datumField", dateString)
+      println(mainFormForDate)
     }
   }
 }

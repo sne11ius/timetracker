@@ -23,7 +23,7 @@ var activitiesListView: ListView<String>? = null
 class BmzefWizard : Wizard("Bmzef all the things!") {
 
   private val logger = KotlinLogging.logger {}
-  private val service: BmzefService by inject()
+  private val bmzefService: BmzefService by inject()
   private val model: BmzefWizardData by inject()
   private var updateSelection = true
 
@@ -96,7 +96,7 @@ class BmzefWizard : Wizard("Bmzef all the things!") {
     if (selectedPath is ActivityPath.Path) {
       @Suppress("SENSELESS_COMPARISON") // "Wir können hier Niemandem trauen"
       if (model.selectedEntryText != null) {
-        if (service.isValid(selectedPath, model.avalailabledEnterprises)) {
+        if (bmzefService.isValid(selectedPath, model.avalailabledEnterprises)) {
           if (model.selectedEntryText.isUnchecked) {
             checkSelectedEntry()
           }
@@ -136,8 +136,9 @@ class BmzefWizard : Wizard("Bmzef all the things!") {
   }
 
   override fun onSave() {
-    service.updateProjectMappingCache(model.projectMapping)
+    bmzefService.updateProjectMappingCache(model.projectMapping)
     logger.debug { mapper.writeValueAsString(model.projectMapping) }
+    bmzefService.commit(model.daySummaryModels, model.projectMapping)
     close()
   }
 
