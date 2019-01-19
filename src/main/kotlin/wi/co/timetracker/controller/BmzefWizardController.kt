@@ -122,7 +122,7 @@ class BmzefWizardController : Controller() {
       .map { m -> m.copy(entries = m.entries.filter { entry -> preferencesController.bmzefIgnoreIndicators.none { it == entry.text } }) }
       .filter { m -> m.entries.isNotEmpty() }
       .toMutableList()
-    val allEntries = models.flatMap { it.entries }.map { it.text }.toSet()
+    val allEntries = models.flatMap { it.entries }.map { it.text }.filter { text -> preferencesController.bmzefIgnoreIndicators.none { it == text } }.toSet()
     model.projectMapping *= bmzefService.loadMapping(allEntries)
     with(model) {
       val entries = allEntries.map { if (projectMapping.unmappedEntries.contains(it)) it else it.checked }.toList().sorted()
