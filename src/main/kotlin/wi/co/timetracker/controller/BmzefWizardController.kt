@@ -4,10 +4,12 @@ import arrow.core.Either
 import com.fasterxml.jackson.module.kotlin.readValue
 import javafx.application.Platform
 import javafx.scene.control.Alert
+import javafx.scene.control.Alert.AlertType.ERROR
 import javafx.stage.StageStyle
 import mu.KotlinLogging
 import tornadofx.*
 import wi.co.timetracker.extensions.checked
+import wi.co.timetracker.model.bmzef.ActivityPathPart
 import wi.co.timetracker.model.parser.hasErrors
 import wi.co.timetracker.model.summary.DaySummaryModel
 import wi.co.timetracker.service.FileLoader
@@ -19,7 +21,6 @@ import wi.co.timetracker.view.bmzef.BmzefWizardData
 import wi.co.timetracker.view.bmzef.WaitController
 import wi.co.timetracker.view.bmzef.WaitDialog
 import java.io.File
-import java.time.LocalDate
 import kotlin.concurrent.thread
 
 class BmzefWizardController : Controller() {
@@ -34,21 +35,21 @@ class BmzefWizardController : Controller() {
   private val bmzefClient: BmzefClient by inject()
 
   fun runTimeTracking() {
-    model.beginDate = LocalDate.now().minusDays(1)
-    model.endDate = LocalDate.now()
-    reloadEntries()
+    find<BmzefWizard>() {
+      reloadEnterprises(::reset, false)
+      currentPage = pages.first()
+      openModal()
+    }
+  }
+
+  fun reloadEnterprises(withEnterprises: (Set<ActivityPathPart.Enterprise>) -> Unit = {}, forceUpdate: Boolean = true) {
     loadEnterprises({
-      find<BmzefWizard>() {
-        openModal()
-      }
-    })
+      withEnterprises(it)
+      reloadEntries()
+    }, forceUpdate)
   }
 
-  fun reloadEnterprises() {
-    loadEnterprises({ reloadEntries() }, true)
-  }
-
-  private fun loadEnterprises(andThen: () -> Unit, forceUpdate: Boolean = false) {
+  private fun loadEnterprises(andThen: (Set<ActivityPathPart.Enterprise>) -> Unit, forceUpdate: Boolean = false) {
     waitController.progressProperty().value = 0
     find<WaitDialog>() {
       openModal(stageStyle = StageStyle.UNDECORATED)
@@ -71,21 +72,18 @@ class BmzefWizardController : Controller() {
               is Either.Right -> allEnterpriseses.b
             }
             mapper.writeValue(enterprisesCacheFile, model.avalailabledEnterprises)
-            andThen()
+            andThen(
+              when (allEnterpriseses) {
+                is Either.Left -> throw RuntimeException(allEnterpriseses.a)
+                else -> allEnterpriseses.b
+              }
+            )
           }
         } else {
           model.avalailabledEnterprises = mapper.readValue(enterprisesCacheFile)
-          val enterpriseCount = model.avalailabledEnterprises.size
-          for (i in 1..enterpriseCount) {
-            Platform.runLater {
-              val currentProgress: Double = i.toDouble() / enterpriseCount
-              waitController.progressProperty().value = currentProgress
-            }
-            Thread.sleep(10)
-          }
           Platform.runLater {
             close()
-            andThen()
+            andThen(model.avalailabledEnterprises)
           }
         }
       }
@@ -106,11 +104,11 @@ class BmzefWizardController : Controller() {
       val (_, errors, entry) = fileLoader.loadDay(currentDay, preferencesController.baseDir)
       if (errors.hasErrors) {
         val errorString = "\n\t- " + errors.joinToString("\n\t- ") { (_, message, severity) -> "$severity: $message" }
-        Alert(Alert.AlertType.ERROR, "Datei für $currentDay ist leider kaputt: $errorString").showAndWait()
+        Alert(ERROR, "Datei für $currentDay ist leider kaputt: $errorString").showAndWait()
         return
       }
       if (entry != null) {
-        models += with (preferencesController) {
+        models += with(preferencesController) {
           entry.toDaySummaryModel(
             breakIndicators,
             travelIndicators,
@@ -120,15 +118,15 @@ class BmzefWizardController : Controller() {
       }
       currentDay = currentDay.plusDays(1)
     }
-    models = models
+    model.daySummaryModels = models
       .map { m -> m.copy(entries = m.entries.filter { entry -> preferencesController.bmzefIgnoreIndicators.none { it == entry.text } }) }
       .filter { m -> m.entries.isNotEmpty() }
       .toMutableList()
     val allEntries = models.flatMap { it.entries }.map { it.text }.toSet()
     model.projectMapping *= bmzefService.loadMapping(allEntries)
-    with (model) {
+    with(model) {
       val entries = allEntries.map { if (projectMapping.unmappedEntries.contains(it)) it else it.checked }.toList().sorted()
-      logger.debug { "${entries.size} entries for ${model.beginDate} - ${model.endDate}" }
+      logger.debug { "${entries.size} entries for $beginDate - $endDate" }
       entryTexts.setAll(entries)
     }
   }

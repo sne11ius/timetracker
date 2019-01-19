@@ -4,12 +4,10 @@ import javafx.scene.layout.Priority.ALWAYS
 import tornadofx.*
 import wi.co.timetracker.controller.BmzefWizardController
 
-class CheckAssignments: View("Zuordnungen Prüfen") {
+class CheckAssignments : View("Zuordnungen Prüfen") {
 
   private val model: BmzefWizardData by inject()
-
   private val controller: BmzefWizardController by inject()
-
   override val complete = false.toProperty()
 
   override val root = borderpane {
@@ -37,7 +35,9 @@ class CheckAssignments: View("Zuordnungen Prüfen") {
           }
         }
         entriesListView!!.bindSelected(model.selectedEntryTextProperty())
-        model.selectedEntryTextProperty().onChange { entriesListView!!.selectionModel.select(it) }
+        model.selectedEntryTextProperty().onChange {
+          entriesListView!!.selectionModel.select(it)
+        }
       }
       vbox {
         hboxConstraints {
@@ -51,7 +51,9 @@ class CheckAssignments: View("Zuordnungen Prüfen") {
           }
         }
         enterprisesListView!!.bindSelected(model.selectedEnterpriseProperty())
-        model.selectedEnterpriseProperty().onChange { enterprisesListView!!.selectionModel.select(it) }
+        model.selectedEnterpriseProperty().onChange {
+          enterprisesListView!!.selectionModel.select(it)
+        }
       }
       vbox {
         hboxConstraints {
@@ -65,7 +67,9 @@ class CheckAssignments: View("Zuordnungen Prüfen") {
           }
         }
         contractsListView!!.bindSelected(model.selectedContractProperty())
-        model.selectedContractProperty().onChange { contractsListView!!.selectionModel.select(it) }
+        model.selectedContractProperty().onChange {
+          contractsListView!!.selectionModel.select(it)
+        }
       }
       vbox {
         hboxConstraints {
@@ -79,7 +83,9 @@ class CheckAssignments: View("Zuordnungen Prüfen") {
           }
         }
         kindsListView!!.bindSelected(model.selectedKindProperty())
-        model.selectedKindProperty().onChange { kindsListView!!.selectionModel.select(it) }
+        model.selectedKindProperty().onChange {
+          kindsListView!!.selectionModel.select(it)
+        }
       }
       vbox {
         hboxConstraints {
@@ -92,7 +98,9 @@ class CheckAssignments: View("Zuordnungen Prüfen") {
           }
         }
         activitiesListView!!.bindSelected(model.selectedActivityProperty())
-        model.selectedActivityProperty().onChange { activitiesListView!!.selectionModel.select(it) }
+        model.selectedActivityProperty().onChange {
+          activitiesListView!!.selectionModel.select(it)
+        }
       }
     }
   }
