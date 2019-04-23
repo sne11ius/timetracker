@@ -172,27 +172,29 @@ class MainView : View() {
       spacing = 10.0
       paddingAll = 10.0
       this += LocalDatePicker().apply {
-        prefWidth = 250.0
+        prefWidth = 300.0
         allowNull = false
         mode = LocalDatePicker.Mode.SINGLE
         bindBidirectional(localDateProperty(), mainController.mainModel.currentDateProperty())
       }
       hbox {
-        button("\uD83E\uDC50") {
-          prefWidth = 125.0
+        // button("\uD83E\uDC50") { --> Waiting for https://bugs.openjdk.java.net/browse/JDK-8207839
+        button("<") {
+          prefWidth = 150.0
           action {
             mainController.mainModel.currentDate = mainController.mainModel.currentDate.minusDays(1)
           }
         }
-        button("\uD83E\uDC52") {
-          prefWidth = 125.0
+        // button("\uD83E\uDC52") { --> Waiting for https://bugs.openjdk.java.net/browse/JDK-8207839
+        button(">") {
+          prefWidth = 150.0
           action {
             mainController.mainModel.currentDate = mainController.mainModel.currentDate.plusDays(1)
           }
         }
       }
       button("Heute") {
-        prefWidth = 250.0
+        prefWidth = 300.0
         action {
           mainController.mainModel.currentDate = LocalDate.now()
         }
