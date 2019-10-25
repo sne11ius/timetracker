@@ -2,12 +2,14 @@ package wi.co.timetracker.controller
 
 import arrow.core.Either
 import com.fasterxml.jackson.module.kotlin.readValue
+import java.io.File
 import javafx.application.Platform
 import javafx.scene.control.Alert
 import javafx.scene.control.Alert.AlertType.ERROR
 import javafx.stage.StageStyle
+import kotlin.concurrent.thread
 import mu.KotlinLogging
-import tornadofx.*
+import tornadofx.Controller
 import wi.co.timetracker.extensions.checked
 import wi.co.timetracker.model.bmzef.ActivityPathPart
 import wi.co.timetracker.model.parser.hasErrors
@@ -20,8 +22,6 @@ import wi.co.timetracker.view.bmzef.BmzefWizard
 import wi.co.timetracker.view.bmzef.BmzefWizardData
 import wi.co.timetracker.view.bmzef.WaitController
 import wi.co.timetracker.view.bmzef.WaitDialog
-import java.io.File
-import kotlin.concurrent.thread
 
 class BmzefWizardController : Controller() {
 
@@ -130,5 +130,4 @@ class BmzefWizardController : Controller() {
       entryTexts.setAll(entries)
     }
   }
-
 }

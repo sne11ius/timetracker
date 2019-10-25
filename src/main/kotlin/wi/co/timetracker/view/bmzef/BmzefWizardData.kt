@@ -1,15 +1,17 @@
 package wi.co.timetracker.view.bmzef
 
+import java.time.LocalDate
 import javafx.application.Platform
 import javafx.collections.FXCollections
 import javafx.collections.ObservableList
-import tornadofx.*
+import tornadofx.ViewModel
+import tornadofx.getProperty
+import tornadofx.property
 import wi.co.timetracker.model.bmzef.ActivityPath
 import wi.co.timetracker.model.bmzef.ActivityPathPart
 import wi.co.timetracker.model.bmzef.ProjectMapping
 import wi.co.timetracker.model.bmzef.sortedTitles
 import wi.co.timetracker.model.summary.DaySummaryModel
-import java.time.LocalDate
 
 class BmzefWizardData(
   avalailabledEnterprises: Set<ActivityPathPart.Enterprise> = emptySet(),

@@ -1,18 +1,17 @@
 package wi.co.timetracker.model
 
+import java.io.File
+import java.time.LocalDate
 import tornadofx.getProperty
 import tornadofx.property
 import wi.co.timetracker.model.entry.DayModel
-import java.io.File
-import java.time.LocalDate
-
 
 class MainModel(
-        currentDate: LocalDate = LocalDate.now(),
-        file: File? = null,
-        fileContent: String = "",
-        dayModel: DayModel? = null,
-        errors: String = ""
+  currentDate: LocalDate = LocalDate.now(),
+  file: File? = null,
+  fileContent: String = "",
+  dayModel: DayModel? = null,
+  errors: String = ""
 ) {
 
     var currentDate: LocalDate by property(currentDate)

@@ -1,18 +1,23 @@
 package wi.co.timetracker.parser
 
-import com.github.h0tk3y.betterParse.combinators.*
+import com.github.h0tk3y.betterParse.combinators.and
+import com.github.h0tk3y.betterParse.combinators.map
+import com.github.h0tk3y.betterParse.combinators.optional
+import com.github.h0tk3y.betterParse.combinators.or
+import com.github.h0tk3y.betterParse.combinators.unaryMinus
+import com.github.h0tk3y.betterParse.combinators.use
 import com.github.h0tk3y.betterParse.grammar.Grammar
 import com.github.h0tk3y.betterParse.grammar.tryParseToEnd
 import com.github.h0tk3y.betterParse.parser.ErrorResult
 import com.github.h0tk3y.betterParse.parser.Parsed
-import org.springframework.stereotype.Component
-import wi.co.timetracker.model.entry.EntryModel
-import wi.co.timetracker.model.parser.ParseError
-import wi.co.timetracker.model.parser.Severity
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.temporal.ChronoUnit.MINUTES
+import org.springframework.stereotype.Component
+import wi.co.timetracker.model.entry.EntryModel
+import wi.co.timetracker.model.parser.ParseError
+import wi.co.timetracker.model.parser.Severity
 
 @Component
 class LineParser : Grammar<EntryModel>() {

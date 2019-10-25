@@ -1,7 +1,7 @@
 package wi.co.timetracker.model.summary
 
-import wi.co.timetracker.extensions.formatDecimal
 import java.time.LocalDate
+import wi.co.timetracker.extensions.formatDecimal
 
 data class DaySummaryModel(val day: LocalDate, val entries: List<EntrySummaryModel>) {
 
@@ -10,5 +10,4 @@ data class DaySummaryModel(val day: LocalDate, val entries: List<EntrySummaryMod
             s + "$text${if (comments.isNotBlank()) " ($comments)" else ""} = ${total.formatDecimal(2)}\n"
         }.trim()
     }
-
 }

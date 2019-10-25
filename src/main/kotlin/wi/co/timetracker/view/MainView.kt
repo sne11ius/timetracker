@@ -1,5 +1,6 @@
 package wi.co.timetracker.view
 
+import java.time.LocalDate
 import javafx.beans.binding.Bindings.bindBidirectional
 import javafx.geometry.Insets
 import javafx.geometry.NodeOrientation
@@ -7,10 +8,26 @@ import javafx.geometry.Orientation
 import javafx.scene.control.SelectionMode
 import jfxtras.scene.control.LocalDatePicker
 import mu.KotlinLogging
-import tornadofx.*
+import tornadofx.View
+import tornadofx.action
+import tornadofx.bind
+import tornadofx.bindSelected
+import tornadofx.borderpane
+import tornadofx.button
+import tornadofx.buttonbar
+import tornadofx.hbox
+import tornadofx.label
+import tornadofx.listview
+import tornadofx.paddingAll
+import tornadofx.piechart
+import tornadofx.plusAssign
+import tornadofx.splitpane
+import tornadofx.tab
+import tornadofx.tabpane
+import tornadofx.textarea
+import tornadofx.vbox
 import wi.co.timetracker.controller.BmzefWizardController
 import wi.co.timetracker.controller.MainController
-import java.time.LocalDate
 
 class MainView : View() {
 

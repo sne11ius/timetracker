@@ -1,14 +1,22 @@
 package wi.co.timetracker.controller
 
-import javafx.scene.chart.PieChart
-import tornadofx.*
-import wi.co.timetracker.extensions.*
-import wi.co.timetracker.model.MainModel
-import wi.co.timetracker.model.entry.MonthModel
-import wi.co.timetracker.service.FileLoader
 import java.time.Duration
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
+import javafx.scene.chart.PieChart
+import tornadofx.Controller
+import tornadofx.confirm
+import tornadofx.getProperty
+import tornadofx.observable
+import tornadofx.property
+import wi.co.timetracker.extensions.existsAndBlank
+import wi.co.timetracker.extensions.formatDecimal
+import wi.co.timetracker.extensions.formatDefault
+import wi.co.timetracker.extensions.isWeekend
+import wi.co.timetracker.extensions.toDouble
+import wi.co.timetracker.model.MainModel
+import wi.co.timetracker.model.entry.MonthModel
+import wi.co.timetracker.service.FileLoader
 
 class MainController(
   lineNums: String = "",
@@ -198,5 +206,4 @@ class MainController(
         |Ist: ${actual.formatDefault()}
         |Differenz: ${diff.formatDefault()}
         """.trimMargin()
-
 }

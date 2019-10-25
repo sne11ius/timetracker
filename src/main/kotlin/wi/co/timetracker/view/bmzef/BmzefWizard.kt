@@ -3,7 +3,8 @@ package wi.co.timetracker.view.bmzef
 import javafx.application.Platform
 import javafx.scene.control.ListView
 import mu.KotlinLogging
-import tornadofx.*
+import tornadofx.Wizard
+import tornadofx.onChange
 import wi.co.timetracker.extensions.checked
 import wi.co.timetracker.extensions.isChecked
 import wi.co.timetracker.extensions.isUnchecked
@@ -156,5 +157,4 @@ class BmzefWizard : Wizard("Bmzef all the things!") {
 
   override val canFinish = allPagesComplete
   override val canGoNext = currentPageComplete
-
 }

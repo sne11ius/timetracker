@@ -18,14 +18,14 @@ sealed class ActivityPathPart {
   data class Activity(
     override val title: String,
     override val isComplete: Boolean = true
-  ): ActivityPathPart()
+  ) : ActivityPathPart()
 
   @JsonIgnoreProperties(value = ["complete", "paths"])
   data class Kind(
     override val title: String,
     val activities: Set<Activity>,
     override val isComplete: Boolean = activities.isEmpty()
-  ): ActivityPathPart() {
+  ) : ActivityPathPart() {
     val paths: Set<Pair<String, String?>>
       get() {
         return if (activities.isEmpty())
@@ -40,7 +40,7 @@ sealed class ActivityPathPart {
     override val title: String,
     val kinds: Set<Kind>,
     override val isComplete: Boolean = kinds.isEmpty()
-  ): ActivityPathPart() {
+  ) : ActivityPathPart() {
     val paths: Set<Triple<String, String?, String?>>
       get() {
         return if (kinds.isEmpty())
@@ -59,7 +59,7 @@ sealed class ActivityPathPart {
     override val title: String,
     val contracts: Set<Contract>,
     override val isComplete: Boolean = contracts.isEmpty()
-  ): ActivityPathPart() {
+  ) : ActivityPathPart() {
     val paths: Set<ActivityPath>
       get() {
         return if (contracts.isEmpty())
@@ -79,11 +79,11 @@ fun Collection<ActivityPathPart>.sortedTitles(): List<String> {
 }
 
 sealed class ActivityPath {
-  object NoPath: ActivityPath()
+  object NoPath : ActivityPath()
   data class Path(
     val enterprise: String,
     val contract: String? = null,
     val kind: String? = null,
     val activity: String? = null
-  ): ActivityPath()
+  ) : ActivityPath()
 }

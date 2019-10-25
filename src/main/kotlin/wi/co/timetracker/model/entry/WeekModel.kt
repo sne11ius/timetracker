@@ -15,5 +15,4 @@ data class WeekModel(private val entries: List<DayModel>) {
             d.plus(m.duration(breakIndicators, travelIndicators, travelMultiplier))
         }
     }
-
 }

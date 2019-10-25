@@ -1,9 +1,9 @@
 package wi.co.timetracker.model.entry
 
-import wi.co.timetracker.model.summary.DaySummaryModel
-import wi.co.timetracker.model.summary.EntrySummaryModel
 import java.time.Duration
 import java.time.LocalDate
+import wi.co.timetracker.model.summary.DaySummaryModel
+import wi.co.timetracker.model.summary.EntrySummaryModel
 
 data class DayModel(val date: LocalDate, val entries: List<EntryModel>) {
 
@@ -43,5 +43,4 @@ data class DayModel(val date: LocalDate, val entries: List<EntryModel>) {
                 .toList()
         )
     }
-
 }

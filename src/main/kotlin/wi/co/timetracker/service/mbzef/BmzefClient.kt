@@ -3,19 +3,19 @@ package wi.co.timetracker.service.mbzef
 import arrow.core.Either
 import arrow.core.Either.Left
 import arrow.core.Either.Right
+import java.time.Duration
+import java.time.LocalDateTime.now
 import mu.KotlinLogging
 import org.jsoup.Connection
 import org.jsoup.Jsoup.connect
 import org.jsoup.nodes.Document
-import tornadofx.*
+import tornadofx.Controller
 import wi.co.timetracker.controller.PreferencesController
 import wi.co.timetracker.extensions.format
 import wi.co.timetracker.extensions.pflatMap
 import wi.co.timetracker.model.bmzef.ActivityPathPart
 import wi.co.timetracker.model.bmzef.ProjectMapping
 import wi.co.timetracker.model.summary.DaySummaryModel
-import java.time.Duration
-import java.time.LocalDateTime.now
 
 private class Sulfur(val baseUrl: String) {
   private var cookies: Map<String, String> = emptyMap()

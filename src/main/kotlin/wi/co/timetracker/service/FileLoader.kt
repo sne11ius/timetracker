@@ -1,5 +1,10 @@
 package wi.co.timetracker.service
 
+import java.io.File
+import java.io.File.separator
+import java.time.DayOfWeek
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 import mu.KotlinLogging
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
@@ -13,11 +18,6 @@ import wi.co.timetracker.model.parser.ParseResult
 import wi.co.timetracker.model.parser.Severity
 import wi.co.timetracker.model.parser.info
 import wi.co.timetracker.parser.LineParser
-import java.io.File
-import java.io.File.separator
-import java.time.DayOfWeek
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter
 
 @Service
 class FileLoader {
@@ -110,7 +110,7 @@ class FileLoader {
                             .map { it
                                     .substringBeforeLast("=")
                                     .removePrefix("\uFEFF")
-                                    .trim()}
+                                    .trim() }
                             .joinToString("\n") + if (file.readText().endsWith("\n")) "\n" else ""
                     if (fixedContent != file.readText()) {
                         changedFiles++
@@ -156,5 +156,4 @@ class FileLoader {
         log.debug { "Load file $file" }
         return file
     }
-
 }

@@ -1,16 +1,16 @@
 package wi.co.timetracker.extensions
 
-import kotlinx.coroutines.ObsoleteCoroutinesApi
-import kotlinx.coroutines.async
-import kotlinx.coroutines.newFixedThreadPoolContext
-import kotlinx.coroutines.runBlocking
-import org.apache.commons.lang3.time.DurationFormatUtils
 import java.io.File
 import java.math.BigDecimal
 import java.math.RoundingMode
 import java.time.DayOfWeek
 import java.time.Duration
 import java.time.LocalDate
+import kotlinx.coroutines.ObsoleteCoroutinesApi
+import kotlinx.coroutines.async
+import kotlinx.coroutines.newFixedThreadPoolContext
+import kotlinx.coroutines.runBlocking
+import org.apache.commons.lang3.time.DurationFormatUtils
 
 fun String.toFile(): File = File(this)
 

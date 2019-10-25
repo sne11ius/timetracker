@@ -1,13 +1,12 @@
 package wi.co.timetracker
 
+import kotlin.reflect.KClass
 import org.springframework.context.annotation.AnnotationConfigApplicationContext
 import tornadofx.App
 import tornadofx.DIContainer
 import tornadofx.FX
 import tornadofx.launch
 import wi.co.timetracker.view.MainView
-import kotlin.reflect.KClass
-
 
 class Timetracker : App(MainView::class) {
     init {

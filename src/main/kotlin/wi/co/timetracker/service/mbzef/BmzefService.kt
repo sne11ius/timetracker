@@ -1,16 +1,16 @@
 package wi.co.timetracker.service.mbzef
 
 import com.fasterxml.jackson.module.kotlin.readValue
-import tornadofx.*
+import java.io.File
+import tornadofx.Controller
 import wi.co.timetracker.controller.PreferencesController
 import wi.co.timetracker.model.bmzef.ActivityPath
 import wi.co.timetracker.model.bmzef.ActivityPathPart
 import wi.co.timetracker.model.bmzef.ProjectMapping
 import wi.co.timetracker.model.summary.DaySummaryModel
 import wi.co.timetracker.service.mapper
-import java.io.File
 
-class BmzefService: Controller() {
+class BmzefService : Controller() {
 
   private val preferencesController: PreferencesController by inject()
   private val bmzefClient: BmzefClient by inject()
@@ -61,5 +61,4 @@ class BmzefService: Controller() {
       bmzefClient.commit(it, projectMapping)
     }
   }
-
 }

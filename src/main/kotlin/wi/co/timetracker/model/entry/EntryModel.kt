@@ -4,10 +4,10 @@ import java.time.Duration
 import java.time.LocalDateTime
 
 data class EntryModel(
-        val begin: LocalDateTime,
-        val end: LocalDateTime,
-        val text: String,
-        val comment: String = ""
+  val begin: LocalDateTime,
+  val end: LocalDateTime,
+  val text: String,
+  val comment: String = ""
 ) {
 
     fun computeDuration(travelIndicators: List<String>, travelMultiplier: Float): Duration {
@@ -23,5 +23,4 @@ data class EntryModel(
         else
             Duration.between(begin, end.plusDays(1))
     }
-
 }

@@ -1,7 +1,18 @@
 package wi.co.timetracker.view
 
 import javafx.geometry.Pos
-import tornadofx.*
+import tornadofx.Form
+import tornadofx.View
+import tornadofx.action
+import tornadofx.bind
+import tornadofx.button
+import tornadofx.chooseDirectory
+import tornadofx.field
+import tornadofx.fieldset
+import tornadofx.hbox
+import tornadofx.passwordfield
+import tornadofx.slider
+import tornadofx.textfield
 import wi.co.timetracker.controller.PreferencesController
 
 class PreferencesView : View() {

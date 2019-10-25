@@ -1,6 +1,7 @@
 package wi.co.timetracker.model
 
-import tornadofx.*
+import tornadofx.getProperty
+import tornadofx.property
 
 class Preferences(
   baseDir: String = System.getProperty("user.home"),

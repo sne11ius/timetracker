@@ -1,14 +1,14 @@
 package wi.co.timetracker.model.entry
 
+import java.time.Duration
+import java.time.LocalDate
 import wi.co.timetracker.extensions.getExpectedWorkDuration
 import wi.co.timetracker.extensions.isWorkDay
 import wi.co.timetracker.model.summary.ExcelSummary
-import java.time.Duration
-import java.time.LocalDate
 
 data class MonthModel(
-        private val firstDayOfMonth: LocalDate,
-        private val entries: List<DayModel>
+  private val firstDayOfMonth: LocalDate,
+  private val entries: List<DayModel>
 ) {
 
     fun projectNames(breakIndicators: List<String>): List<String> {
@@ -46,7 +46,7 @@ data class MonthModel(
                 ExcelSummary(date + currentDate + "\n", time + currentTime + "\n", description + currentDescription + "\n", duration.plus(currentDuration))
             } else ExcelSummary(date, time, description, duration)
         }
-        return with (summary) {
+        return with(summary) {
             ExcelSummary(date.trim(), time.trim(), description.trim(), totalDuration)
         }
     }
@@ -63,5 +63,4 @@ data class MonthModel(
             projectName to totalDuration
         }.toMap()
     }
-
 }

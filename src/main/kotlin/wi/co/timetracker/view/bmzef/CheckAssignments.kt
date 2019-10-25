@@ -1,7 +1,19 @@
 package wi.co.timetracker.view.bmzef
 
 import javafx.scene.layout.Priority.ALWAYS
-import tornadofx.*
+import tornadofx.View
+import tornadofx.action
+import tornadofx.bindSelected
+import tornadofx.borderpane
+import tornadofx.button
+import tornadofx.hbox
+import tornadofx.hboxConstraints
+import tornadofx.label
+import tornadofx.listview
+import tornadofx.onChange
+import tornadofx.toProperty
+import tornadofx.vbox
+import tornadofx.vboxConstraints
 import wi.co.timetracker.controller.BmzefWizardController
 
 class CheckAssignments : View("Zuordnungen Prüfen") {
@@ -104,5 +116,4 @@ class CheckAssignments : View("Zuordnungen Prüfen") {
       }
     }
   }
-
 }

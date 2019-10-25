@@ -2,7 +2,7 @@ group 'wi.co.timetracker'
 version '1.0.2-SNAPSHOT'
 
 buildscript {
-  ext.kotlin_version = '1.3.30'
+  ext.kotlin_version = '1.3.50'
   ext.jackson_version = '2.9.8'
   ext.log4j_version = '2.11.1'
   ext.arrow_version = '0.8.2'
@@ -20,6 +20,8 @@ buildscript {
 
 apply plugin: 'kotlin'
 apply plugin: 'com.github.ben-manes.versions'
+
+apply from: 'ktlint.gradle'
 
 repositories {
   mavenCentral()
@@ -64,6 +66,8 @@ compileTestKotlin {
 }
 
 apply plugin: 'javafx-gradle-plugin'
+
+check.dependsOn ktlint
 
 jfx {
   mainClass = 'wi.co.timetracker.TimetrackerKt'

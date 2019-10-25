@@ -1,10 +1,10 @@
 package wi.co.timetracker.controller
 
-import tornadofx.*
-import wi.co.timetracker.extensions.toFile
-import wi.co.timetracker.model.Preferences
 import java.io.File
 import java.time.Duration
+import tornadofx.Controller
+import wi.co.timetracker.extensions.toFile
+import wi.co.timetracker.model.Preferences
 
 class PreferencesController : Controller() {
 
@@ -91,5 +91,4 @@ class PreferencesController : Controller() {
     const val TRAVEL_MULTIPLIER = "travelMultiplier"
     const val EXCEL_CORRECTION = "excelCorrection"
   }
-
 }

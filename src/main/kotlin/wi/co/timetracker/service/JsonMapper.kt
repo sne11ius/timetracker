@@ -7,7 +7,6 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 
-
 val mapper: ObjectMapper = ObjectMapper()
   .registerKotlinModule()
   .configure(JsonParser.Feature.ALLOW_COMMENTS, true)

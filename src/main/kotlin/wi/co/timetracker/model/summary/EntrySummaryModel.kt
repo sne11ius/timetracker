@@ -1,15 +1,15 @@
 package wi.co.timetracker.model.summary
 
-import wi.co.timetracker.extensions.format
-import wi.co.timetracker.extensions.formatDefault
 import java.time.Duration
 import java.time.LocalDate
+import wi.co.timetracker.extensions.format
+import wi.co.timetracker.extensions.formatDefault
 
 data class EntrySummaryModel(
-        val date: LocalDate,
-        val text: String,
-        val comment: String,
-        val duration: Duration
+  val date: LocalDate,
+  val text: String,
+  val comment: String,
+  val duration: Duration
 ) {
 
     fun formatFiExcelStyle(excelCorrection: Duration): ExcelSummary {
@@ -19,6 +19,4 @@ data class EntrySummaryModel(
         val what = text + if (comment.isNotBlank()) " ($comment)" else ""
         return ExcelSummary(theDate, begin + "\t" + end, what, duration)
     }
-
 }
-
