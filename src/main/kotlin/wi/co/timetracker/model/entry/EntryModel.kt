@@ -1,6 +1,8 @@
 package wi.co.timetracker.model.entry
 
 import java.time.Duration
+import java.time.Duration.between
+import java.time.Duration.ofMillis
 import java.time.LocalDateTime
 
 data class EntryModel(
@@ -12,15 +14,15 @@ data class EntryModel(
 
     fun computeDuration(travelIndicators: List<String>, travelMultiplier: Float): Duration {
         return if (travelIndicators.any { text.contains(it) || comment.contains(it) }) {
-            Duration.ofMillis((computeBaseDuration().toMillis() * travelMultiplier).toLong())
+            ofMillis((computeBaseDuration().toMillis() * travelMultiplier).toLong())
         } else
             computeBaseDuration()
     }
 
     private fun computeBaseDuration(): Duration {
         return if (end.isAfter(begin))
-            Duration.between(begin, end)
+            between(begin, end)
         else
-            Duration.between(begin, end.plusDays(1))
+            between(begin, end.plusDays(1))
     }
 }

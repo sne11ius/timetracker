@@ -1,16 +1,17 @@
 package wi.co.timetracker.model.entry
 
-import java.time.Duration
-import java.time.LocalDate
 import wi.co.timetracker.model.summary.DaySummaryModel
 import wi.co.timetracker.model.summary.EntrySummaryModel
+import java.time.Duration
+import java.time.Duration.ZERO
+import java.time.LocalDate
 
 data class DayModel(val date: LocalDate, val entries: List<EntryModel>) {
 
     fun duration(excludes: List<String>, travelIndicators: List<String>, travelMultiplier: Float): Duration {
-        return entries.fold(Duration.ZERO) { d, m ->
-            d.plus(if (excludes.any { m.text.contains(it) }) {
-                Duration.ZERO
+        return entries.fold(ZERO) { d, m ->
+            d + (if (excludes.any { m.text.contains(it) }) {
+                ZERO
             } else {
                 m.computeDuration(travelIndicators, travelMultiplier)
             })
@@ -23,7 +24,7 @@ data class DayModel(val date: LocalDate, val entries: List<EntryModel>) {
                 .filter { !breakIndicators.any { indicator -> it.text.contains(indicator) } }
                 .groupBy { it.text }
                 .map { (text, entries) ->
-                    val totalDuration = entries.fold(Duration.ZERO) { d, m ->
+                    val totalDuration = entries.fold(ZERO) { d, m ->
                         d.plus(m.computeDuration(travelIndicators, travelMultiplier))
                     }
                     var anyEmpty = false
